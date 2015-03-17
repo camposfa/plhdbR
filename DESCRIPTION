@@ -1,0 +1,12 @@
+Package: plhdbR
+Type: Package
+Title: Tools for working with the Primate Life History Database
+Version: 1.0
+Date: 2015-03-17
+Authors@R: person("Fernando", "Campos", email = "camposfa@gmail.com",
+  role = c("aut", "cre"))
+Maintainer: Fernando Campos <camposfa@gmail.com>
+Description: Tools for working with the Primate Life History Database
+License: CC0
+Depends: R (>= 3.0.2)
+Imports: magrittr, plyr, RcppRoll, dplyr, lubridate, tidyr, stringr

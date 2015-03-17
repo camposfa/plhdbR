@@ -1,0 +1,81 @@
+---
+title: "plhdbR Vignette"
+author: "Fernando A. Campos"
+date: "`r Sys.Date()`"
+output:
+  md_document:
+    variant: markdown_github
+---
+
+```{r, echo = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# plhdbR
+
+`plhdbR` is a collection of tools to work with data from the [Primate Life History Database](https://plhdb.org/) (PLHDB).
+
+_There are no life history data included in this package._
+
+To use the tools, you must have access to the PLHDB. The site is currently accessible for the working group members only.
+
+>Karen B. Strier, Jeanne Altmann, Diane K. Brockman, Anne M. Bronikowski, Marina Cords, Linda M. Fedigan, Hilmar Lapp, Xianhua Liu, William F. Morris, Anne E. Pusey, Tara S. Stoinski and Susan C. Alberts (2010). The Primate Life History Database: a unique shared ecological data resource. _Methods in Ecology and Evolution_, 1(2), 199–211. doi: [10.1111/j.2041-210X.2010.00023.x](http://doi.org/10.1111/j.2041-210X.2010.00023.x)
+
+
+`plhdbR` aims to facillitate the analysis of data in the PLHDB. It will have three main sets of utilities:
+
+* Functions for reading and error-checking the life history and fertility data
+
+* Functions for calculating vital rates
+
+* Functions for loading and analyzing climate data
+
+The available functions will be documented below as they become available.
+
+## Preparation
+
+To use this package, you first need to install `devtools` with:
+```{r, eval = FALSE}
+    install.packages("devtools")
+```
+
+Then, you can install the latest development version from github:
+
+```{r, eval = FALSE}
+  library(devtools)
+  devtools::install_github("camposfa/plhdR")
+```
+
+```{r, echo = FALSE}
+  library(plhdbR)
+```
+
+This package makes heavy use of the data manipulation utilities provided by packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, plhdbR will install these packages automatically. To load them in one fell swoop, use the convenience function:
+
+```{r, message = FALSE}
+  load_plhdb_packages()
+```
+
+## Utility functions for climate data
+
+`plhdbR` includes functionality for pulling the most recent data for several large-scale climate oscillation indices from various online data repositories. Supported climate indices include:
+
+- Dipole Mode indes ("dmi")
+- Multivariate ENSO Index ("mei")
+- Oceanic Niño Index ("oni")
+- Southern Oscillation Index ("soi")
+- Pacific Decadal Oscillation ("pdo")
+- Atlantic Multidecadal Oscillation ("amo")
+- North Atlantic Oscillation ("nao")
+
+The function `load_climate_index` returns a named list of monthly climate index data. Each element of the list is an object of class `dplyr::tbl_df`, an extension of R's data.frame
+
+```{r}
+  indices <- load_climate_index(c("nao", "pdo"))
+  indices
+```
+
