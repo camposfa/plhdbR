@@ -1,3 +1,4 @@
+#' @export
 read_bio_table <- function(f){
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &
@@ -49,6 +50,7 @@ read_bio_table <- function(f){
   return(lh)
 }
 
+#' @export
 read_fert_table <- function(f){
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &

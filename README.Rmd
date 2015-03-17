@@ -57,7 +57,7 @@ Then, you can install the latest development version from github:
 
 This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install and load these packages automatically. It also provides a convenient wrapper to load them all in one fell swoop:
 
-```{r, message = FALSE}
+```{r, message = FALSE, eval = FALSE}
   load_plhdb_packages()
 ```
 
