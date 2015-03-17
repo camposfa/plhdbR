@@ -41,12 +41,6 @@ Then, you can install the latest development version from github:
     #> 'plhdbR'
     #> Warning: replacing previous import by 'lubridate::union' when loading
     #> 'plhdbR'
-    #> 
-    #> Attaching package: 'plhdbR'
-    #> 
-    #> The following objects are masked _by_ '.GlobalEnv':
-    #> 
-    #>     load_climate_index, read_bio_table, read_fert_table
 
 This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install and load these packages automatically. It also provides a convenient wrapper to load them all in one fell swoop:
 
@@ -196,7 +190,7 @@ The function `load_climate_index` returns a named list of monthly climate index 
 Squash them all together with:
 
 ``` r
-  summary(bind_rows(indices))
+  summary(dplyr::bind_rows(indices))
 #>     date_of                        value              index          
 #>  Min.   :1950-01-01 00:00:00   Min.   :-3.180000   Length:1564       
 #>  1st Qu.:1966-04-12 06:00:00   1st Qu.:-0.679250   Class :character  

@@ -106,6 +106,6 @@ The function `load_climate_index` returns a named list of monthly climate index 
 Squash them all together with:
 
 ```{r}
-  summary(bind_rows(indices))
+  summary(dplyr::bind_rows(indices))
 ```
 
