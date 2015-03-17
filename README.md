@@ -46,7 +46,7 @@ Utility functions for climate data
 
 `plhdbR` includes functionality for pulling the most recent data for several large-scale climate oscillation indices from various online data repositories. Supported climate indices include:
 
--   Dipole Mode indes ("dmi")
+-   Dipole Mode index ("dmi")
 -   Multivariate ENSO Index ("mei")
 -   Oceanic Niño Index ("oni")
 -   Southern Oscillation Index ("soi")
@@ -60,6 +60,7 @@ The function `load_climate_index` returns a named list of monthly climate index 
   indices <- load_climate_index(c("nao", "pdo"))
 #> Reading PDO data from http://jisao.washington.edu/pdo/PDO.latest
 #> Reading NAO data from http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table
+  
   indices
 #> $pdo
 #> Source: local data frame [1,382 x 3]
