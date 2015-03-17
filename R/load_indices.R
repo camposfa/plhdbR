@@ -2,8 +2,8 @@ load_climate_index <- function(index)
 {
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &
-              requireNamespace("tidyr", quietly = TRUE) & requireNamespace("lubridate", quietly = TRUE) &
-                & requireNamespace("plyr", quietly = TRUE))
+                      requireNamespace("tidyr", quietly = TRUE) & requireNamespace("lubridate", quietly = TRUE) &
+                      requireNamespace("plyr", quietly = TRUE))
 
   if(!test_packages){
     message("Please load the required packages first with load_plhdb_packages()")
