@@ -17,9 +17,11 @@ knitr::opts_chunk$set(
 
 # plhdbR
 
+------------
+
 `plhdbR` is a collection of tools to work with data from the [Primate Life History Database](https://plhdb.org/) (PLHDB).
 
-_There are no life history data included in this package._
+_There are no life history or fertility data included in this package._
 
 To use the tools, you must have access to the PLHDB. The site is currently accessible for the working group members only.
 
@@ -35,6 +37,8 @@ To use the tools, you must have access to the PLHDB. The site is currently acces
 * Functions for loading and analyzing climate data
 
 The available functions will be documented below as they become available.
+
+------------
 
 ## Preparation
 
@@ -59,6 +63,30 @@ This package makes heavy use of the data manipulation utilities provided by pack
 ```{r, message = FALSE}
   load_plhdb_packages()
 ```
+
+------------
+
+## Utility functions for life history and fertility data
+
+The functions `load_lh_data` and `load_fert_data` read biography and fertility csv files, respectively, created by the download button at [PLHDB](https://plhdb.org/). These functions strip away the header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage.
+
+### Biography data
+
+```{r}
+  # Assuming your file is called "biography_2015_03_17.csv"
+  lh <- load_lh_data("biography_2015_03_17.csv")
+  summary(lh)
+```
+
+### Fertility data
+
+```{r}
+  # Assuming your file is called "fertility_2015_03_17.csv"
+  fert <- load_fert_data("fertility_2015_03_17.csv")
+  summary(fert)
+```
+
+------------
 
 ## Utility functions for climate data
 
