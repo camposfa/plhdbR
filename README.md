@@ -1,9 +1,11 @@
 plhdbR
 ======
 
+------------------------------------------------------------------------
+
 `plhdbR` is a collection of tools to work with data from the [Primate Life History Database](https://plhdb.org/) (PLHDB).
 
-*There are no life history data included in this package.*
+*There are no life history or fertility data included in this package.*
 
 To use the tools, you must have access to the PLHDB. The site is currently accessible for the working group members only.
 
@@ -18,6 +20,8 @@ To use the tools, you must have access to the PLHDB. The site is currently acces
 -   Functions for loading and analyzing climate data
 
 The available functions will be documented below as they become available.
+
+------------------------------------------------------------------------
 
 Preparation
 -----------
@@ -40,6 +44,95 @@ This package makes heavy use of the data manipulation utilities provided by pack
 ``` r
   load_plhdb_packages()
 ```
+
+------------------------------------------------------------------------
+
+Utility functions for life history and fertility data
+-----------------------------------------------------
+
+The functions `load_lh_data` and `load_fert_data` read biography and fertility csv files, respectively, created by the download button at [PLHDB](https://plhdb.org/). These functions strip away the header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage.
+
+### Biography data
+
+``` r
+  # Assuming your file is called "biography_2015_03_17.csv"
+  lh <- load_lh_data("biography_2015_03_17.csv")
+  summary(lh)
+#>      Study.Id      Animal.Id     Animal.Name  
+#>  rppn-fma: 564   KOM    :   4          : 993  
+#>  amboseli:1324   RUS    :   4   Ahab   :   2  
+#>  kakamega: 599   AFR    :   3   APOLLO :   2  
+#>  gombe   : 305   BUS    :   3   APPLE  :   2  
+#>  karisoke: 321   FLO    :   3   AQUA   :   2  
+#>  beza    : 993   GOD    :   3   Bali   :   2  
+#>  ssr     : 299   (Other):4385   (Other):3402  
+#>    Birth.Date                  Min.Birth.Date               
+#>  Min.   :1919-07-02 00:00:00   Min.   :1914-07-03 00:00:00  
+#>  1st Qu.:1988-07-15 00:00:00   1st Qu.:1988-01-02 00:00:00  
+#>  Median :1999-10-13 00:00:00   Median :1999-07-30 00:00:00  
+#>  Mean   :1996-08-26 14:01:26   Mean   :1996-02-19 17:40:28  
+#>  3rd Qu.:2007-07-15 00:00:00   3rd Qu.:2007-07-09 00:00:00  
+#>  Max.   :2014-09-17 00:00:00   Max.   :2014-09-18 00:00:00  
+#>                                                             
+#>  Max.Birth.Date                Birth.Date.Distribution  Birth.Group  
+#>  Min.   :1924-06-30 00:00:00   N: 743                         : 546  
+#>  1st Qu.:1989-08-05 00:00:00   U:3662                  Matão  : 206  
+#>  Median :2000-01-02 00:00:00                           KK     : 204  
+#>  Mean   :1997-05-21 14:30:32                           1.1    : 193  
+#>  3rd Qu.:2007-07-17 00:00:00                           2.2    : 174  
+#>  Max.   :2997-11-26 00:00:00                           1      : 170  
+#>                                                        (Other):2912  
+#>  Birth.Group.Certainty First.Born     Mom.Id     Sex     
+#>   : 189                N:2713            : 908   F:1868  
+#>  C:4031                U:1086     81     :  16   M:1988  
+#>  U: 185                Y: 606     137    :  15   U: 549  
+#>                                   9160   :  14           
+#>                                   86     :  13           
+#>                                   (Other):3433           
+#>                                   NA's   :   6           
+#>    Entry.Date                  Entry.Type  Depart.Date                 
+#>  Min.   :1963-01-15 00:00:00   B:3066     Min.   :1963-04-29 00:00:00  
+#>  1st Qu.:1991-12-28 00:00:00   C: 456     1st Qu.:1998-07-30 00:00:00  
+#>  Median :2001-10-02 00:00:00   I: 315     Median :2009-01-22 00:00:00  
+#>  Mean   :1998-11-23 22:55:16   O: 568     Mean   :2004-12-19 09:05:55  
+#>  3rd Qu.:2007-11-26 00:00:00              3rd Qu.:2013-06-28 00:00:00  
+#>  Max.   :2014-09-29 00:00:00              Max.   :2014-09-30 00:00:00  
+#>                                                                        
+#>  Depart.Type Depart.Date.Error
+#>  D:2137      Min.   :0.00000  
+#>  E:  98      1st Qu.:0.00000  
+#>  O:1549      Median :0.00000  
+#>  P: 621      Mean   :0.06836  
+#>              3rd Qu.:0.01000  
+#>              Max.   :3.00000  
+#> 
+```
+
+### Fertility data
+
+``` r
+  # Assuming your file is called "fertility_2015_03_17.csv"
+  fert <- load_fert_data("fertility_2015_03_17.csv")
+  summary(fert)
+#>      Study.Id     Animal.Id      Start.Date                  Start.Type
+#>  rppn-fma:151   BLAN   :   8   Min.   :1963-05-15 00:00:00   B:1078    
+#>  amboseli:618   DOS-   :   8   1st Qu.:1990-05-19 00:00:00   C: 183    
+#>  kakamega:229   KATH   :   8   Median :1998-09-29 00:00:00   I: 109    
+#>  gombe   :162   SERI   :   8   Mean   :1997-05-16 16:59:06   O: 457    
+#>  karisoke:202   LIMP   :   7   3rd Qu.:2006-07-13 00:00:00             
+#>  beza    :252   NYLA   :   7   Max.   :2014-08-27 00:00:00             
+#>  ssr     :213   (Other):1781                                           
+#>    Stop.Date                   Stop.Type
+#>  Min.   :1965-02-14 00:00:00   D:838    
+#>  1st Qu.:1997-05-09 12:00:00   E: 78    
+#>  Median :2008-03-08 00:00:00   O:832    
+#>  Mean   :2004-02-11 19:17:02   P: 79    
+#>  3rd Qu.:2013-06-27 00:00:00            
+#>  Max.   :2014-09-30 00:00:00            
+#> 
+```
+
+------------------------------------------------------------------------
 
 Utility functions for climate data
 ----------------------------------
