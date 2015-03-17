@@ -1,3 +1,4 @@
+#' @export
 load_plhdb_packages <- function (...)
 {
   packages <- c('stringr', 'plyr', 'lubridate', 'tidyr', 'dplyr')

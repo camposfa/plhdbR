@@ -98,8 +98,14 @@ The functions `read_bio_table` and `read_fert_table` read csv files of biography
 The function `load_climate_index` returns a named list of monthly climate index data. Each element of the list is an object of class `dplyr::tbl_df`, an extension of R's data.frame
 
 ```{r}
-  indices <- load_climate_index(c("nao", "pdo"))
+  indices <- load_climate_index(c("nao", "mei"))
   
   indices
+```
+
+Squash them all together with:
+
+```{r}
+  summary(bind_rows(indices))
 ```
 

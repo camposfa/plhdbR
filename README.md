@@ -35,22 +35,35 @@ Then, you can install the latest development version from github:
   devtools::install_github("camposfa/plhdbR")
 ```
 
-This package makes heavy use of the data manipulation utilities provided by packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, plhdbR will install these packages automatically. To load them in one fell swoop, use the convenience function:
+    #> Warning: replacing previous import by 'lubridate::intersect' when loading
+    #> 'plhdbR'
+    #> Warning: replacing previous import by 'lubridate::setdiff' when loading
+    #> 'plhdbR'
+    #> Warning: replacing previous import by 'lubridate::union' when loading
+    #> 'plhdbR'
+    #> 
+    #> Attaching package: 'plhdbR'
+    #> 
+    #> The following objects are masked _by_ '.GlobalEnv':
+    #> 
+    #>     load_climate_index, read_bio_table, read_fert_table
+
+This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install and load these packages automatically. It also provides a convenient wrapper to load them all in one fell swoop:
 
 ``` r
   load_plhdb_packages()
 ```
 
-Utility functions for life history and fertility data
------------------------------------------------------
+Functions for working with life history and fertility data
+----------------------------------------------------------
 
-The functions `load_lh_data` and `load_fert_data` read biography and fertility csv files, respectively, created by the download button at [PLHDB](https://plhdb.org/). These functions strip away the header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage.
+The functions `read_bio_table` and `read_fert_table` read csv files of biography and fertility, respectively, created by the download buttons for these tables [<https://plhdb.org>](https://plhdb.org/). These functions strip away blank lines and header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data from a given table, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage. If you try to feed these functions a normal csv file, bad things might happen.
 
 ### Biography data
 
 ``` r
   # Assuming your file is called "biography_2015_03_17.csv"
-  lh <- load_lh_data("biography_2015_03_17.csv")
+  lh <- read_bio_table("biography_2015_03_17.csv")
   summary(lh)
 #>      Study.Id      Animal.Id     Animal.Name  
 #>  rppn-fma: 564   KOM    :   4          : 993  
@@ -106,7 +119,7 @@ The functions `load_lh_data` and `load_fert_data` read biography and fertility c
 
 ``` r
   # Assuming your file is called "fertility_2015_03_17.csv"
-  fert <- load_fert_data("fertility_2015_03_17.csv")
+  fert <- read_fert_table("fertility_2015_03_17.csv")
   summary(fert)
 #>      Study.Id     Animal.Id      Start.Date                  Start.Type
 #>  rppn-fma:151   BLAN   :   8   Min.   :1963-05-15 00:00:00   B:1078    
@@ -142,26 +155,26 @@ Utility functions for climate data
 The function `load_climate_index` returns a named list of monthly climate index data. Each element of the list is an object of class `dplyr::tbl_df`, an extension of R's data.frame
 
 ``` r
-  indices <- load_climate_index(c("nao", "pdo"))
-#> Reading PDO data from http://jisao.washington.edu/pdo/PDO.latest
+  indices <- load_climate_index(c("nao", "mei"))
+#> Reading MEI data from http://www.esrl.noaa.gov/psd/enso/mei/table.html
 #> Reading NAO data from http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table
   
   indices
-#> $pdo
-#> Source: local data frame [1,382 x 3]
+#> $mei
+#> Source: local data frame [782 x 3]
 #> 
-#>       date_of value index
-#> 1  1900-01-16  0.04   pdo
-#> 2  1900-02-16  1.32   pdo
-#> 3  1900-03-16  0.49   pdo
-#> 4  1900-04-16  0.35   pdo
-#> 5  1900-05-16  0.77   pdo
-#> 6  1900-06-16  0.65   pdo
-#> 7  1900-07-16  0.95   pdo
-#> 8  1900-08-16  0.14   pdo
-#> 9  1900-09-16 -0.24   pdo
-#> 10 1900-10-16  0.23   pdo
-#> ..        ...   ...   ...
+#>       date_of  value index
+#> 1  1950-01-01 -1.027   mei
+#> 2  1950-02-01 -1.149   mei
+#> 3  1950-03-01 -1.290   mei
+#> 4  1950-04-01 -1.061   mei
+#> 5  1950-05-01 -1.416   mei
+#> 6  1950-06-01 -1.372   mei
+#> 7  1950-07-01 -1.332   mei
+#> 8  1950-08-01 -1.061   mei
+#> 9  1950-09-01 -0.584   mei
+#> 10 1950-10-01 -0.402   mei
+#> ..        ...    ...   ...
 #> 
 #> $nao
 #> Source: local data frame [782 x 3]
@@ -178,4 +191,17 @@ The function `load_climate_index` returns a named list of monthly climate index 
 #> 9  1950-09-16  0.25   nao
 #> 10 1950-10-16  0.85   nao
 #> ..        ...   ...   ...
+```
+
+Squash them all together with:
+
+``` r
+  summary(bind_rows(indices))
+#>     date_of                        value              index          
+#>  Min.   :1950-01-01 00:00:00   Min.   :-3.180000   Length:1564       
+#>  1st Qu.:1966-04-12 06:00:00   1st Qu.:-0.679250   Class :character  
+#>  Median :1982-07-24 00:00:00   Median : 0.010000   Mode  :character  
+#>  Mean   :1982-07-24 12:31:18   Mean   : 0.005236                     
+#>  3rd Qu.:1998-11-04 18:00:00   3rd Qu.: 0.680000                     
+#>  Max.   :2015-02-16 00:00:00   Max.   : 3.040000
 ```

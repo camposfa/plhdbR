@@ -17,6 +17,7 @@
 #' @import lubridate
 #' @import tidyr
 #' @import dplyr
+#' @import magrittr
 #' @importFrom plyr mapvalues
 #' @importFrom plyr revalue
 NULL
