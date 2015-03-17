@@ -53,7 +53,7 @@ Then, you can install the latest development version from github:
 
 After you have installed the package once, you can load it in the future using:
 
-```{r, message = FALSE} 
+```{r, message = FALSE, warning = FALSE} 
   library(plhdbR)
 ```
 
