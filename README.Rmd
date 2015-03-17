@@ -47,7 +47,7 @@ Then, you can install the latest development version from github:
 
 ```{r, eval = FALSE}
   library(devtools)
-  devtools::install_github("camposfa/plhdR")
+  devtools::install_github("camposfa/plhdbR")
 ```
 
 ```{r, echo = FALSE}
