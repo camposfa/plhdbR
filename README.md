@@ -1,8 +1,6 @@
 plhdbR
 ======
 
-------------------------------------------------------------------------
-
 `plhdbR` is a collection of tools to work with data from the [Primate Life History Database](https://plhdb.org/) (PLHDB).
 
 *There are no life history or fertility data included in this package.*
@@ -20,8 +18,6 @@ To use the tools, you must have access to the PLHDB. The site is currently acces
 -   Functions for loading and analyzing climate data
 
 The available functions will be documented below as they become available.
-
-------------------------------------------------------------------------
 
 Preparation
 -----------
@@ -44,8 +40,6 @@ This package makes heavy use of the data manipulation utilities provided by pack
 ``` r
   load_plhdb_packages()
 ```
-
-------------------------------------------------------------------------
 
 Utility functions for life history and fertility data
 -----------------------------------------------------
@@ -131,8 +125,6 @@ The functions `load_lh_data` and `load_fert_data` read biography and fertility c
 #>  Max.   :2014-09-30 00:00:00            
 #> 
 ```
-
-------------------------------------------------------------------------
 
 Utility functions for climate data
 ----------------------------------

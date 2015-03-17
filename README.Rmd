@@ -17,8 +17,6 @@ knitr::opts_chunk$set(
 
 # plhdbR
 
-------------
-
 `plhdbR` is a collection of tools to work with data from the [Primate Life History Database](https://plhdb.org/) (PLHDB).
 
 _There are no life history or fertility data included in this package._
@@ -38,7 +36,6 @@ To use the tools, you must have access to the PLHDB. The site is currently acces
 
 The available functions will be documented below as they become available.
 
-------------
 
 ## Preparation
 
@@ -64,7 +61,6 @@ This package makes heavy use of the data manipulation utilities provided by pack
   load_plhdb_packages()
 ```
 
-------------
 
 ## Utility functions for life history and fertility data
 
@@ -86,7 +82,6 @@ The functions `load_lh_data` and `load_fert_data` read biography and fertility c
   summary(fert)
 ```
 
-------------
 
 ## Utility functions for climate data
 
