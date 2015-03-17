@@ -143,7 +143,7 @@ load_climate_index <- function(index)
                              skip = 29, header = TRUE, fill = TRUE,
                              nrows = lubridate::year(Sys.Date()) - 1900 + 1))
 
-    pdo$YEAR <- stringr::str_replace_all(pdo$YEAR, fixed("*"), "")
+    pdo$YEAR <- stringr::str_replace_all(pdo$YEAR, stringr::fixed("*"), "")
     pdo <- tidyr::gather(pdo, month_of, value, -YEAR)
     pdo <- pdo %>%
       dplyr::mutate(date_of = lubridate::ymd(paste(YEAR,
