@@ -1,4 +1,12 @@
+#' Read biography table from plhdb.org csv export.
+#'
+#' Returns a tbl_df.
+#'
+#' @param f Name of the csv file containing biography data. Do not edit the file manually after downloading.
 #' @export
+#' @examples
+#' # Assuming your file is called "biography_2015_03_17.csv"
+#' lh <- read_bio_table("biography_2015_03_17.csv")
 read_bio_table <- function(f){
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &
@@ -50,7 +58,15 @@ read_bio_table <- function(f){
   return(lh)
 }
 
+#' Read fertility table from plhdb.org csv export.
+#'
+#' Returns a tbl_df.
+#'
+#' @param f Name of the csv file containing fertility data. Do not edit the file manually after downloading.
 #' @export
+#' @examples
+#' # Assuming your file is called "fertility_2015_03_17.csv"
+#' lh <- read_fert_table("fertility_2015_03_17.csv")
 read_fert_table <- function(f){
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &

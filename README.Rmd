@@ -51,7 +51,9 @@ Then, you can install the latest development version from github:
   devtools::install_github("camposfa/plhdbR")
 ```
 
-```{r, echo = FALSE}
+After you have installed the package once, you can load it in the future using:
+
+```{r, message = FALSE} 
   library(plhdbR)
 ```
 

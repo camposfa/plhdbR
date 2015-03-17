@@ -35,12 +35,17 @@ Then, you can install the latest development version from github:
   devtools::install_github("camposfa/plhdbR")
 ```
 
-    #> Warning: replacing previous import by 'lubridate::intersect' when loading
-    #> 'plhdbR'
-    #> Warning: replacing previous import by 'lubridate::setdiff' when loading
-    #> 'plhdbR'
-    #> Warning: replacing previous import by 'lubridate::union' when loading
-    #> 'plhdbR'
+After you have installed the package once, you can load it in the future using:
+
+``` r
+  library(plhdbR)
+#> Warning: replacing previous import by 'lubridate::intersect' when loading
+#> 'plhdbR'
+#> Warning: replacing previous import by 'lubridate::setdiff' when loading
+#> 'plhdbR'
+#> Warning: replacing previous import by 'lubridate::union' when loading
+#> 'plhdbR'
+```
 
 This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install and load these packages automatically. It also provides a convenient wrapper to load them all in one fell swoop:
 
