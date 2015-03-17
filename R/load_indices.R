@@ -41,7 +41,7 @@ load_climate_index <- function(index)
     # Starts at 1950
     # Read in current year - 1950 + 1 lines
     mei <- dplyr::tbl_df(read.table("http://www.esrl.noaa.gov/psd/enso/mei/table.html",
-                                    skip = 12, nrows = year(Sys.Date()) - 1950 + 1,
+                                    skip = 12, nrows = lubridate::year(Sys.Date()) - 1950 + 1,
                                     header = TRUE, fill = TRUE))
 
     if(nrow(mei) > 0){
@@ -95,7 +95,7 @@ load_climate_index <- function(index)
     # Starts in 1876
     soi <- dplyr::tbl_df(read.delim("ftp://ftp.bom.gov.au/anon/home/ncc/www/sco/soi/soiplaintext.html",
                                     skip = 12, fill = TRUE,
-                                    nrows = year(Sys.Date()) - 1876 + 1))
+                                    nrows = lubridate::year(Sys.Date()) - 1876 + 1))
 
     if(nrow(soi) > 0){
       soi <- dplyr::select(soi, -X)
@@ -121,21 +121,21 @@ load_climate_index <- function(index)
     message("Reading PDO data from http://jisao.washington.edu/pdo/PDO.latest")
 
     # Starts 1900
-    pdo <- tbl_df(read.table("http://jisao.washington.edu/pdo/PDO.latest",
+    pdo <- dplyr::tbl_df(read.table("http://jisao.washington.edu/pdo/PDO.latest",
                              skip = 29, header = TRUE, fill = TRUE,
-                             nrows = year(Sys.Date()) - 1900 + 1))
+                             nrows = lubridate::year(Sys.Date()) - 1900 + 1))
 
-    pdo$YEAR <- str_replace_all(pdo$YEAR, fixed("*"), "")
-    pdo <- gather(pdo, month_of, value, -YEAR)
+    pdo$YEAR <- stringr::str_replace_all(pdo$YEAR, fixed("*"), "")
+    pdo <- tidyr::gather(pdo, month_of, value, -YEAR)
     pdo <- pdo %>%
-      mutate(date_of = ymd(paste(YEAR,
-                                 as.numeric(month_of),
-                                 "16", sep = "-")),
-             value = as.numeric(value),
-             index = "pdo") %>%
-      filter(!is.na(value)) %>%
-      arrange(date_of) %>%
-      select(date_of, value, index)
+      dplyr::mutate(date_of = lubridate::ymd(paste(YEAR,
+                                                   as.numeric(month_of),
+                                                   "16", sep = "-")),
+                    value = as.numeric(value),
+                    index = "pdo") %>%
+      dplyr::filter(!is.na(value)) %>%
+      dplyr::arrange(date_of) %>%
+      dplyr::select(date_of, value, index)
 
     res[["pdo"]] <- pdo
   }
@@ -145,20 +145,20 @@ load_climate_index <- function(index)
    message("Reading AMO data from http://www.esrl.noaa.gov/psd/data/correlation/amon.us.data")
 
    # Starts 1948
-   amo <- tbl_df(read.table("http://www.esrl.noaa.gov/psd/data/correlation/amon.us.data",
-                            skip = 1, fill = TRUE, nrows = year(Sys.Date()) - 1948 + 1))
+   amo <- dplyr::tbl_df(read.table("http://www.esrl.noaa.gov/psd/data/correlation/amon.us.data",
+                                   skip = 1, fill = TRUE, nrows = lubridate::year(Sys.Date()) - 1948 + 1))
 
    names(amo)[2:13] <- month.abb
-   amo <- gather(amo, month_of, value, -V1)
+   amo <- tidyr::gather(amo, month_of, value, -V1)
    amo <- amo %>%
-     mutate(date_of = ymd(paste(V1,
-                                as.numeric(month_of),
-                                "16", sep = "-")),
-            value = as.numeric(value),
-            index = "amo") %>%
-     filter(value != -99.990) %>%
-     arrange(date_of) %>%
-     select(date_of, value, index)
+     dplyr::mutate(date_of = lubridate::ymd(paste(V1,
+                                                  as.numeric(month_of),
+                                                  "16", sep = "-")),
+                   value = as.numeric(value),
+                   index = "amo") %>%
+     dplyr::filter(value != -99.990) %>%
+     dplyr::arrange(date_of) %>%
+     dplyr::select(date_of, value, index)
 
    res[["amo"]] <- amo
  }
@@ -167,20 +167,20 @@ load_climate_index <- function(index)
 
    message("Reading NAO data from http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table")
 
-   nao <- tbl_df(read.table("http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table",
-                            fill = TRUE))
+   nao <- dplyr::tbl_df(read.table("http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table",
+                                   fill = TRUE))
 
    names(nao)[2:13] <- month.abb
-   nao <- gather(nao, month_of, value, -V1)
+   nao <- tidyr::gather(nao, month_of, value, -V1)
    nao <- nao %>%
-     mutate(date_of = ymd(paste(V1,
-                                as.numeric(month_of),
-                                "16", sep = "-")),
-            value = as.numeric(value),
-            index = "nao") %>%
-     filter(!is.na(value)) %>%
-     arrange(date_of) %>%
-     select(date_of, value, index)
+     dplyr::mutate(date_of = lubridate::ymd(paste(V1,
+                                                  as.numeric(month_of),
+                                                  "16", sep = "-")),
+                   value = as.numeric(value),
+                   index = "nao") %>%
+     dplyr::filter(!is.na(value)) %>%
+     dplyr::arrange(date_of) %>%
+     dplyr::select(date_of, value, index)
 
    res[["nao"]] <- nao
  }
