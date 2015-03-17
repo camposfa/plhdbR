@@ -55,22 +55,22 @@ Then, you can install the latest development version from github:
   library(plhdbR)
 ```
 
-This package makes heavy use of the data manipulation utilities provided by packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, plhdbR will install these packages automatically. To load them in one fell swoop, use the convenience function:
+This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install and load these packages automatically. It also provides a convenient wrapper to load them all in one fell swoop:
 
 ```{r, message = FALSE}
   load_plhdb_packages()
 ```
 
 
-## Utility functions for life history and fertility data
+## Functions for working with life history and fertility data
 
-The functions `load_lh_data` and `load_fert_data` read biography and fertility csv files, respectively, created by the download button at [PLHDB](https://plhdb.org/). These functions strip away the header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage.
+The functions `read_bio_table` and `read_fert_table` read csv files of biography and fertility, respectively, created by the download buttons for these tables [https://plhdb.org](https://plhdb.org/). These functions strip away blank lines and header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data from a given table, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage. If you try to feed these functions a normal csv file, bad things might happen.
 
 ### Biography data
 
 ```{r}
   # Assuming your file is called "biography_2015_03_17.csv"
-  lh <- load_lh_data("biography_2015_03_17.csv")
+  lh <- read_bio_table("biography_2015_03_17.csv")
   summary(lh)
 ```
 
@@ -78,7 +78,7 @@ The functions `load_lh_data` and `load_fert_data` read biography and fertility c
 
 ```{r}
   # Assuming your file is called "fertility_2015_03_17.csv"
-  fert <- load_fert_data("fertility_2015_03_17.csv")
+  fert <- read_fert_table("fertility_2015_03_17.csv")
   summary(fert)
 ```
 

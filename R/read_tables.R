@@ -1,4 +1,4 @@
-load_lh_data <- function(f){
+read_bio_table <- function(f){
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &
                       requireNamespace("tidyr", quietly = TRUE) & requireNamespace("lubridate", quietly = TRUE) &
@@ -49,7 +49,7 @@ load_lh_data <- function(f){
   return(lh)
 }
 
-load_fert_data <- function(f){
+read_fert_table <- function(f){
 
   test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &
                       requireNamespace("tidyr", quietly = TRUE) & requireNamespace("lubridate", quietly = TRUE) &

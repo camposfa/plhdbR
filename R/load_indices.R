@@ -1,3 +1,21 @@
+#' Obtain data on large-scale climate oscillation indices.
+#'
+#' Returns a named list of dplyr::tbl_df objects.
+#'
+#' @param index One or more climate indices.
+#' Supported indices include.
+#' \itemize{
+#' \item Dipole Mode index ("dmi")
+#' \item Multivariate ENSO Index ("mei")
+#' \item Oceanic Niño Index ("oni")
+#' \item Southern Oscillation Index ("soi")
+#' \item Pacific Decadal Oscillation ("pdo")
+#' \item Atlantic Multidecadal Oscillation ("amo")
+#' \item North Atlantic Oscillation ("nao")
+#' }
+#' @export
+#' @examples
+#' indices <- load_climate_index(c("mei", "oni"))
 load_climate_index <- function(index)
 {
 
