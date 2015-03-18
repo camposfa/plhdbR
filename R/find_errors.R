@@ -41,7 +41,7 @@ find_bio_errors <- function(x){
 
   error_dates <- x %>%
     dplyr::anti_join(temp, by = c("Study.Id", "Animal.Id")) %>%
-    dplyr::select(dplyr::ends_with("Id"), dplyr::ends_with("Date")) %>%
+    dplyr::select(ends_with("Id"), ends_with("Date")) %>%
     suppressMessages()
 
   if(nrow(error_dates) > 0){
@@ -85,7 +85,7 @@ find_fert_errors <- function(x){
 
   error_dates <- x %>%
     dplyr::anti_join(temp, by = c("Study.Id", "Animal.Id")) %>%
-    dplyr::select(dplyr::ends_with("Id"), dplyr::ends_with("Date")) %>%
+    dplyr::select(ends_with("Id"), ends_with("Date")) %>%
     suppressMessages()
 
   if(nrow(error_dates) > 0){
