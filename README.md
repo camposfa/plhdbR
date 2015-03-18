@@ -3,21 +3,21 @@ plhdbR
 
 `plhdbR` is a collection of tools to work with data from the [Primate Life History Database](https://plhdb.org/) (PLHDB).
 
+> Karen B. Strier, Jeanne Altmann, Diane K. Brockman, Anne M. Bronikowski, Marina Cords, Linda M. Fedigan, Hilmar Lapp, Xianhua Liu, William F. Morris, Anne E. Pusey, Tara S. Stoinski and Susan C. Alberts (2010). The Primate Life History Database: a unique shared ecological data resource. *Methods in Ecology and Evolution*, 1(2), 199–211. doi: [10.1111/j.2041-210X.2010.00023.x](http://doi.org/10.1111/j.2041-210X.2010.00023.x)
+
 *There are no life history or fertility data included in this package.*
 
 To use the tools, you must have access to the PLHDB. The site is currently accessible for the working group members only.
 
-> Karen B. Strier, Jeanne Altmann, Diane K. Brockman, Anne M. Bronikowski, Marina Cords, Linda M. Fedigan, Hilmar Lapp, Xianhua Liu, William F. Morris, Anne E. Pusey, Tara S. Stoinski and Susan C. Alberts (2010). The Primate Life History Database: a unique shared ecological data resource. *Methods in Ecology and Evolution*, 1(2), 199–211. doi: [10.1111/j.2041-210X.2010.00023.x](http://doi.org/10.1111/j.2041-210X.2010.00023.x)
+`plhdbR` aims to facillitate the analysis of data in the PLHDB. It will set out to accomplish three main tasks:
 
-`plhdbR` aims to facillitate the analysis of data in the PLHDB. It will have three main sets of utilities:
-
--   Functions for reading and error-checking the life history and fertility data
+-   Tools that make it easy to read the life history and fertility data into R for further analysis
 
 -   Functions for calculating vital rates
 
--   Functions for loading and analyzing climate data
+-   Functions for retrieving and analyzing up-to-date climate data
 
-The available functions will be documented below as they become available.
+Additional functionality may be added in the future. The available functions will be documented below as they become available.
 
 Preparation
 -----------
@@ -28,20 +28,20 @@ To use this package, you first need to install `devtools` with:
     install.packages("devtools")
 ```
 
-Then, you can install the latest development version from github:
+Then, you can install the latest development version of `plhdbR` from github:
 
 ``` r
   library(devtools)
   devtools::install_github("camposfa/plhdbR")
 ```
 
-After you have installed the package once, you can load it in the future using:
+After you have installed the package once, you can simply load it in the future using:
 
 ``` r
   library(plhdbR)
 ```
 
-This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install and load these packages automatically. It also provides a convenient wrapper to load them all in one fell swoop:
+This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install these packages automatically. It also provides a convenient function to load them all into your R session, if you want to use them for other tasks:
 
 ``` r
   load_plhdb_packages()
@@ -50,7 +50,7 @@ This package makes heavy use of the data manipulation packages [stringr](http://
 Functions for working with life history and fertility data
 ----------------------------------------------------------
 
-The functions `read_bio_table` and `read_fert_table` read csv files of biography and fertility, respectively, created by the download buttons for these tables [<https://plhdb.org>](https://plhdb.org/). These functions strip away blank lines and header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`. To pull all the data from a given table, use search criteria like 'Study.ID != 10'. Note that the data are **not** extensively error-checked at this stage. If you try to feed these functions a normal csv file, bad things might happen.
+The functions `read_bio_table` and `read_fert_table` read csv files of biography and fertility data, respectively, created by the download buttons for these tables on the [PLDDB website](https://plhdb.org/). These functions strip away blank lines and header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`--an extension of R's `data.frame`. To pull all the data from a given table, use search criteria like `'Study.ID != 10'`. Note that the data are **not** extensively error-checked at this stage. If you try to feed these functions a normal csv file, bad things might happen.
 
 ### Biography data
 
@@ -135,7 +135,7 @@ The functions `read_bio_table` and `read_fert_table` read csv files of biography
 Utility functions for climate data
 ----------------------------------
 
-`plhdbR` includes functionality for pulling the most recent data for several large-scale climate oscillation indices from various online data repositories. Supported climate indices include:
+`plhdbR` includes functions for pulling the most recent data for several large-scale climate oscillation indices from various online data repositories. Supported climate indices include:
 
 -   Dipole Mode index ("dmi")
 -   Multivariate ENSO Index ("mei")
@@ -145,7 +145,7 @@ Utility functions for climate data
 -   Atlantic Multidecadal Oscillation ("amo")
 -   North Atlantic Oscillation ("nao")
 
-The function `load_climate_index` returns a named list of monthly climate index data. Each element of the list is an object of class `dplyr::tbl_df`, an extension of R's data.frame
+The function `load_climate_index` returns a named list of monthly climate index data. Each element of the list is an object of class `dplyr::tbl_df`.
 
 ``` r
   indices <- load_climate_index(c("nao", "mei"))
@@ -189,7 +189,8 @@ The function `load_climate_index` returns a named list of monthly climate index 
 Squash them all together with:
 
 ``` r
-  summary(dplyr::bind_rows(indices))
+  indices_df <- dplyr::bind_rows(indices)
+  summary(indices_df)
 #>     date_of                        value              index          
 #>  Min.   :1950-01-01 00:00:00   Min.   :-3.180000   Length:1564       
 #>  1st Qu.:1966-04-12 06:00:00   1st Qu.:-0.679250   Class :character  
