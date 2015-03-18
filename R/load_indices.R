@@ -67,7 +67,7 @@ load_climate_index <- function(index){
       res[["mei"]] <- mei
     }
     else{
-      message("Error reading file")
+      message("Error reading file.")
     }
   }
 
@@ -94,6 +94,9 @@ load_climate_index <- function(index){
         dplyr::select(date_of, value, index)
 
       res[["oni"]] <- oni
+    }
+    else{
+      message("Error reading file.")
     }
   }
 
@@ -122,6 +125,9 @@ load_climate_index <- function(index){
 
       res[["soi"]] <- soi
     }
+    else{
+      message("Error reading file.")
+    }
   }
 
   if("pdo" %in% index){
@@ -133,19 +139,24 @@ load_climate_index <- function(index){
                              skip = 29, header = TRUE, fill = TRUE,
                              nrows = lubridate::year(Sys.Date()) - 1900 + 1))
 
-    pdo$YEAR <- stringr::str_replace_all(pdo$YEAR, stringr::fixed("*"), "")
-    pdo <- tidyr::gather(pdo, month_of, value, -YEAR)
-    pdo <- pdo %>%
-      dplyr::mutate(date_of = lubridate::ymd(paste(YEAR,
-                                                   as.numeric(month_of),
-                                                   "16", sep = "-")),
-                    value = as.numeric(value),
-                    index = "pdo") %>%
-      dplyr::filter(!is.na(value)) %>%
-      dplyr::arrange(date_of) %>%
-      dplyr::select(date_of, value, index)
+    if(nrow(pdo) > 0){
+      pdo$YEAR <- stringr::str_replace_all(pdo$YEAR, stringr::fixed("*"), "")
+      pdo <- tidyr::gather(pdo, month_of, value, -YEAR)
+      pdo <- pdo %>%
+        dplyr::mutate(date_of = lubridate::ymd(paste(YEAR,
+                                                     as.numeric(month_of),
+                                                     "16", sep = "-")),
+                      value = as.numeric(value),
+                      index = "pdo") %>%
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::arrange(date_of) %>%
+        dplyr::select(date_of, value, index)
 
-    res[["pdo"]] <- pdo
+      res[["pdo"]] <- pdo
+    }
+    else{
+      message("Error reading file.")
+    }
   }
 
  if("amo" %in% index){
@@ -156,19 +167,24 @@ load_climate_index <- function(index){
    amo <- dplyr::tbl_df(read.table("http://www.esrl.noaa.gov/psd/data/correlation/amon.us.data",
                                    skip = 1, fill = TRUE, nrows = lubridate::year(Sys.Date()) - 1948 + 1))
 
-   names(amo)[2:13] <- month.abb
-   amo <- tidyr::gather(amo, month_of, value, -V1)
-   amo <- amo %>%
-     dplyr::mutate(date_of = lubridate::ymd(paste(V1,
-                                                  as.numeric(month_of),
-                                                  "16", sep = "-")),
-                   value = as.numeric(value),
-                   index = "amo") %>%
-     dplyr::filter(value != -99.990) %>%
-     dplyr::arrange(date_of) %>%
-     dplyr::select(date_of, value, index)
+   if(nrow(amo) > 0){
+     names(amo)[2:13] <- month.abb
+     amo <- tidyr::gather(amo, month_of, value, -V1)
+     amo <- amo %>%
+       dplyr::mutate(date_of = lubridate::ymd(paste(V1,
+                                                    as.numeric(month_of),
+                                                    "16", sep = "-")),
+                     value = as.numeric(value),
+                     index = "amo") %>%
+       dplyr::filter(value != -99.990) %>%
+       dplyr::arrange(date_of) %>%
+       dplyr::select(date_of, value, index)
 
    res[["amo"]] <- amo
+   }
+   else{
+     message("Error reading file.")
+   }
  }
 
  if("nao" %in% index){
@@ -178,19 +194,23 @@ load_climate_index <- function(index){
    nao <- dplyr::tbl_df(read.table("http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table",
                                    fill = TRUE))
 
-   names(nao)[2:13] <- month.abb
-   nao <- tidyr::gather(nao, month_of, value, -V1)
-   nao <- nao %>%
-     dplyr::mutate(date_of = lubridate::ymd(paste(V1,
-                                                  as.numeric(month_of),
-                                                  "16", sep = "-")),
-                   value = as.numeric(value),
-                   index = "nao") %>%
-     dplyr::filter(!is.na(value)) %>%
-     dplyr::arrange(date_of) %>%
-     dplyr::select(date_of, value, index)
+   if(nrow(nao) > 0){
+     names(nao)[2:13] <- month.abb
+     nao <- tidyr::gather(nao, month_of, value, -V1)
+     nao <- nao %>%
+       dplyr::mutate(date_of = lubridate::ymd(paste(V1,
+                                                    as.numeric(month_of),
+                                                    "16", sep = "-")),
+                     value = as.numeric(value),
+                     index = "nao") %>%
+       dplyr::filter(!is.na(value)) %>%
+       dplyr::arrange(date_of) %>%
+       dplyr::select(date_of, value, index)
 
-   res[["nao"]] <- nao
+     res[["nao"]] <- nao
+   }else{
+     message("Error reading file.")
+   }
  }
 
  if(length(res) < length(index)){
