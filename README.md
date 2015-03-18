@@ -9,9 +9,9 @@ plhdbR
 
 To use the tools, you must have access to the PLHDB. The site is currently accessible for the working group members only.
 
-`plhdbR` aims to facillitate the analysis of data in the PLHDB. It will set out to accomplish three main tasks:
+`plhdbR` aims to facillitate the analysis of data in the PLHDB. It will contain three main sets of tools:
 
--   Tools that make it easy to read the life history and fertility data into R for further analysis
+-   Functions that make it easy to read the life history and fertility data into R for further analysis
 
 -   Functions for calculating vital rates
 
@@ -186,7 +186,7 @@ The function `load_climate_index` returns a named list of monthly climate index 
 #> ..        ...   ...   ...
 ```
 
-Squash them all together with:
+Squash all the list elements together to a single `tbl_df` with `dplyr::bind_rows`:
 
 ``` r
   indices_df <- dplyr::bind_rows(indices)
