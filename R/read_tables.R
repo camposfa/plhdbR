@@ -60,15 +60,6 @@ read_bio_table <- function(f){
 #' lh <- read_fert_table("fertility_2015_03_17.csv")
 read_fert_table <- function(f){
 
-  test_packages <- (requireNamespace("dplyr", quietly = TRUE) & requireNamespace("stringr", quietly = TRUE) &
-                      requireNamespace("tidyr", quietly = TRUE) & requireNamespace("lubridate", quietly = TRUE) &
-                      requireNamespace("plyr", quietly = TRUE))
-
-  if(!test_packages){
-    message("Please load the required packages first with load_plhdb_packages()")
-    return(NULL)
-  }
-
   # file_ext function from tools package
   file_ext <- function (x)
   {

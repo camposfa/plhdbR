@@ -14,9 +14,13 @@
 #' @docType package
 #' @name plhdbR
 #' @import stringr
-#' @import lubridate
 #' @import tidyr
 #' @import dplyr
 #' @importFrom plyr mapvalues
 #' @importFrom plyr revalue
+#' @importFrom lubridate year
+#' @importFrom lubridate ymd
+#' @importFrom lubridate ymd_hms
+#' @importFrom lubridate parse_date_time
+#' @importFrom lubridate parse_date_time2
 NULL
