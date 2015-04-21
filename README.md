@@ -146,7 +146,7 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
   bio_errors$error_duplicates
 #> NULL
   
-  # There is currently (2015-04-21) a date error for Max.Birth.Date for animal "AKI" in the Karisoke data
+  # There is currently an error for animal "AKI" in the Karisoke data
   # Look at AKI's data
   lh %>% filter(Animal.Id == "AKI") %>% glimpse()
 #> Observations: 1
