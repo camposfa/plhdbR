@@ -58,14 +58,14 @@ After you have installed the package once, you can simply load it in the future 
 
 This package makes heavy use of the data manipulation packages [stringr](http://cran.r-project.org/package=stringr), [lubridate](http://cran.r-project.org/package=lubridate), [tidyr](http://cran.r-project.org/package=tidyr), and [dplyr](http://cran.r-project.org/package=dplyr). If not already installed, `plhdbR` will install these packages automatically. It also provides a convenient function to load them all into your R session, if you want to use them for other tasks:
 
-```{r, message = FALSE, eval = FALSE}
+```{r, message = FALSE}
   load_plhdb_packages()
 ```
 
 
 ## Functions for working with life history and fertility data
 
-The functions `read_bio_table` and `read_fert_table` read csv files of biography and fertility data, respectively, created by the download buttons for these tables on the [PLDDB website](https://plhdb.org/). These functions strip away blank lines and header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`, an extension of R's `data.frame`. To pull all the data from a given table, use search criteria like `'Study.ID != 10'`. Note that the data are **not** extensively error-checked at this stage. If you try to feed these functions a normal csv file, bad things might happen.
+The functions `read_bio_table` and `read_fert_table` read csv files of biography and fertility data, respectively, created by the download buttons for these tables on the [PLHDB website](https://plhdb.org/). These functions strip away blank lines and header lines, parse any date/time columns, and return a well-ordered `dplyr::tbl_df`, an extension of R's `data.frame`. To pull all the data from a given table, use search criteria like `'Study.ID != 10'`. Note that the data are **not** extensively error-checked at this stage. If you try to feed these functions a normal csv file, bad things might happen.
 
 ### Biography data
 
@@ -90,10 +90,22 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
   bio_errors <- find_bio_errors(lh)
   bio_errors$error_dates
   bio_errors$error_duplicates
+  
+  # There is currently (2015-04-21) a date error for Max.Birth.Date for animal "AKI" in the Karisoke data
+  # Look at AKI's data
+  lh %>% filter(Animal.Id == "AKI") %>% glimpse()
+
+  # Fix error
+  lh[lh$Animal.Id == "AKI", ]$Max.Birth.Date <- ymd("2007-11-26")
+
+  # Check again
+  find_bio_errors(lh)$error_dates
 
   # Check the fertility data for errors
   fert_errors <- find_fert_errors(fert)
   fert_errors$error_dates
+  
+  # Currently no errors
 ```
 
 

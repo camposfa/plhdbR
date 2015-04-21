@@ -145,12 +145,45 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
 #> Variables not shown: Entry.Date (time), Depart.Date (time)
   bio_errors$error_duplicates
 #> NULL
+  
+  # There is currently (2015-04-21) a date error for Max.Birth.Date for animal "AKI" in the Karisoke data
+  # Look at AKI's data
+  lh %>% filter(Animal.Id == "AKI") %>% glimpse()
+#> Observations: 1
+#> Variables:
+#> $ Study.Id                (fctr) karisoke
+#> $ Animal.Id               (fctr) AKI
+#> $ Animal.Name             (fctr) Agakiza
+#> $ Birth.Date              (time) 2007-11-26
+#> $ Min.Birth.Date          (time) 2007-11-26
+#> $ Max.Birth.Date          (time) 2997-11-26
+#> $ Birth.Date.Distribution (fctr) N
+#> $ Birth.Group             (fctr) Pablo
+#> $ Birth.Group.Certainty   (fctr) C
+#> $ First.Born              (fctr) N
+#> $ Mom.Id                  (fctr) MAH
+#> $ Sex                     (fctr) F
+#> $ Entry.Date              (time) 2007-11-26
+#> $ Entry.Type              (fctr) B
+#> $ Depart.Date             (time) 2008-12-08
+#> $ Depart.Type             (fctr) D
+#> $ Depart.Date.Error       (dbl) 0
+
+  # Fix error
+  lh[lh$Animal.Id == "AKI", ]$Max.Birth.Date <- ymd("2007-11-26")
+
+  # Check again
+  find_bio_errors(lh)$error_dates
+#> No errors found!
+#> NULL
 
   # Check the fertility data for errors
   fert_errors <- find_fert_errors(fert)
 #> No errors found!
   fert_errors$error_dates
 #> NULL
+  
+  # Currently no errors
 ```
 
 Utility functions for climate data
@@ -175,12 +208,12 @@ The function `load_climate_index` returns a named list of monthly climate index 
   
   indices
 #> $mei
-#> Source: local data frame [782 x 3]
+#> Source: local data frame [783 x 3]
 #> 
 #>       date_of  value index
 #> 1  1950-01-01 -1.027   mei
 #> 2  1950-02-01 -1.149   mei
-#> 3  1950-03-01 -1.290   mei
+#> 3  1950-03-01 -1.298   mei
 #> 4  1950-04-01 -1.061   mei
 #> 5  1950-05-01 -1.416   mei
 #> 6  1950-06-01 -1.372   mei
@@ -191,7 +224,7 @@ The function `load_climate_index` returns a named list of monthly climate index 
 #> ..        ...    ...   ...
 #> 
 #> $nao
-#> Source: local data frame [782 x 3]
+#> Source: local data frame [783 x 3]
 #> 
 #>       date_of value index
 #> 1  1950-01-16  0.92   nao
@@ -213,10 +246,10 @@ Squash all the list elements together to a single `tbl_df` with `dplyr::bind_row
   indices_df <- dplyr::bind_rows(indices)
   summary(indices_df)
 #>     date_of                        value              index          
-#>  Min.   :1950-01-01 00:00:00   Min.   :-3.180000   Length:1564       
-#>  1st Qu.:1966-04-12 06:00:00   1st Qu.:-0.679250   Class :character  
-#>  Median :1982-07-24 00:00:00   Median : 0.010000   Mode  :character  
-#>  Mean   :1982-07-24 12:31:18   Mean   : 0.005236                     
-#>  3rd Qu.:1998-11-04 18:00:00   3rd Qu.: 0.680000                     
-#>  Max.   :2015-02-16 00:00:00   Max.   : 3.040000
+#>  Min.   :1950-01-01 00:00:00   Min.   :-3.180000   Length:1566       
+#>  1st Qu.:1966-04-19 18:00:00   1st Qu.:-0.676750   Class :character  
+#>  Median :1982-08-08 12:00:00   Median : 0.010000   Mode  :character  
+#>  Mean   :1982-08-08 17:43:54   Mean   : 0.006591                     
+#>  3rd Qu.:1998-11-27 06:00:00   3rd Qu.: 0.683750                     
+#>  Max.   :2015-03-16 00:00:00   Max.   : 3.040000
 ```
