@@ -10,19 +10,31 @@
 median_age_first_rep <- function(b, f){
 
   # Find all animals that are first born offspring
-  fb <- filter(b, First.Born == "Y")
+  fb <- b %>%
+    filter(First.Born == "Y") %>%
+    select(Study.Id, Animal.Id, Birth.Date, Mom.Id, Sex)
 
-  # Create a temporary data frame of mothers with their birth dates
-  mothers <- semi_join(b, fb, by = c("Study.Id" = "Study.Id", "Animal.Id" = "Mom.Id"))
 
-  missing <- anti_join(fb, mothers, by = c("Study.Id" = "Study.Id", "Mom.Id" = "Animal.Id"))
+  # Create a temporary data frame of mothers of these animals with their birth dates
+  # Note that there may be errors here if Mom.Id doesn't match exactly with Animal.Id
+  # Use find_mom_errors() function to find these cases!
+  mothers <- suppressWarnings(semi_join(b, fb,
+                                        by = c("Study.Id" = "Study.Id",
+                                               "Animal.Id" = "Mom.Id")))
+  mothers <- mothers %>%
+    select(Study.Id, Animal.Id, Birth.Date) %>%
+    rename(Mother.Birth.Date = Birth.Date)
 
-  # For each of these animals, get the
+  # For first-born animal in fb, get the mother's age using inner join
+  temp <- inner_join(fb, mothers, by = c("Study.Id" = "Study.Id",
+                                              "Mom.Id" = "Animal.Id"))
 
   temp <- suppressMessages(suppressWarnings(dplyr::inner_join(b, f, by = c("Study.Id" = "Study.Id",
                                                                            "Animal.Id" = "Animal.Id"))))
 
 }
+
+
 
 #' Calculate age-specific fertility
 #'
@@ -222,8 +234,6 @@ stage_specific_fertility <- function(b, f){
     }
 
     ssf_i$Discrete.Age.Class <- lubridate::year(ssf_i$Last.BD) - lubridate::year(ssf_i$Birth.Date)
-
-    # filter(b, Study.Id == s & Mom.Id == m) %>% data.frame()
 
     for(j in 1:nrow(ssf_i)){
       ssf_i[j, ]$Num.Offspring <- b %>%
