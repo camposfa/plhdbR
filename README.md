@@ -52,4 +52,6 @@ Vignettes
 
 [Reading and error-checking the PLHDB data tables](vignettes/ErrorChecking.md)
 
+[Calculating vital rates](vignettes/VitalRates.md)
+
 [Obtaining and analyzing climate data](vignettes/Climate.md)
