@@ -67,32 +67,4 @@ This package makes heavy use of the data manipulation packages [stringr](http://
 
 [Reading and error-checking the PLHDB data tables](vignettes/ErrorChecking.md)
 
-
-
-## Utility functions for climate data
-
-`plhdbR` includes functions for pulling the most recent data for several large-scale climate oscillation indices from various online data repositories. Supported climate indices include:
-
-- Dipole Mode index ("dmi")
-- Multivariate ENSO Index ("mei")
-- Oceanic Niño Index ("oni")
-- Southern Oscillation Index ("soi")
-- Pacific Decadal Oscillation ("pdo")
-- Atlantic Multidecadal Oscillation ("amo")
-- North Atlantic Oscillation ("nao")
-
-The function `load_climate_index` returns a named list of monthly climate index data. Each element of the list is an object of class `dplyr::tbl_df`.
-
-```{r}
-  indices <- load_climate_index(c("nao", "mei"))
-  
-  indices
-```
-
-Squash all the list elements together to a single `tbl_df` with `dplyr::bind_rows`:
-
-```{r}
-  indices_df <- dplyr::bind_rows(indices)
-  summary(indices_df)
-```
-
+[Obtaining and analyzing climate data](vignettes/Climate.md)

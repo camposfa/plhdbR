@@ -80,4 +80,5 @@ in the biography table for a given study have a corresponding record in Animal.I
   find_mom_errors(lh)
 ```
 
-We can see from this that there are 40 such records that need to be corrected.
+We can see from this that there are 40 Mom.ID records that don't match any entry
+in Animal.Id and therefore need to be corrected.

@@ -193,4 +193,4 @@ The function `find_mom_errors` checks to see if all the animals listed in Mom.Id
 #> 7      ssr
 ```
 
-We can see from this that there are 40 such records that need to be corrected.
+We can see from this that there are 40 Mom.ID records that don't match any entry in Animal.Id and therefore need to be corrected.
