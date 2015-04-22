@@ -21,10 +21,10 @@ read_bio_table <- function(f){
     return(NULL)
   }
 
-  lh_names <- read.delim(f, sep = ",", skip = 5,
+  lh_names <- read.delim(f, sep = ",", skip = 5, na.strings = "",
                          encoding = "latin1", nrows = 1, header = TRUE)
   lh <- dplyr::tbl_df(read.delim(f, sep = ",", skip = 8, header = FALSE,
-                                 encoding = "latin1"))
+                                 encoding = "latin1", na.strings = ""))
   names(lh) <- names(lh_names)
 
   # Convert date fields to date/time understood by R
@@ -73,9 +73,10 @@ read_fert_table <- function(f){
   }
 
   fert_names <- read.delim(f, sep = ",", skip = 5,
-                           encoding = "latin1", nrows = 1, header = TRUE)
+                           encoding = "latin1", nrows = 1, header = TRUE,
+                           na.strings = "")
   fert <- dplyr::tbl_df(read.delim(f, sep = ",", skip = 8, header = FALSE,
-                                   encoding = "latin1"))
+                                   encoding = "latin1", na.strings = ""))
   names(fert) <- names(fert_names)
 
   fert <- fert %>%

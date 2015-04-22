@@ -18,6 +18,7 @@
 #' @import dplyr
 #' @importFrom plyr mapvalues
 #' @importFrom plyr revalue
+#' @importFrom plyr dlply
 #' @importFrom lubridate year
 #' @importFrom lubridate ymd
 #' @importFrom lubridate ymd_hms
