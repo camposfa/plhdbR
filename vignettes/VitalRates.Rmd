@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 
 # Functions for calculating vital rates
 
-## Prepare workspace and [read biography and fertility data](ErrorChecking.md)
+## Prepare workspace and read biography and fertility data
 
 ```{r, message = FALSE, warning = FALSE} 
   library(plhdbR)

@@ -67,7 +67,7 @@ age_specific_fertility <- function(b, f){
                                                                            "Animal.Id" = "Animal.Id"))))
 
   # Create columns for first and last birthday, and fill with dummy dates
-  temp <- mutate(temp, FirstBirthday = lubridate::ymd("1900-01-01"),
+  temp <- dplyr::mutate(temp, FirstBirthday = lubridate::ymd("1900-01-01"),
                  LastBirthday = lubridate::ymd("1900-01-01"))
 
   # Find the end of each study
@@ -163,12 +163,12 @@ age_specific_fertility <- function(b, f){
   }
 
   # Bind all rows of the list together into one tbl_df
-  asf <- suppressWarnings(bind_rows(asf))
+  asf <- suppressWarnings(dplyr::bind_rows(asf))
 
   # Compute average age-specific per-capita fertility
   asf_summary <- asf %>%
-    group_by(Study.Id, Discrete.Age.Class) %>%
-    summarise(f = sum(Num.Offspring * Weight) / sum(Weight),
+    dplyr::group_by(Study.Id, Discrete.Age.Class) %>%
+    dplyr::summarise(f = sum(Num.Offspring * Weight) / sum(Weight),
               n = n())
 
   return(asf_summary)
