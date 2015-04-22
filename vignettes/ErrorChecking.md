@@ -199,7 +199,7 @@ The function `find_mom_id_errors` checks to see if all the animals listed in Mom
 
 We can see from this that there are 40 Mom.ID records that don't match any entry in Animal.Id and therefore need to be corrected.
 
-### Problems with animals that are supposed to be first born offspring
+### Problems with animals that are supposed to be first-born offspring
 
 The function `find_first_born_errors` checks for two kinds of errors regarding first-born offspring.
 
@@ -207,7 +207,7 @@ The function `find_first_born_errors` checks for two kinds of errors regarding f
   first_born_errors <- find_first_born_errors(lh)
 ```
 
-First, there should be known Mom.Id (not blank or NA) for any animal that has "N" or "Y" in the First.Born column because if the animal's first-born status is known ("N", or "Y"), then the researchers must know the mother. Cases that violate this rule are returned in the named list element `$unknown_mother_first_born`.
+First, there should be a known Mom.Id (not blank or NA) for any animal that has "N" or "Y" in the First.Born column because if the animal's first-born status is known ("N", or "Y"), then the researchers must know the mother. Cases that violate this rule are returned in the named list element `$unknown_mother_first_born`.
 
 ``` r
   first_born_errors$unknown_mother_first_born
