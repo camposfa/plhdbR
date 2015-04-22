@@ -23,16 +23,16 @@ The function `median_age_first_rep` uses the biography data to calculate the med
 
 ``` r
   median_age_first_rep(lh)
-#> Source: local data frame [7 x 2]
+#> Source: local data frame [7 x 3]
 #> 
-#>   Study.Id median_age
-#> 1 rppn-fma   8.795890
-#> 2 amboseli   5.975342
-#> 3 kakamega   7.301370
-#> 4    gombe  15.190411
-#> 5 karisoke   9.865753
-#> 6     beza   6.002740
-#> 7      ssr   6.475342
+#>   Study.Id median_age_days median_age_years
+#> 1 rppn-fma     3210.5 days         8.795890
+#> 2 amboseli     2181.0 days         5.975342
+#> 3 kakamega     2665.0 days         7.301370
+#> 4    gombe     5544.5 days        15.190411
+#> 5 karisoke     3601.0 days         9.865753
+#> 6     beza     2191.0 days         6.002740
+#> 7      ssr     2363.5 days         6.475342
 ```
 
 Age-specific fertility

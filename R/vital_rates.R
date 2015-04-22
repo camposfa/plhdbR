@@ -37,10 +37,12 @@ median_age_first_rep <- function(b){
 
   # Calculate mother's age when the first offspring was born
   med_age <- temp %>%
-    dplyr::mutate(Mother.Age.At.Birth = lubridate::interval(Mother.Birth.Date,
-                                                            Birth.Date) / eyears(1)) %>%
+    dplyr::mutate(age_days = Birth.Date - Mother.Birth.Date,
+                  age_years = lubridate::interval(Mother.Birth.Date,
+                                                  Birth.Date) / eyears(1)) %>%
     dplyr::group_by(Study.Id) %>%
-    dplyr::summarise(median_age = median(Mother.Age.At.Birth))
+    dplyr::summarise(median_age_days = median(age_days),
+                     median_age_years = median(age_years))
 
   return(med_age)
 }
@@ -184,79 +186,7 @@ age_specific_fertility <- function(b, f){
 #' ssf <- stage_specific_fertility(lh, fert)
 stage_specific_fertility <- function(b, f){
 
-  temp <- suppressMessages(suppressWarnings(dplyr::inner_join(b, f, by = c("Study.Id" = "Study.Id",
-                                                                           "Animal.Id" = "Animal.Id"))))
 
-  temp <- mutate(temp, FirstBirthday = lubridate::ymd("1900-01-01"),
-                 LastBirthday = lubridate::ymd("1900-01-01"))
-
-  study_end <- b %>%
-    dplyr::group_by(Study.Id) %>%
-    dplyr::summarise(Study.End = max(Depart.Date))
-
-  temp <- suppressMessages(dplyr::inner_join(temp, study_end))
-
-  ssf <- list()
-
-  for(i in 1:nrow(temp)){
-
-    actual_bd <- temp[i, ]$Birth.Date
-    end_bd <- lubridate::ymd(paste(lubridate::year(temp[i, ]$Study.End),
-                                   lubridate::month(temp[i, ]$Birth.Date),
-                                   lubridate::day(temp[i, ]$Birth.Date),
-                                   sep = "-"))
-    s <- temp[i, ]$Study.Id
-    m <- temp[i, ]$Animal.Id
-
-    if(temp[i, ]$Study.End > end_bd){
-      end_bd <- end_bd + lubridate::years(1)
-    }
-
-    bd <- seq(actual_bd, end_bd, "1 year")
-
-    first_bd <- max(bd[bd <= temp[i, ]$Start.Date])
-    last_bd <- min(bd[bd >= temp[i, ]$Stop.Date])
-
-    bd <- seq(first_bd, last_bd, "1 year")
-
-    ssf_i <- data.frame(Study.Id = temp[i, ]$Study.Id,
-                        Animal.Id = temp[i, ]$Animal.Id,
-                        Birth.Date = temp[i, ]$Birth.Date,
-                        Start.Date = temp[i, ]$Start.Date,
-                        Stop.Date = temp[i, ]$Stop.Date,
-                        Last.BD = bd[1:(length(bd) - 1)],
-                        Next.BD = bd[2:length(bd)],
-                        Weight = NA,
-                        Num.Offspring = NA)
-
-    if(ssf_i[1, ]$Last.BD < ssf_i[1, ]$Start.Date){
-      ssf_i[1, ]$Weight <- (ssf_i[1, ]$Next.BD - ssf_i[1, ]$Start.Date) / 365.25
-    }
-
-    k <- nrow(ssf_i)
-
-    if(ssf_i[k, ]$Next.BD > ssf_i[k, ]$Stop.Date){
-      ssf_i[k, ]$Weight <- (ssf_i[k, ]$Stop.Date - ssf_i[k, ]$Last.BD) / 365.25
-    }
-
-    if(nrow(ssf_i[is.na(ssf_i$Weight), ]) > 0){
-      ssf_i[is.na(ssf_i$Weight), ]$Weight <- 1
-    }
-
-    ssf_i$Discrete.Age.Class <- lubridate::year(ssf_i$Last.BD) - lubridate::year(ssf_i$Birth.Date)
-
-    for(j in 1:nrow(ssf_i)){
-      ssf_i[j, ]$Num.Offspring <- b %>%
-        dplyr::filter(Study.Id == s & Mom.Id == m &
-                        Birth.Date >= ssf_i[j, ]$Last.BD &
-                        Birth.Date < ssf_i[j, ]$Next.BD) %>%
-        nrow()
-    }
-
-    ssf[[i]] <- ssf_i
-  }
-
-  ssf <- bind_rows(ssf)
 
   return(ssf)
 }
