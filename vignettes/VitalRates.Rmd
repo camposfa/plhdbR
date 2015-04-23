@@ -79,4 +79,4 @@ _Warning: this function takes ~5 minutes to run._
 
 ## Age-specific and stage-specific survival
 
-** Work in progress**
+__Work in progress__

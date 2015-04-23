@@ -96,4 +96,4 @@ The optional logical argument `annual` determines whether fertilities are calcul
 Age-specific and stage-specific survival
 ----------------------------------------
 
-\*\* Work in progress\*\*
+**Work in progress**
