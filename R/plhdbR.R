@@ -16,14 +16,8 @@
 #' @import stringr
 #' @import tidyr
 #' @import dplyr
+#' @import lubridate
 #' @importFrom plyr mapvalues
 #' @importFrom plyr revalue
 #' @importFrom plyr dlply
-#' @importFrom lubridate year
-#' @importFrom lubridate ymd
-#' @importFrom lubridate ymd_hms
-#' @importFrom lubridate parse_date_time
-#' @importFrom lubridate parse_date_time2
-#' @importFrom lubridate new_interval
-#' @importFrom lubridate %within%
 NULL

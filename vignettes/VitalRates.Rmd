@@ -11,7 +11,8 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-"
+  fig.path = "README-",
+  cache = TRUE
 )
 ```
 
@@ -22,6 +23,8 @@ knitr::opts_chunk$set(
 ## Prepare workspace and read biography and fertility data
 
 ```{r, message = FALSE, warning = FALSE} 
+  Sys.setenv(TZ = 'UTC')
+
   library(plhdbR)
   load_plhdb_packages()
 
@@ -47,12 +50,33 @@ The function `age_specific_fertility` uses the biography and fertility tables to
 calculate age-specific fertility separately for each study species using discrete
 age-classes. The procedure follows the instructions provided by Bill Morris in the
 "Methods for calculating vital rates" Word file available on the PLHDB Wiki.
-_Warning_: this function takes ~1 minute to run.
+
+_Warning: this function takes ~1 minute to run._
 
 ```{r}
-  age_specific_fertility(lh, fert)
+  asf <- age_specific_fertility(lh, fert)
+  asf
 ```
 
 ## Stage-specific fertility between censuses
 
-__Work in progress__
+The function `stage_specific_fertility` uses the biography and fertility tables to
+calculate stage-specific fertility separately for each study species. The function 
+uses pseudo-census dates on January 1 of each year of the study. The life-history
+stages include (following Morris et al. 2011):
+- Newborns: individuals born between the pseudo-census dates in each interval
+- Juveniles: individuals alive but younger than the median age at first reproduction at the first pseudo-census date in each interval
+- Adults: individuals that are older than the median age at first reproduction at the first pseudo-census date in each interval
+
+The optional logical argument `annual` determines whether fertilities are calculated for each year separately (the default is TRUE).
+
+_Warning: this function takes ~5 minutes to run._
+
+```{r}
+  ssf <- stage_specific_fertility(lh, fert, annual = TRUE)
+  ssf
+```
+
+## Age-specific and stage-specific survival
+
+** Work in progress**
