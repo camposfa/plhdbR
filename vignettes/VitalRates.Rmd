@@ -64,9 +64,10 @@ The function `stage_specific_fertility` uses the biography and fertility tables 
 calculate stage-specific fertility separately for each study species. The function 
 uses pseudo-census dates on January 1 of each year of the study. The life-history
 stages include (following Morris et al. 2011):
-- Newborns: individuals born between the pseudo-census dates in each interval
-- Juveniles: individuals alive but younger than the median age at first reproduction at the first pseudo-census date in each interval
-- Adults: individuals that are older than the median age at first reproduction at the first pseudo-census date in each interval
+
+* Newborns: individuals born between the pseudo-census dates in each interval
+* Juveniles: individuals alive but younger than the median age at first reproduction at the first pseudo-census date in each interval
+* Adults: individuals that are older than the median age at first reproduction at the first pseudo-census date in each interval
 
 The optional logical argument `annual` determines whether fertilities are calculated for each year separately (the default is TRUE).
 
