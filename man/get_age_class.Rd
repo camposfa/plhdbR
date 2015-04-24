@@ -12,8 +12,12 @@ get_age_class(age_years, mafr)
 
 \item{mafr}{Median age of first reproduction in years for the species.}
 }
+\value{
+Output is a character string: "newborn", "juvenile", or "adult"
+}
 \description{
-Returns a character string: "newborn", "juvenile", or "adult"
+Calculates the age class of an animal based on its age and the median age at
+first reproduction for the species.
 }
 \examples{
 age_class <- get_age_class(5.1, 8.78589)

@@ -14,8 +14,12 @@ stage_specific_fertility(b, f, annual = TRUE)
 
 \item{f}{Logical. Should the fertility be calculated for each year separately?}
 }
+\value{
+Output is a tbl_df that includes the per capita fertility for each life-history stage for each study species. Life history stages include newborns, juveniles, and adults; these are defined as in Morris et al. 2011. Also included are the number of animals and the "female-years" of observation on which the calculation is based.
+}
 \description{
-Returns a dplyr::tbl_df.
+Calculate stage-specific fertility
+Based on Bill Morris' methods for calculating vital rates, available on the Wiki.
 }
 \examples{
 ssf <- stage_specific_fertility(lh, fert)
