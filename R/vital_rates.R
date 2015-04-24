@@ -172,8 +172,9 @@ age_specific_fertility <- function(b, f){
   # Compute average age-specific per-capita fertility
   asf_summary <- asf %>%
     dplyr::group_by(Study.Id, Discrete.Age.Class) %>%
-    dplyr::summarise(f = sum(Num.Offspring * Weight) / sum(Weight),
-              n = n())
+    dplyr::summarise(n_animals = n(),
+                     female_years = sum(Weight),
+                     f = sum(Num.Offspring * Weight) / sum(Weight))
 
   return(asf_summary)
 }
@@ -195,7 +196,8 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
   b$Animal.Id <- as.character(b$Animal.Id)
 
   # Get subset of animals for which fertility was monitored
-  temp <- dplyr::left_join(b, f, by = c("Study.Id" = "Study.Id",
+  # Semi-join retains all rows in b that have a match in f
+  temp <- dplyr::semi_join(b, f, by = c("Study.Id" = "Study.Id",
                                         "Animal.Id" = "Animal.Id"))
 
   # Get life history stage (newborn, juvenile, or adult) of each animal at each
@@ -259,15 +261,17 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
     ssf_summary <- ps_ages %>%
       dplyr::mutate(year_of = lubridate::year(census_date)) %>%
       dplyr::group_by(Study.Id, year_of, age_class) %>%
-      dplyr::summarise(f = sum(Num.Offspring * Weight) / sum(Weight),
-                       n = n())
+      dplyr::summarise(n_animals = n(),
+                       female_years = sum(Weight),
+                       f = sum(Num.Offspring * Weight) / sum(Weight))
   }
   else{
-    # Compute average stage-specific per-capita fertility for all years
+    # Compute average stage-specific per-capita fertility across all years
     ssf_summary <- ps_ages %>%
       dplyr::group_by(Study.Id, age_class) %>%
-      dplyr::summarise(f = sum(Num.Offspring * Weight) / sum(Weight),
-                       n = n())
+      dplyr::summarise(n_animals = n(),
+                       female_years = sum(Weight),
+                       f = sum(Num.Offspring * Weight) / sum(Weight))
   }
 
   return(ssf_summary)

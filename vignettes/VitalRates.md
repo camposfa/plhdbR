@@ -47,21 +47,21 @@ The function `age_specific_fertility` uses the biography and fertility tables to
 ``` r
   asf <- age_specific_fertility(lh, fert)
   asf
-#> Source: local data frame [266 x 4]
+#> Source: local data frame [266 x 5]
 #> Groups: Study.Id
 #> 
-#>    Study.Id Discrete.Age.Class         f  n
-#> 1  rppn-fma                  0 0.0000000 83
-#> 2  rppn-fma                  1 0.0000000 90
-#> 3  rppn-fma                  2 0.0000000 75
-#> 4  rppn-fma                  3 0.0000000 62
-#> 5  rppn-fma                  4 0.0000000 61
-#> 6  rppn-fma                  5 0.0000000 83
-#> 7  rppn-fma                  6 0.0000000 68
-#> 8  rppn-fma                  7 0.2122556 42
-#> 9  rppn-fma                  8 0.3593110 38
-#> 10 rppn-fma                  9 0.2350101 35
-#> ..      ...                ...       ... ..
+#>    Study.Id Discrete.Age.Class n_animals female_years         f
+#> 1  rppn-fma                  0        83     79.81644 0.0000000
+#> 2  rppn-fma                  1        90     77.35890 0.0000000
+#> 3  rppn-fma                  2        75     67.61644 0.0000000
+#> 4  rppn-fma                  3        62     59.33973 0.0000000
+#> 5  rppn-fma                  4        61     57.40548 0.0000000
+#> 6  rppn-fma                  5        83     59.61096 0.0000000
+#> 7  rppn-fma                  6        68     46.36986 0.0000000
+#> 8  rppn-fma                  7        42     37.69041 0.2122556
+#> 9  rppn-fma                  8        38     36.10411 0.3593110
+#> 10 rppn-fma                  9        35     34.04110 0.2350101
+#> ..      ...                ...       ...          ...       ...
 ```
 
 Stage-specific fertility between censuses
@@ -80,21 +80,21 @@ The optional logical argument `annual` determines whether fertilities are calcul
 ``` r
   ssf <- stage_specific_fertility(lh, fert, annual = TRUE)
   ssf
-#> Source: local data frame [712 x 5]
+#> Source: local data frame [712 x 6]
 #> Groups: Study.Id, year_of
 #> 
-#>    Study.Id year_of age_class         f  n
-#> 1  rppn-fma    1983     adult 0.0000000 14
-#> 2  rppn-fma    1983  juvenile 0.1936799 12
-#> 3  rppn-fma    1983   newborn 0.0000000  2
-#> 4  rppn-fma    1984     adult 0.4285714 14
-#> 5  rppn-fma    1984  juvenile 0.0000000 16
-#> 6  rppn-fma    1984   newborn 0.0000000  2
-#> 7  rppn-fma    1986     adult 0.3750000 16
-#> 8  rppn-fma    1986  juvenile 0.0000000 19
-#> 9  rppn-fma    1986   newborn 0.0000000  2
-#> 10 rppn-fma    1987     adult 0.1250000 16
-#> ..      ...     ...       ...       ... ..
+#>    Study.Id year_of age_class n_animals female_years         f
+#> 1  rppn-fma    1983     adult         7    3.6438356 0.0000000
+#> 2  rppn-fma    1983  juvenile         6    2.6876712 0.1936799
+#> 3  rppn-fma    1983   newborn         1    0.4191781 0.0000000
+#> 4  rppn-fma    1984     adult         7    3.7780822 0.4285714
+#> 5  rppn-fma    1984  juvenile         8    4.1643836 0.0000000
+#> 6  rppn-fma    1984   newborn         1    0.0739726 0.0000000
+#> 7  rppn-fma    1986     adult         8    4.0986301 0.3750000
+#> 8  rppn-fma    1986  juvenile        11    5.5945205 0.0000000
+#> 9  rppn-fma    1986   newborn         2    0.8191781 0.0000000
+#> 10 rppn-fma    1987     adult         8    8.0000000 0.1250000
+#> ..      ...     ...       ...       ...          ...       ...
 ```
 
 Age-specific and stage-specific survival
