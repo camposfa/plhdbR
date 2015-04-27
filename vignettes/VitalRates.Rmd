@@ -11,7 +11,7 @@ output:
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "README-",
+  fig.path = "Vitals-",
   cache = TRUE
 )
 ```
@@ -83,7 +83,7 @@ _Warning: this function takes ~5 minutes to run._
 
 ## Stage-specific mortality
 
-The function `stage_specific_mortality` uses the biography table to calculate stage-specific mortality separately for each study species for each year of the study. The function 
+The function `stage_specific_survival` uses the biography table to calculate stage-specific probability of survival separately for each study species for each year of the study. The function 
 uses pseudo-census dates on January 1 of each year of the study. The life-history
 stages include (following Morris et al. 2011):
 
@@ -93,7 +93,17 @@ stages include (following Morris et al. 2011):
 
 _Warning: this function takes ~1 minute to run._
 
-```{r}
-  ssm <- stage_specific_mortality(lh)
+```{r fig.width=8, fig.height=6}
+  ssm <- stage_specific_survival(lh)
   ssm
+  
+  # Visualize changes over time (not adjusted for sampling effort!!!)
+  library(ggplot2)
+  
+  ggplot(ssm, aes(x = year_of, y = s)) +
+  geom_line() +
+  facet_grid(Study.Id ~ age_class) +
+  labs(x = "Year", y = "Probability of Survival") + 
+  theme_bw()
+  
 ```

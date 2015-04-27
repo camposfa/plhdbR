@@ -31,13 +31,13 @@ The function `median_age_first_rep` uses the biography data to calculate the med
 #> Source: local data frame [7 x 4]
 #> 
 #>   Study.Id median_age_days median_age_years n_first_births
-#> 1 rppn-fma     3210.5 days         8.795890             58
-#> 2 amboseli     2181.0 days         5.975342            193
-#> 3 kakamega     2665.0 days         7.301370            117
-#> 4    gombe     5544.5 days        15.190411             54
-#> 5 karisoke     3601.0 days         9.865753             55
-#> 6     beza     2191.0 days         6.002740             80
-#> 7      ssr     2363.5 days         6.475342             32
+#> 1 rppn-fma          3210.5         8.789870             58
+#> 2 amboseli          2181.0         5.971253            193
+#> 3 kakamega          2665.0         7.296372            117
+#> 4    gombe          5544.5        15.180014             54
+#> 5 karisoke          3601.0         9.859001             55
+#> 6     beza          2191.0         5.998631             80
+#> 7      ssr          2363.5         6.470910             32
 ```
 
 Age-specific fertility
@@ -54,16 +54,16 @@ The function `age_specific_fertility` uses the biography and fertility tables to
 #> Groups: Study.Id
 #> 
 #>    Study.Id Discrete.Age.Class n_animals female_years         f
-#> 1  rppn-fma                  0        83     79.81644 0.0000000
-#> 2  rppn-fma                  1        90     77.35890 0.0000000
-#> 3  rppn-fma                  2        75     67.61644 0.0000000
-#> 4  rppn-fma                  3        62     59.33973 0.0000000
-#> 5  rppn-fma                  4        61     57.40548 0.0000000
-#> 6  rppn-fma                  5        83     59.61096 0.0000000
-#> 7  rppn-fma                  6        68     46.36986 0.0000000
-#> 8  rppn-fma                  7        42     37.69041 0.2122556
-#> 9  rppn-fma                  8        38     36.10411 0.3593110
-#> 10 rppn-fma                  9        35     34.04110 0.2350101
+#> 1  rppn-fma                  0        83     79.77687 0.0000000
+#> 2  rppn-fma                  1        90     77.35181 0.0000000
+#> 3  rppn-fma                  2        75     67.61123 0.0000000
+#> 4  rppn-fma                  3        62     59.33812 0.0000000
+#> 5  rppn-fma                  4        61     57.40315 0.0000000
+#> 6  rppn-fma                  5        83     59.59343 0.0000000
+#> 7  rppn-fma                  6        68     46.35866 0.0000000
+#> 8  rppn-fma                  7        42     37.68857 0.2122659
+#> 9  rppn-fma                  8        38     36.10267 0.3593069
+#> 10 rppn-fma                  9        35     34.04107 0.2350103
 #> ..      ...                ...       ...          ...       ...
 ```
 
@@ -82,28 +82,4082 @@ The optional logical argument `annual` determines whether fertilities are calcul
 
 ``` r
   ssf <- stage_specific_fertility(lh, fert, annual = TRUE)
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.Date",
+#> "Ops.POSIXt") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.Date",
+#> "Ops.POSIXt") for "<="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for ">="
+#> Warning: Incompatible methods ("Ops.Date", "Ops.POSIXt") for "<="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for ">="
+#> Warning in filter_impl(.data, dots): Incompatible methods ("Ops.POSIXt",
+#> "Ops.Date") for "<"
   ssf
-#> Source: local data frame [712 x 6]
+#> Source: local data frame [122 x 6]
 #> Groups: Study.Id, year_of
 #> 
-#>    Study.Id year_of age_class n_animals female_years         f
-#> 1  rppn-fma    1983     adult         7    3.6438356 0.0000000
-#> 2  rppn-fma    1983  juvenile         6    2.6876712 0.1936799
-#> 3  rppn-fma    1983   newborn         1    0.4191781 0.0000000
-#> 4  rppn-fma    1984     adult         7    3.7780822 0.4285714
-#> 5  rppn-fma    1984  juvenile         8    4.1643836 0.0000000
-#> 6  rppn-fma    1984   newborn         1    0.0739726 0.0000000
-#> 7  rppn-fma    1986     adult         8    4.0986301 0.3750000
-#> 8  rppn-fma    1986  juvenile        11    5.5945205 0.0000000
-#> 9  rppn-fma    1986   newborn         2    0.8191781 0.0000000
-#> 10 rppn-fma    1987     adult         8    8.0000000 0.1250000
-#> ..      ...     ...       ...       ...          ...       ...
+#>    Study.Id year_of age_class n_animals female_years f
+#> 1     gombe    1963     adult         2            2 0
+#> 2     gombe    1963  juvenile         7            7 0
+#> 3     gombe    1964     adult         2            2 0
+#> 4     gombe    1964  juvenile         8            8 0
+#> 5     gombe    1965     adult         5            5 0
+#> 6     gombe    1965  juvenile         9            9 0
+#> 7     gombe    1965   newborn         1            1 0
+#> 8     gombe    1966     adult         6            6 0
+#> 9     gombe    1966  juvenile         9            9 0
+#> 10    gombe    1966   newborn         1            1 0
+#> ..      ...     ...       ...       ...          ... .
 ```
 
 Stage-specific mortality
 ------------------------
 
-The function `stage_specific_mortality` uses the biography table to calculate stage-specific mortality separately for each study species for each year of the study. The function uses pseudo-census dates on January 1 of each year of the study. The life-history stages include (following Morris et al. 2011):
+The function `stage_specific_survival` uses the biography table to calculate stage-specific probability of survival separately for each study species for each year of the study. The function uses pseudo-census dates on January 1 of each year of the study. The life-history stages include (following Morris et al. 2011):
 
 -   Newborns: individuals born between the pseudo-census dates in each interval
 -   Juveniles: individuals alive but younger than the median age at first reproduction at the first pseudo-census date in each interval
@@ -112,7 +4166,7 @@ The function `stage_specific_mortality` uses the biography table to calculate st
 *Warning: this function takes ~1 minute to run.*
 
 ``` r
-  ssm <- stage_specific_mortality(lh)
+  ssm <- stage_specific_survival(lh)
   ssm
 #> Source: local data frame [798 x 6]
 #> Groups: Study.Id, year_of
@@ -129,4 +4183,15 @@ The function `stage_specific_mortality` uses the biography table to calculate st
 #> 9  rppn-fma    1985   newborn         1          1.00000 1
 #> 10 rppn-fma    1986     adult        14         14.00000 1
 #> ..      ...     ...       ...       ...              ... .
+  
+  # Visualize changes over time (not adjusted for sampling effort!!!)
+  library(ggplot2)
+  
+  ggplot(ssm, aes(x = year_of, y = s)) +
+  geom_line() +
+  facet_grid(Study.Id ~ age_class) +
+  labs(x = "Year", y = "Probability of Survival") + 
+  theme_bw()
 ```
+
+![](Vitals-unnamed-chunk-6-1.png)
