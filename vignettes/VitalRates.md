@@ -100,8 +100,8 @@ The optional logical argument `annual` determines whether fertilities are calcul
 #> ..      ...     ...       ...       ...          ...       ...
 ```
 
-Stage-specific mortality
-------------------------
+Stage-specific survival
+-----------------------
 
 The function `stage_specific_survival` uses the biography table to calculate stage-specific probability of survival separately for each study species for each year of the study. The function uses pseudo-census dates on January 1 of each year of the study. The life-history stages include (following Morris et al. 2011):
 

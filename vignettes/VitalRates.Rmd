@@ -81,7 +81,7 @@ _Warning: this function takes ~5 minutes to run._
   ssf
 ```
 
-## Stage-specific mortality
+## Stage-specific survival
 
 The function `stage_specific_survival` uses the biography table to calculate stage-specific probability of survival separately for each study species for each year of the study. The function 
 uses pseudo-census dates on January 1 of each year of the study. The life-history
