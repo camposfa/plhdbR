@@ -6,7 +6,7 @@
 #' @export
 #' @examples
 #' # Assuming your file is called "biography_2015_03_17.csv"
-#' lh <- read_bio_table("biography_2015_03_17.csv")
+#' lh <- read_bio_table("data/biography_2015_03_17.csv")
 read_bio_table <- function(f){
 
   # file_ext function from tools package

@@ -36,9 +36,8 @@ median_age_first_rep <- function(b){
 
   # Calculate mother's age when the first offspring was born
   med_age <- temp %>%
-    dplyr::mutate(age_days = Birth.Date - Mother.Birth.Date,
-                  age_years = lubridate::interval(Mother.Birth.Date,
-                                                  Birth.Date) / lubridate::eyears(1)) %>%
+    dplyr::mutate(age_days = as.numeric(Birth.Date - Mother.Birth.Date),
+                  age_years = as.numeric(difftime(Birth.Date, Mother.Birth.Date) / 365.25)) %>%
     dplyr::group_by(Study.Id) %>%
     dplyr::summarise(median_age_days = median(age_days),
                      median_age_years = median(age_years),
@@ -133,13 +132,13 @@ age_specific_fertility <- function(b, f){
 
     # Calculate weight of first year based on fraction of year actually observed
     if(asf_i[1, ]$Last.BD < asf_i[1, ]$Start.Date){
-      asf_i[1, ]$Weight <- (asf_i[1, ]$Next.BD - asf_i[1, ]$Start.Date) / lubridate::eyears(1)
+      asf_i[1, ]$Weight <- (asf_i[1, ]$Next.BD - asf_i[1, ]$Start.Date) / 365.25
     }
 
     # Calcualte weight of last year based on fraction of year actually observed
     k <- nrow(asf_i)
     if(asf_i[k, ]$Next.BD > asf_i[k, ]$Stop.Date){
-      asf_i[k, ]$Weight <- (asf_i[k, ]$Stop.Date - asf_i[k, ]$Last.BD) / lubridate::eyears(1)
+      asf_i[k, ]$Weight <- (asf_i[k, ]$Stop.Date - asf_i[k, ]$Last.BD) / 365.25
     }
 
     # Set all other weights to 1 because fertility was observed for complete year
@@ -199,10 +198,11 @@ stage_specific_mortality <- function(b){
   # pseudocensus date during the study
   ps_ages <- pseudocensus_ages(b)
 
-  # Remove years for which census_end < Start.Date or census_date > End.Date
+  # Remove years for which census_end < Entry.Date or census_date > Depart.Date
   ps_ages <- ps_ages %>%
-    dplyr:: mutate(census_end = census_date + lubridate::years(1)) %>%
-    dplyr::filter(census_end >= Start.Date & census_date <= Stop.Date)
+    dplyr:: mutate(census_date = ymd(census_date),
+                   census_end = census_date + lubridate::years(1)) %>%
+    dplyr::filter(census_end >= Entry.Date & census_date <= Depart.Date)
 
   animals <- ps_ages %>%
     distinct(Study.Id, Animal.Id) %>%
@@ -232,9 +232,16 @@ stage_specific_mortality <- function(b){
 
           # Individual survives to next census
           if(temp_set[j, ]$Depart.Date > temp_set[j, ]$census_date + lubridate::years(1)){
-            w <- difftime(temp_set[j, ]$census_date + lubridate::years(1),
-                          temp_set[j, ]$Entry.Date,
-                          units = "days") / lubridate::eyears(1)
+
+            # Deal with leap year
+            if(temp_set[j, ]$Entry.Date == temp_set[j, ]$census_date){
+              w <- 1
+            }
+            else{
+              w <- difftime(temp_set[j, ]$census_date + lubridate::years(1),
+                            temp_set[j, ]$Entry.Date,
+                            units = "days") / 365.25
+            }
           }
 
           # Individual not present at next census
@@ -242,7 +249,7 @@ stage_specific_mortality <- function(b){
           else{
             w <- difftime(temp_set[j, ]$Depart.Date,
                           temp_set[j, ]$Entry.Date,
-                          units = "days") / lubridate::eyears(1)
+                          units = "days") / 365.25
 
             # Individual died before next census
             if(temp_set[j, ]$Depart.Type == "D"){
@@ -255,7 +262,7 @@ stage_specific_mortality <- function(b){
         else if(temp_set[j, ]$discrete_age_class == 0){
 
           # Infant survives to next census
-          if(temp_set[j, ]$Depart.Date > temp_set[j, ]$census_date + lubridate::years(1)){
+          if(temp_set[j, ]$Depart.Date >= temp_set[j, ]$census_date + lubridate::years(1)){
             w <- 1
           }
 
@@ -264,7 +271,7 @@ stage_specific_mortality <- function(b){
           else{
             w <- difftime(temp_set[j, ]$Depart.Date,
                           temp_set[j, ]$census_date,
-                          units = "days") / lubridate::eyears(1)
+                          units = "days") / 365.25
 
             # Infant died before next census
             if(temp_set[j, ]$Depart.Type == "D"){
@@ -283,7 +290,7 @@ stage_specific_mortality <- function(b){
         else{
           w <- difftime(temp_set[j, ]$Depart.Date,
                         temp_set[j, ]$census_date,
-                        units = "days") / lubridate::eyears(1)
+                        units = "days") / 365.25
         }
 
       }
@@ -301,36 +308,12 @@ stage_specific_mortality <- function(b){
 
   m <- bind_rows(m)
 
-
-
-
-  if(annual){
-    # Compute annual stage-specific per-capita fertility
-    ssf_summary <- ps_ages %>%
-      dplyr::mutate(year_of = lubridate::year(census_date)) %>%
-      dplyr::group_by(Study.Id, year_of, age_class) %>%
-      dplyr::summarise(n_animals = n(),
-                       female_years = sum(Weight),
-                       f = sum(Num.Offspring * Weight) / sum(Weight))
-  }
-  else{
-    # Compute average stage-specific per-capita fertility across all years
-    ssf_summary <- ps_ages %>%
-      dplyr::group_by(Study.Id, age_class) %>%
-      dplyr::summarise(n_animals = n(),
-                       female_years = sum(Weight),
-                       f = sum(Num.Offspring * Weight) / sum(Weight))
-  }
-
-#     s <- ps_ages %>%
-#       group_by(Study.Id, Animal.Id) %>%
-#       mutate(weight = ifelse(is.na(lag(age_class)) & !is.na(lead(age_class)) & discrete_age_class != 0,
-#                              difftime((census_date + years(1)), Entry.Date, units = "days") / 365.25,
-#                              ifelse(is.na(lag(age_class)) & is.na(lead(age_class)) & discrete_age_class == 0 & Depart.Type %in% c("E", "O", "P"),
-#                                     difftime((census_date + years(1)), Entry.Date, units = "days") / 365.25,
-#                                     ifelse(is.na(lead(age_class)),
-#                                            difftime(Depart.Date, census_date, units = "days") / 365.25,
-#                                            1))))
+  ssm_summary <- m %>%
+    dplyr::mutate(year_of = lubridate::year(census_date)) %>%
+    dplyr::group_by(Study.Id, year_of, age_class) %>%
+    dplyr::summarise(n_animals = n(),
+                     individual_years = sum(Alive),
+                     s = 1 - (sum(Deaths) / sum(Alive)))
 }
 
 
@@ -390,14 +373,14 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
     else if(ps_ages[i, ]$census_date < ps_ages[i, ]$Start.Date){
       ps_ages[i, ]$Weight <- (min(c(ps_ages[i, ]$census_end,
                                     ps_ages[i, ]$Stop.Date)) -
-                                ps_ages[i, ]$Start.Date) / lubridate::eyears(1)
+                                ps_ages[i, ]$Start.Date) / 365.25
     }
 
     # Else if stop date is before next census, fertility observation is censored
     # Get length between max of {census start, start date} and stop date
     else if(ps_ages[i, ]$Stop.Date < ps_ages[i, ]$census_end){
       ps_ages[i, ]$Weight <- (ps_ages[i, ]$Stop.Date -
-        (max(c(ps_ages[i, ]$census_date, ps_ages[i, ]$Start.Date)))) / lubridate::eyears(1)
+        (max(c(ps_ages[i, ]$census_date, ps_ages[i, ]$Start.Date)))) / 365.25
     }
 
     t1 <- ps_ages[i, ]$census_date
@@ -476,8 +459,8 @@ pseudocensus_ages <- function(b){
   census <- suppressMessages(dplyr::inner_join(census, census_end))
 
   # Fix two special cases where only one animal recorded in first year(s)
-  census[census$Study.Id == "beza", ]$census_start <- lubridate::ymd("1984-01-01")
-  census[census$Study.Id == "kakamega", ]$census_start <- lubridate::ymd("1980-01-01")
+  # census[census$Study.Id == "beza", ]$census_start <- lubridate::ymd("1984-01-01")
+  # census[census$Study.Id == "kakamega", ]$census_start <- lubridate::ymd("1980-01-01")
 
   census_seq <- function(df) {
     seq(df$census_start, df$census_end, "1 year")
@@ -504,13 +487,11 @@ pseudocensus_ages <- function(b){
 
       temp_set <- temp_lh %>%
         dplyr::filter(Entry.Date - lubridate::years(1) < t & Depart.Date >= t)
-        # dplyr::filter(Entry.Date - lubridate::years(1) < t & Depart.Date >= t)
-        # dplyr::filter(Entry.Date <= t & Depart.Date >= t)
 
       # If present, calculate age and assign to age category; calculate weight if neccesary
       ages[[i]] <- temp_set %>%
         dplyr::mutate(age_days = difftime(t, Birth.Date, units = "days"),
-                      age_years = lubridate::interval(Birth.Date, t) / lubridate::eyears(1),
+                      age_years = age_days / 365.25,
                       census_date = as.Date(t),
                       discrete_age_class = ceiling(age_years),
                       age_class = get_age_class(age_years, temp_mafr)) %>%

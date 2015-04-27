@@ -28,8 +28,11 @@ knitr::opts_chunk$set(
   library(plhdbR)
   load_plhdb_packages()
 
-  lh <- read_bio_table("biography_2015_03_17.csv")
-  fert <- read_fert_table("fertility_2015_03_17.csv")
+  lh <- read_bio_table("../data/biography_2015_03_17.csv")
+  fert <- read_fert_table("../data/fertility_2015_03_17.csv")
+  
+  # Need to fix a presumed error in the beza data before calculating vital rates
+  lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
 ```
 
 It's a good idea to [error-check](ErrorChecking.md) the data extensively before 
@@ -78,6 +81,19 @@ _Warning: this function takes ~5 minutes to run._
   ssf
 ```
 
-## Age-specific and stage-specific survival
+## Stage-specific mortality
 
-__Work in progress__
+The function `stage_specific_mortality` uses the biography table to calculate stage-specific mortality separately for each study species for each year of the study. The function 
+uses pseudo-census dates on January 1 of each year of the study. The life-history
+stages include (following Morris et al. 2011):
+
+* Newborns: individuals born between the pseudo-census dates in each interval
+* Juveniles: individuals alive but younger than the median age at first reproduction at the first pseudo-census date in each interval
+* Adults: individuals that are older than the median age at first reproduction at the first pseudo-census date in each interval
+
+_Warning: this function takes ~1 minute to run._
+
+```{r}
+  ssm <- stage_specific_mortality(lh)
+  ssm
+```
