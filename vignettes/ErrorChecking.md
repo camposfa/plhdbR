@@ -7,6 +7,8 @@ Prepare workspace
 -----------------
 
 ``` r
+  Sys.setenv(TZ = 'UTC')
+  
   library(plhdbR)
   load_plhdb_packages()
 ```
@@ -20,7 +22,7 @@ The functions `read_bio_table` and `read_fert_table` read csv files of biography
 
 ``` r
   # Assuming your file is called "biography_2015_03_17.csv"
-  lh <- read_bio_table("biography_2015_03_17.csv")
+  lh <- read_bio_table("../data/biography_2015_03_17.csv")
   summary(lh)
 #>      Study.Id      Animal.Id     Animal.Name  
 #>  rppn-fma: 564   KOM    :   4   Ahab   :   2  
@@ -76,7 +78,7 @@ The functions `read_bio_table` and `read_fert_table` read csv files of biography
 
 ``` r
   # Assuming your file is called "fertility_2015_03_17.csv"
-  fert <- read_fert_table("fertility_2015_03_17.csv")
+  fert <- read_fert_table("../data/fertility_2015_03_17.csv")
   summary(fert)
 #>      Study.Id     Animal.Id      Start.Date                  Start.Type
 #>  rppn-fma:151   BLAN   :   8   Min.   :1963-05-15 00:00:00   B:1078    

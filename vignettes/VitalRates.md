@@ -12,8 +12,11 @@ Prepare workspace and read biography and fertility data
   library(plhdbR)
   load_plhdb_packages()
 
-  lh <- read_bio_table("biography_2015_03_17.csv")
-  fert <- read_fert_table("fertility_2015_03_17.csv")
+  lh <- read_bio_table("../data/biography_2015_03_17.csv")
+  fert <- read_fert_table("../data/fertility_2015_03_17.csv")
+  
+  # Need to fix a presumed error in the beza data before calculating vital rates
+  lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
 ```
 
 It's a good idea to [error-check](ErrorChecking.md) the data extensively before running the fuctions below.
@@ -97,7 +100,33 @@ The optional logical argument `annual` determines whether fertilities are calcul
 #> ..      ...     ...       ...       ...          ...       ...
 ```
 
-Age-specific and stage-specific survival
-----------------------------------------
+Stage-specific mortality
+------------------------
 
-**Work in progress**
+The function `stage_specific_mortality` uses the biography table to calculate stage-specific mortality separately for each study species for each year of the study. The function uses pseudo-census dates on January 1 of each year of the study. The life-history stages include (following Morris et al. 2011):
+
+-   Newborns: individuals born between the pseudo-census dates in each interval
+-   Juveniles: individuals alive but younger than the median age at first reproduction at the first pseudo-census date in each interval
+-   Adults: individuals that are older than the median age at first reproduction at the first pseudo-census date in each interval
+
+*Warning: this function takes ~1 minute to run.*
+
+``` r
+  ssm <- stage_specific_mortality(lh)
+  ssm
+#> Source: local data frame [798 x 6]
+#> Groups: Study.Id, year_of
+#> 
+#>    Study.Id year_of age_class n_animals individual_years s
+#> 1  rppn-fma    1983     adult        12          6.24230 1
+#> 2  rppn-fma    1983  juvenile        11          5.28679 1
+#> 3  rppn-fma    1983   newborn         1          1.00000 1
+#> 4  rppn-fma    1984     adult        12         12.00000 1
+#> 5  rppn-fma    1984  juvenile        13         12.84873 1
+#> 6  rppn-fma    1984   newborn         1          1.00000 1
+#> 7  rppn-fma    1985     adult        14         14.00000 1
+#> 8  rppn-fma    1985  juvenile        14         12.52293 1
+#> 9  rppn-fma    1985   newborn         1          1.00000 1
+#> 10 rppn-fma    1986     adult        14         14.00000 1
+#> ..      ...     ...       ...       ...              ... .
+```
