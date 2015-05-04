@@ -2,8 +2,6 @@
 .Rhistory
 .RData
 
-test.R
-
 Read-and-delete-me
 
 Data/*
@@ -12,8 +10,8 @@ Supporting/Methods for calculating vital rates 2.doc
 
 README_OLD.Rmd
 
-Supporting/*
+supporting/*
 
-plots/*
+plots/
 
 vignettes/VitalRates_cache/
