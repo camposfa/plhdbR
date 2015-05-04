@@ -12,10 +12,8 @@ Supporting/Methods for calculating vital rates 2.doc
 
 README_OLD.Rmd
 
-Supporting/~$thods for calculating vital rates 2.doc
+Supporting/*
 
-Supporting/multiyear vital rates for seven primates.csv
-
-Supporting/README.txt
+plots/*
 
 vignettes/VitalRates_cache/
