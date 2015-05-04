@@ -12,6 +12,7 @@
 #' \item Pacific Decadal Oscillation ("pdo")
 #' \item Atlantic Multidecadal Oscillation ("amo")
 #' \item North Atlantic Oscillation ("nao")
+#' \item Southern Annular Mode ("sam")
 #' }
 #' @export
 #' @examples
@@ -159,7 +160,7 @@ load_climate_index <- function(index){
     }
   }
 
- if("amo" %in% index){
+  if("amo" %in% index){
 
    message("Reading AMO data from http://www.esrl.noaa.gov/psd/data/correlation/amon.us.data")
 
@@ -187,7 +188,7 @@ load_climate_index <- function(index){
    }
  }
 
- if("nao" %in% index){
+  if("nao" %in% index){
 
    message("Reading NAO data from http://www.cpc.ncep.noaa.gov/products/precip/CWlink/pna/norm.nao.monthly.b5001.current.ascii.table")
 
@@ -208,13 +209,73 @@ load_climate_index <- function(index){
        dplyr::select(date_of, value, index)
 
      res[["nao"]] <- nao
-   }else{
+   }
+   else{
      message("Error reading file.")
    }
  }
 
+  if("sam" %in% index){
+
+    message("Reading SAM data from http://www.nerc-bas.ac.uk/public/icd/gjma/newsam.1957.2007.txt")
+
+    sam <- read.table("http://www.nerc-bas.ac.uk/public/icd/gjma/newsam.1957.2007.txt",
+                      header = TRUE, fill = TRUE)
+
+    if(nrow(sam) > 0){
+      sam$year_of <- row.names(sam)
+      sam <- tbl_df(sam)
+      names(sam)[1:12] <- month.abb
+      sam <- tidyr::gather(sam, month_of, value, -year_of)
+
+      sam <- sam %>%
+        dplyr::mutate(date_of = lubridate::ymd(paste(year_of,
+                                                     as.numeric(month_of),
+                                                     "16", sep = "-")),
+                      index = "sam") %>%
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::arrange(date_of) %>%
+        dplyr::select(date_of, value, index)
+
+      res[["sam"]] <- sam
+    }
+    else{
+      message("Error reading file.")
+    }
+  }
+
+  if("ao" %in% index){
+
+    message("Reading AO data from http://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/monthly.ao.index.b50.current.ascii.table")
+
+    ao <- read.table("http://www.cpc.ncep.noaa.gov/products/precip/CWlink/daily_ao_index/monthly.ao.index.b50.current.ascii.table",
+                      header = TRUE, fill = TRUE)
+
+    if(nrow(ao) > 0){
+      ao$year_of <- row.names(ao)
+      ao <- tbl_df(ao)
+      names(ao)[1:12] <- month.abb
+      ao <- tidyr::gather(ao, month_of, value, -year_of)
+
+      ao <- ao %>%
+        dplyr::mutate(date_of = lubridate::ymd(paste(year_of,
+                                                     as.numeric(month_of),
+                                                     "16", sep = "-")),
+                      index = "ao") %>%
+        dplyr::filter(!is.na(value)) %>%
+        dplyr::arrange(date_of) %>%
+        dplyr::select(date_of, value, index)
+
+      res[["ao"]] <- ao
+    }
+    else{
+      message("Error reading file.")
+    }
+  }
+
+
  if(length(res) < length(index)){
-   known_indices <- c("dmi", "mei", "oni", "soi", "pdo", "amo", "nao")
+   known_indices <- c("dmi", "mei", "oni", "soi", "pdo", "amo", "nao", "sam", "ao")
    errors <- index[which(index %ni% known_indices)]
    message(paste("Unknown indices:" , paste(errors, collapse=", "), sep = " "))
  }

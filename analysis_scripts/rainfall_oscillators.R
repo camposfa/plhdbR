@@ -16,13 +16,14 @@ load_plhdb_packages()
 
 # ---- load_indices -------------------------------------------------------
 
-ind <- load_climate_index(c("pdo", "dmi", "oni", "amo", "nao"))
+ind <- load_climate_index(c("pdo", "dmi", "oni", "amo", "nao", "sam", "ao"))
 
 ind_df <- bind_rows(ind)
 
 ind_df <- filter(ind_df, date_of > ymd("1945-01-01"))
 
-ind_df$index <- factor(ind_df$index, levels = c("amo", "nao", "oni", "pdo", "dmi"))
+ind_df$index <- factor(ind_df$index, levels = c("amo", "nao", "oni", "pdo",
+                                                "dmi", "sam", "ao"))
 
 ind_neg <- ind_df
 ind_neg[ind_neg$value > 0, ]$value <- 0
@@ -203,12 +204,6 @@ for(j in 1:length(ind)){
 
 indices_df <- bind_rows(indices_ts)
 
-ggplot(filter(indices_df, n_months == 4), aes(x = as.Date(date_of), y = value)) +
-  geom_line() +
-  facet_grid(component ~ index, scales = "free") +
-  theme_bw() +
-  scale_x_date(limits = c(as.Date("1945-01-01"), as.Date("2016-01-01")))
-
 
 # ---- combine_rain_temp_data ---------------------------------------------
 
@@ -292,7 +287,8 @@ for(i in 1:length(clim_site)){
                        index = current_ind,
                        acf = temp$acf,
                        lag = temp$lag,
-                       ci = acf_ci(ccf(ind_ts, clim_ts, plot = FALSE, lag.max = 24)))
+                       ci = acf_ci(ccf(ind_ts, clim_ts, plot = FALSE,
+                                       lag.max = 24)))
 
     clim_anom_test[[j]] <- temp
   }
@@ -331,3 +327,77 @@ for(i in 1:length(levels(rain_anom$site))){
          width = 8, height = 12, units = "in")
 }
 
+
+
+# ---- anomaly_analysis ---------------------------------------------------
+
+get_phase <- function(df){
+
+  df$phase <- cut(df$value, include.lowest = TRUE,
+      breaks = c(min(df$value), -sd(df$value), sd(df$value), max(df$value)),
+      labels = c("Negative Phase", "Neutral Phase",
+                 "Positive Phase"))
+
+  return(df)
+
+}
+
+temp <- dlply(ind_df, .(index), function(x) get_phase(x))
+temp <- bind_rows(temp)
+
+temp1 <- climates %>%
+  inner_join(temp) %>%
+  group_by(site, month_of) %>%
+  summarise(new_tavg_med = median(t_avg_monthly))
+
+monthly_anom <- climates %>%
+  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly, t_avg_monthly) %>%
+  inner_join(temp) %>%
+  inner_join(temp1) %>%
+  mutate(new_tavg_anom = t_avg_monthly - new_tavg_med) %>%
+  group_by(site, month_of, index, phase) %>%
+  summarise(mean_rain_anomaly = mean(rain_anomaly, na.rm = TRUE),
+            med_rain_anomaly = median(rain_anomaly, na.rm = TRUE),
+            mean_tavg_anomaly = mean(t_avg_anomaly, na.rm = TRUE),
+            med_tavg_anomaly = median(t_avg_anomaly, na.rm = TRUE),
+            new_med_tavg_anomaly = median(new_tavg_anom, na.rm = TRUE))
+
+for(i in 1:length(levels(monthly_anom$site))){
+
+  current_site <- levels(monthly_anom$site)[i]
+
+  t_min <- min(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
+  t_max <- max(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
+  lim <- max(abs(t_min), abs(t_max))
+
+  p <- ggplot(filter(monthly_anom, site == current_site),
+         # aes(x = month_of, y = med_rain_anomaly, fill = med_rain_anomaly)) +
+         aes(x = month_of, y = new_med_tavg_anomaly, fill = new_med_tavg_anomaly)) +
+    geom_bar(stat = "identity", position = "dodge",
+             width = 0.8, size = 0.1, color = "black") +
+    geom_hline(yintercept = 0, size = 0.1) +
+    facet_grid(index ~ phase) +
+    labs(y = expression("Median Temperature Anomaly (mm)"), x = "Month") +
+    theme_bw() +
+#     scale_fill_gradient2(#low = "#8c510a", high = "#01665e", mid = "#f5f5f5",
+#                          low = "#4575b4", high = "#d73027", mid = "#ffffbf",
+#                          # trans = "sqrt_sign",
+#                          name = "Median Anomaly") +
+    scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
+                         name = "Median Anomaly",
+                         limits = c(-lim, lim)) +
+    theme(strip.background = element_blank(),
+          legend.position = "bottom",
+          legend.key.width=unit(2, "cm"),
+          legend.key.height=unit(0.2, "cm"),
+          axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+  f <- paste(i, "_", current_site, ".pdf", sep = "")
+
+#   ggsave(filename = f, plot = p, path = "plots/phase_anomaly_plots/rain_anomalies",
+#          width = 8, height = 12, units = "in")
+
+  ggsave(filename = f, plot = p, path = "plots/phase_anomaly_plots/tavg_anomalies",
+         width = 8, height = 12, units = "in")
+
+}

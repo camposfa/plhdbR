@@ -1,11 +1,9 @@
-library(plyr)
-library(ncdf4)
-library(lubridate)
-library(dplyr)
-library(ggplot2)
-library(RColorBrewer)
-library(scales)
-library(grid)
+Sys.setenv(TZ = 'UTC')
+list.of.packages <- list("plyr", "ncdf4", "lubridate", "ggplot2",
+                         "RColorBrewer", "grid", "scales", "dplyr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(unlist(new.packages))
+lapply(list.of.packages, require, character.only = T)
 
 # ---- new_format ---------------------------------------------------------
 

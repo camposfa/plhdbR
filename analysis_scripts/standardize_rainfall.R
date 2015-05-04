@@ -1,15 +1,13 @@
 
 # ---- load_packages ------------------------------------------------------
 
-Sys.setenv(TZ='UTC')
+Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("plyr", "reshape2", "ggplot2", "lubridate",
                          "RColorBrewer", "dplyr", "magrittr",
-                         "stringr", "ggvis", "scales", "grid", "readr")
+                         "stringr", "scales", "grid", "readr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
-
-# load("~/Dropbox/R/PLHD_climate/.RData")
 
 
 study_durations <- lh %>%
@@ -231,7 +229,7 @@ sat_trmm <- sat_trmm %>%
 
 rain_sites <- bind_rows(amboseli, kakamega, karisoke,
                         karisoke_air, rppn, ssr)
-rain_sites$data_source <- "station"
+rain_sites$data_source <- "rain_gauge"
 rain_sites[rain_sites$site == "karisoke_airstrip", ]$data_source <- "nearby_station"
 rain_sites[rain_sites$site == "karisoke_airstrip", ]$site <- "karisoke"
 
@@ -264,7 +262,7 @@ rain_monthly <- rain %>%
   select(site, year_of, month_of, recording_interval, n_measurements, rain_monthly_mm, data_source)
 
 rain_monthly$is_complete <- TRUE
-rain_monthly[rain_monthly$recording_interval == "daily" & rain_monthly$n_measurements < 25, ]$is_complete <- FALSE
+rain_monthly[rain_monthly$recording_interval == "daily" & rain_monthly$n_measurements < 20, ]$is_complete <- FALSE
 
 rain_monthly$site <- factor(rain_monthly$site,
                             levels = c("rppn-fma", "amboseli", "kakamega",
@@ -275,11 +273,11 @@ rain_monthly <- inner_join(rain_monthly, study_durations, by = c("site" = "Study
 
 rain_monthly <- rain_monthly %>%
   mutate(date_of = ymd(paste(year_of, month_of, "01", sep = "-")),
-         priority = ifelse(data_source == "station", 1,
+         priority = ifelse(data_source == "rain_gauge", 1,
                            ifelse(data_source == "nearby_station", 2,
                                   ifelse(data_source == "satellite_trmm", 3,
-                                         ifelse(data_source == "satellite_gpcp", 4,
-                                                5))))) %>%
+                                         ifelse(data_source == "satellite_gpcp", 5,
+                                                4))))) %>%
   filter(date_of > min_entry - years(5))
 
 rain_selected <- rain_monthly %>%
@@ -313,12 +311,18 @@ study_durations$site <- study_durations$Study.Id
 
 rain_selected$month_of <- factor(rain_selected$month_of, labels = month.abb)
 
+rain_selected$data_source <- factor(rain_selected$data_source,
+                                    levels = c("rain_gauge", "nearby_station",
+                                               "satellite_trmm", "satellite_gpcp",
+                                               "gpcc"))
+
 ggplot() +
   geom_tile(data = rain_selected,
            aes(x = month_of, y = year_of,
                fill = rain_monthly_mm)) +
-  scale_fill_gradientn(colours = brewer.pal(9, "Blues")[2:9],
+  scale_fill_gradientn(colours = brewer.pal(9, "Blues"),
                        name = "Rainfall Total (mm)",
+                       guide = FALSE,
                        trans = "cubroot") +
   facet_grid(. ~ site) +
   theme_bw() +
@@ -328,7 +332,7 @@ ggplot() +
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
 
@@ -340,7 +344,9 @@ ggplot() +
   facet_grid(. ~ site) +
   theme_bw() +
   labs(x = "Month", y = "Year") +
-  scale_fill_discrete(name = "Data Source") +
+  scale_fill_brewer(name = "Data Source",
+                    guide = FALSE,
+                    palette = "Dark2") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
         legend.position = "bottom",
         strip.background = element_blank(),
@@ -349,6 +355,16 @@ ggplot() +
         legend.key.width = unit(2, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
+
+quaroot_sign_trans <-  function(){
+  trans_new('quaroot_sign', transform = function(x) sign(x) * abs(x)^(1/4),
+            inverse = function(x) sign(x) * x^4)
+}
+
+sqrt_sign_trans <-  function(){
+  trans_new('sqrt_sign', transform = function(x) sign(x) * sqrt(abs(x)),
+            inverse = function(x) sign(x) * x^2)
+}
 
 ggplot() +
   geom_tile(data = rain_selected,
@@ -359,16 +375,16 @@ ggplot() +
   theme_bw() +
   labs(x = "Month", y = "Year") +
   scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
-                       name = "Rainfall Total (mm)",
+                       name = "Rainfall Anomaly (mm)",
                        trans = "sqrt_sign",
-                       limits = c(-1308, 1308),
-                       guide = FALSE) +
+                       # guide = FALSE,
+                       limits = c(-1308, 1308)) +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
         legend.position = "bottom",
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
 
@@ -381,92 +397,127 @@ write.csv(rain_selected, "data/rain_csv/rain_selected.csv", row.names = FALSE)
 
 # ---- source_comparisons -------------------------------------------------
 
+rain_monthly$site <- factor(rain_monthly$site,
+                            levels = c("rppn-fma", "amboseli", "kakamega",
+                                       "gombe", "karisoke", "karisoke_airstrip",
+                                       "beza", "ssr"))
+
 source_comp <- rain_monthly %>%
   ungroup %>%
   dcast(site + date_of ~ data_source, value.var = "rain_monthly_mm")
 
 # Station rain gauges vs. gpcc
 source_comp %>%
-  filter(!is.na(station) & !is.na(gpcc)) %>%
-  select(site, date_of, station, gpcc) %>%
+  filter(!is.na(rain_gauge) & !is.na(gpcc)) %>%
+  select(site, date_of, rain_gauge, gpcc) %>%
   tbl_df() %>%
-  ggplot(aes(x = station, y = gpcc, color = site)) +
+  ggplot(aes(x = rain_gauge, y = gpcc, color = site)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
   facet_wrap(~site, scales = "free") +
   coord_fixed() +
-  labs(title = "Station rain gauges vs. GPCC") +
+  labs(x = "Rain Gauge",
+       y = "GPCC Weather Stations",
+       title = "Station rain gauges vs. GPCC\n") +
   theme_bw()
+
+ggsave(filename = "Rain Gauge VS GPCC.pdf", path = "plots/source_comparisons",
+       width = 12, height = 9, units = "in")
 
 # Station rain gauges vs. trmm satellite
 source_comp %>%
-  filter(!is.na(station) & !is.na(satellite_trmm)) %>%
-  select(site, date_of, station, satellite_trmm) %>%
+  filter(!is.na(rain_gauge) & !is.na(satellite_trmm)) %>%
+  select(site, date_of, rain_gauge, satellite_trmm) %>%
   tbl_df() %>%
-  ggplot(aes(x = station, y = satellite_trmm, color = site)) +
+  ggplot(aes(x = rain_gauge, y = satellite_trmm, color = site)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
   facet_wrap(~site, scales = "free") +
   coord_fixed() +
-  labs(title = "Station rain gauges vs. TRMM satellite") +
+  labs(x = "Rain Gauge",
+       y = "TRMM Satellite",
+       title = "Station rain gauges vs. TRMM satellite\n") +
   theme_bw()
+
+ggsave(filename = "Rain Gauge VS TRMM Satellite.pdf", path = "plots/source_comparisons",
+       width = 12, height = 9, units = "in")
 
 # Station rain gauges vs. gpcp satellite
 source_comp %>%
-  filter(!is.na(station) & !is.na(satellite_gpcp)) %>%
-  select(site, date_of, station, satellite_gpcp) %>%
+  filter(!is.na(rain_gauge) & !is.na(satellite_gpcp)) %>%
+  select(site, date_of, rain_gauge, satellite_gpcp) %>%
   tbl_df() %>%
-  ggplot(aes(x = station, y = satellite_gpcp, color = site)) +
+  ggplot(aes(x = rain_gauge, y = satellite_gpcp, color = site)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
   facet_wrap(~site, scales = "free") +
   coord_fixed() +
-  labs(title = "Station rain gauges vs. GPCP satellite") +
+  labs(x = "Rain Gauge",
+       y = "GPCP Satellite",
+       title = "Station rain gauges vs. GPCP satellite\n") +
   theme_bw()
+
+ggsave(filename = "Rain Gauge VS GPCP Satellite.pdf", path = "plots/source_comparisons",
+       width = 12, height = 9, units = "in")
 
 # gpcc vs. trmm satellite
 source_comp %>%
   filter(!is.na(gpcc) & !is.na(satellite_trmm)) %>%
   select(site, date_of, gpcc, satellite_trmm) %>%
   tbl_df() %>%
-  ggplot(aes(x = gpcc, y = satellite_trmm, color = site)) +
+  ggplot(aes(x = satellite_trmm, y = gpcc, color = site)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
   facet_wrap(~site, scales = "free") +
   coord_fixed() +
-  labs(title = "GPCC vs. TRMM satellite") +
+  labs(x = "TRMM Satellite",
+       y = "GPCC Weather Stations",
+       title = "TRMM satellite vs. GPCC\n") +
   theme_bw()
+
+ggsave(filename = "TRMM Satellite VS GPCC.pdf", path = "plots/source_comparisons",
+       width = 12, height = 9, units = "in")
 
 # gpcc vs. gpcp satellite
 source_comp %>%
   filter(!is.na(gpcc) & !is.na(satellite_gpcp)) %>%
   select(site, date_of, gpcc, satellite_gpcp) %>%
   tbl_df() %>%
-  ggplot(aes(x = gpcc, y = satellite_gpcp, color = site)) +
+  ggplot(aes(x = satellite_gpcp, y = gpcc, color = site)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
   facet_wrap(~site, scales = "free") +
   coord_fixed() +
-  labs(title = "GPCC vs. GPCP satellite") +
+  labs(x = "GPCP Satellite",
+       y = "GPCC Weather Stations",
+       title = "GPCP satellite vs. GPCC\n") +
   theme_bw()
+
+ggsave(filename = "GPCP Satellite VS GPCC.pdf", path = "plots/source_comparisons",
+       width = 12, height = 9, units = "in")
 
 # gpcp satellite vs. trmm satellite
 source_comp %>%
   filter(!is.na(satellite_gpcp) & !is.na(satellite_trmm)) %>%
   select(site, date_of, satellite_gpcp, satellite_trmm) %>%
   tbl_df() %>%
-  ggplot(aes(x = satellite_gpcp, y = satellite_trmm, color = site)) +
+  ggplot(aes(x = satellite_trmm, y = satellite_gpcp, color = site)) +
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
   facet_wrap(~site, scales = "free") +
-  labs(title = "GPCP satellite vs. TRMM satellite") +
+  labs(x = "TRMM Satellite",
+       y = "GPCP Satellite",
+       title = "TRMM satellite vs. GPCP satellite\n") +
   coord_fixed() +
   theme_bw()
+
+ggsave(filename = "TRMM Satellite VS GPCP Satellite.pdf", path = "plots/source_comparisons",
+       width = 12, height = 9, units = "in")
 
 

@@ -17,6 +17,7 @@ Supported indices include.
 \item Pacific Decadal Oscillation ("pdo")
 \item Atlantic Multidecadal Oscillation ("amo")
 \item North Atlantic Oscillation ("nao")
+\item Southern Annular Mode ("sam")
 }}
 }
 \description{

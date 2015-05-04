@@ -1,11 +1,9 @@
-library(plyr)
-library(ncdf4)
-library(lubridate)
-library(dplyr)
-library(ggplot2)
-library(RColorBrewer)
-library(grid)
-
+Sys.setenv(TZ = 'UTC')
+list.of.packages <- list("plyr", "ncdf4", "lubridate", "ggplot2",
+                         "RColorBrewer", "grid", "scales", "dplyr")
+new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(unlist(new.packages))
+lapply(list.of.packages, require, character.only = T)
 
 # ---- mean_temp ----------------------------------------------------------
 
@@ -77,17 +75,17 @@ ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
 ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
   geom_tile() +
   facet_grid(. ~ site) +
-  scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"), name = "Mean Temperature") +
+  scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"), name = "Temperature") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
         legend.position = "bottom",
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
+  labs(x = "Month", y = "Year", title = "GHCN CAMS Temperature Data\n")
 
 
 # ---- berkeley_tavg_anom -------------------------------------------------
@@ -225,7 +223,7 @@ ggplot(at, aes(x = month_of, y = year_of, fill = t_anomaly)) +
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
   labs(x = "Month", y = "Year")
@@ -241,7 +239,7 @@ ggplot(at, aes(x = month_of, y = year_of, fill = t_monthly)) +
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
   labs(x = "Month", y = "Year")
@@ -263,7 +261,7 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_anomaly)) +
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
   labs(x = "Month", y = "Year")
@@ -272,6 +270,7 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
   geom_tile() +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"),
+                       # guide = FALSE,
                        name = "Temperature") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
@@ -279,7 +278,7 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
         strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
+  labs(x = "Month", y = "Year", title = "Berkeley Earth Temperature Data\n")
