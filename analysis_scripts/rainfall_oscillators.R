@@ -377,11 +377,11 @@ for(i in 1:length(levels(monthly_anom$site))){
              width = 0.8, size = 0.1, color = "black") +
     geom_hline(yintercept = 0, size = 0.1) +
     facet_grid(index ~ phase) +
-    labs(y = expression("Median Temperature Anomaly (mm)"), x = "Month") +
+    labs(y = expression("Median Temperature Anomaly"), x = "Month") +
+    # labs(y = expression("Median Rainfall Anomaly (mm)"), x = "Month") +
     theme_bw() +
-#     scale_fill_gradient2(#low = "#8c510a", high = "#01665e", mid = "#f5f5f5",
-#                          low = "#4575b4", high = "#d73027", mid = "#ffffbf",
-#                          # trans = "sqrt_sign",
+#     scale_fill_gradient2(low = "#8c510a", high = "#01665e", mid = "#f5f5f5",
+#                          trans = "sqrt_sign",
 #                          name = "Median Anomaly") +
     scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
                          name = "Median Anomaly",
@@ -395,9 +395,119 @@ for(i in 1:length(levels(monthly_anom$site))){
   f <- paste(i, "_", current_site, ".pdf", sep = "")
 
 #   ggsave(filename = f, plot = p, path = "plots/phase_anomaly_plots/rain_anomalies",
-#          width = 8, height = 12, units = "in")
+#          width = 12, height = 12, units = "in")
 
   ggsave(filename = f, plot = p, path = "plots/phase_anomaly_plots/tavg_anomalies",
-         width = 8, height = 12, units = "in")
+         width = 12, height = 12, units = "in")
 
 }
+
+
+
+# ---- heat_maps ----------------------------------------------------------
+
+
+temp <- monthly_anom %>%
+  ungroup() %>%
+  select(1:4, med_rain_anomaly) %>%
+  spread(phase, med_rain_anomaly) %>%
+  mutate(diff = `Positive Phase` - `Negative Phase`)
+
+lim <-  max(c(abs(min(temp$diff, na.rm = TRUE)), abs(max(temp$diff, na.rm = TRUE))))
+
+ggplot(temp, aes(x = month_of, y = index, fill = diff)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(site ~ .) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "Spectral")),
+                       name = "Difference",
+                       trans = "sqrt_sign",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+
+temp2 <- climates %>%
+  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly, t_avg_monthly) %>%
+  inner_join(temp) %>%
+  inner_join(temp1) %>%
+  mutate(new_tavg_anom = t_avg_monthly - new_tavg_med) %>%
+  group_by(site, month_of, index) %>%
+  summarise(ind_rain_cor = cor(value, rain_anomaly),
+            ind_rain_p = cor.test(value, rain_anomaly)$p.value,
+            ind_tavg_cor = cor(value, new_tavg_anom),
+            ind_tavg_p = cor.test(value, new_tavg_anom)$p.value)
+
+temp2 <- temp2 %>%
+  mutate(new_rain_cor = ifelse(ind_rain_p >= .05, 0, ind_rain_cor),
+         new_tavg_cor = ifelse(ind_tavg_p >= .05, 0, ind_tavg_cor))
+
+lim <-  max(c(abs(min(temp2$ind_rain_cor, na.rm = TRUE)),
+              abs(max(temp2$ind_rain_cor, na.rm = TRUE))))
+
+ggplot(temp2, aes(x = index, y = month_of, fill = ind_rain_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and monthly rainfall anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggplot(temp2, aes(x = index, y = month_of, fill = new_rain_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and monthly rainfall anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+
+lim <-  max(c(abs(min(temp2$ind_tavg_cor, na.rm = TRUE)),
+              abs(max(temp2$ind_tavg_cor, na.rm = TRUE))))
+
+ggplot(temp2, aes(x = index, y = month_of, fill = ind_tavg_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and monthly temperature anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggplot(temp2, aes(x = index, y = month_of, fill = new_tavg_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and monthly temperature anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
