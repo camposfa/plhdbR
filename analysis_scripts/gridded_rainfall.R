@@ -23,7 +23,7 @@ inds_lon <- (1:dim(longitude))
 inds_lat <- (1:dim(latitude))
 inds_time <- (1:dim(time))
 
-site_coords <- read.csv("site_coords.csv")
+site_coords <- read.csv("data/site_coords.csv")
 names(site_coords)[2] <- "long_name"
 site_list <- c("rppn-fma", "amboseli", "kakamega", "gombe", "karisoke", "beza", "ssr")
 site_coords$site <- site_list
@@ -78,7 +78,7 @@ inds_lon <- (1:dim(longitude))
 inds_lat <- (1:dim(latitude))
 inds_time <- (1:dim(time))
 
-site_coords <- read.csv("site_coords.csv")
+site_coords <- read.csv("data/site_coords.csv")
 names(site_coords)[2] <- "long_name"
 site_list <- c("rppn-fma", "amboseli", "kakamega", "gombe", "karisoke", "beza", "ssr")
 site_coords$site <- site_list

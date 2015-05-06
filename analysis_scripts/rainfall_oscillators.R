@@ -429,6 +429,7 @@ ggplot(temp, aes(x = month_of, y = index, fill = diff)) +
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
 
+temp <- ind_df
 
 temp2 <- climates %>%
   select(site, date_of, month_of, rain_anomaly, t_avg_anomaly, t_avg_monthly) %>%

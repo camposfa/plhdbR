@@ -63,13 +63,13 @@ at <- at_sites_f %>%
 at$month_of <- factor(at$month_of, labels = month.abb)
 
 # Circular
-ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
-  geom_tile() +
-  facet_wrap(~site, ncol = 2) +
-  scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd")) +
-  theme_classic() +
-  scale_y_continuous(limits = c(1920, 2016)) +
-  coord_polar()
+# ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
+#   geom_tile() +
+#   facet_wrap(~site, ncol = 2) +
+#   scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd")) +
+#   theme_classic() +
+#   scale_y_continuous(limits = c(1920, 2016)) +
+#   coord_polar()
 
 # Rectangular
 ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
