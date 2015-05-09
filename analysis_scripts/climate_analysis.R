@@ -1,7 +1,7 @@
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("plyr", "reshape2", "ncdf4", "lubridate", "ggplot2",
                          "RColorBrewer", "grid", "stringr", "scales", "tidyr",
-                         "grid", "dplyr", "plhdbR")
+                         "grid", "zoo", "dplyr", "plhdbR")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
@@ -477,9 +477,9 @@ ggplot(at, aes(x = month_of, y = year_of, fill = t_monthly)) +
   labs(x = "Month", y = "Year")
 
 
-# TAVG only
+# TMAX only
 
-temp <- filter(at, var == "t_avg")
+temp <- filter(at, var == "t_max")
 
 ggplot(temp, aes(x = month_of, y = year_of, fill = t_anomaly)) +
   geom_tile() +
@@ -1147,7 +1147,7 @@ for(j in 1:length(tavg_site)){
 
   stl_res <- list()
 
-  for(i in 4:37){
+  for(i in 4:121){
     temp <- data.frame(stl(tavg_ts,
                            s.window = "periodic",
                            t.window = i,
@@ -1228,8 +1228,9 @@ temp4 <- rain_sites_df %>%
   select(site, date_of, rain_detrended)
 
 temp5 <- tavg_sites_df %>%
-  filter(n_months == 18 & component == "remainder") %>%
-  rename(tavg_detrended = value) %>%
+  filter(n_months == 121 & (component == "remainder" | component == "seasonal")) %>%
+  spread(component, value) %>%
+  mutate(tavg_detrended = seasonal + remainder) %>%
   select(site, date_of, tavg_detrended)
 
 climates <- temp1 %>%
@@ -1466,24 +1467,33 @@ lim <-  max(c(abs(min(phase_anom$diff, na.rm = TRUE)),
 
 temp <- climates %>%
   group_by(site, month_of) %>%
-  summarise(new_tavg_med = median(t_avg_monthly))
+  summarise(new_tavg_med = median(t_avg_monthly),
+            detrended_tavg_med = median(tavg_detrended))
 
 phase_cor <- climates %>%
-  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly, t_avg_monthly) %>%
+  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly,
+         t_avg_monthly, tavg_detrended) %>%
   inner_join(ind_df) %>%
   inner_join(temp) %>%
-  mutate(new_tavg_anom = t_avg_monthly - new_tavg_med) %>%
+  mutate(new_tavg_anom = t_avg_monthly - new_tavg_med,
+         detrended_tavg_anom = tavg_detrended - detrended_tavg_med) %>%
   group_by(site, month_of, index) %>%
   arrange(year_of) %>%
   summarise(ind_rain_cor = cor(value, rain_anomaly),
             ind_rain_p = cor.test(value, rain_anomaly)$p.value,
             ind_tavg_cor = cor(value, new_tavg_anom),
+            d_ind_tavg_cor = cor(value, detrended_tavg_anom),
             ind_tavg_p = cor.test(value, new_tavg_anom)$p.value,
+            d_ind_tavg_p = cor.test(value, detrended_tavg_anom)$p.value,
             n = n())
 
 phase_cor <- phase_cor %>%
   mutate(new_rain_cor = ifelse(ind_rain_p >= .05, 0, ind_rain_cor),
          new_tavg_cor = ifelse(ind_tavg_p >= .05, 0, ind_tavg_cor))
+
+d_phase_cor <- phase_cor %>%
+  mutate(new_rain_cor = ifelse(ind_rain_p >= .05, 0, ind_rain_cor),
+         new_tavg_cor = ifelse(d_ind_tavg_p >= .05, 0, d_ind_tavg_cor))
 
 lim <-  max(c(abs(min(phase_cor$ind_rain_cor, na.rm = TRUE)),
               abs(max(phase_cor$ind_rain_cor, na.rm = TRUE))))
@@ -1522,6 +1532,9 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = new_rain_cor)) +
 lim <-  max(c(abs(min(phase_cor$ind_tavg_cor, na.rm = TRUE)),
               abs(max(phase_cor$ind_tavg_cor, na.rm = TRUE))))
 
+d_lim <-  max(c(abs(min(d_phase_cor$d_ind_tavg_cor, na.rm = TRUE)),
+              abs(max(d_phase_cor$d_ind_tavg_cor, na.rm = TRUE))))
+
 ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tavg_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
@@ -1537,12 +1550,42 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tavg_cor)) +
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
 
+ggplot(d_phase_cor, aes(x = index, y = month_of, fill = d_ind_tavg_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-d_lim, d_lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and monthly temperature anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
 ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tavg_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
                        name = "Correlation Coefficient",
                        limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and monthly temperature anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggplot(d_phase_cor, aes(x = index, y = month_of, fill = new_tavg_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-d_lim, d_lim)) +
   theme_bw() +
   labs(x = "Climate Oscillation Index", y = "Month",
        title = "Correlation between climate indices and monthly temperature anomalies") +
