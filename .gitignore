@@ -4,12 +4,14 @@
 
 Read-and-delete-me
 
-Data/*
+data/*
 
-Supporting/Methods for calculating vital rates 2.doc
+supporting/Methods for calculating vital rates 2.doc
 
 README_OLD.Rmd
 
 supporting/*
 
 vignettes/VitalRates_cache/
+
+analysis_scripts/old/*

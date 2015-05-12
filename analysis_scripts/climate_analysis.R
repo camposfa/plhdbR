@@ -23,15 +23,12 @@ sqrt_sign_trans <-  function(){
 
 # ---- prep ---------------------------------------------------------------
 
-f <- "data/biography_2015_03_17.csv"
+f <- "data/biography_2015_05_11.csv"
 lh <- read_bio_table(f)
 
 
-f <- "data/fertility_2015_03_17.csv"
+f <- "data/fertility_2015_05_11.csv"
 fert <- read_fert_table(f)
-
-# Fix a probable error
-lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
 
 study_durations <- lh %>%
   group_by(Study.Id) %>%
@@ -329,13 +326,16 @@ ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
 
 # ---- berkeley_tavg_anom -------------------------------------------------
 
-# Average Temperature Anomaly (relative to 1951-1980 mean)
+# Temperature Anomaly (relative to 1951-1980 mean)
 # 1 degree latitude x 1 degree longitude global grid
-# http://berkeleyearth.lbl.gov/auto/Global/Gridded/Land_and_Ocean_LatLong1.nc
-# t <- nc_open("data/grids/Berkeley/Land_and_Ocean_LatLong1.nc")
+
+# http://berkeleyearth.lbl.gov/auto/Global/Gridded/Complete_TAVG_LatLong1.nc
 ta <- nc_open("data/grids/Berkeley/Complete_TAVG_LatLong1.nc")
+# http://berkeleyearth.lbl.gov/auto/Global/Gridded/Complete_TMAX_LatLong1.nc
 tx <- nc_open("data/grids/Berkeley/Complete_TMAX_LatLong1.nc")
+# http://berkeleyearth.lbl.gov/auto/Global/Gridded/Complete_TMIN_LatLong1.nc
 tn <- nc_open("data/grids/Berkeley/Complete_TMIN_LatLong1.nc")
+
 
 lon <- ncvar_get(ta, varid = "longitude")
 lat <- ncvar_get(ta, varid = "latitude")
@@ -377,7 +377,7 @@ for(i in 1:nrow(site_coords)){
 
   ta_df$month_of <- month(ta_df$date_of)
   ta_df <- suppressMessages(inner_join(ta_df, ta_avg))
-  ta_df$var <- "t_avg"
+  ta_df$var <- "tavg"
 
 
   tx_anom <- ncvar_get(tx, varid = "temperature",
@@ -399,7 +399,7 @@ for(i in 1:nrow(site_coords)){
 
   tx_df$month_of <- month(tx_df$date_of)
   tx_df <- suppressMessages(inner_join(tx_df, tx_avg))
-  tx_df$var <- "t_max"
+  tx_df$var <- "tmax"
 
 
   tn_anom <- ncvar_get(tn, varid = "temperature",
@@ -421,7 +421,7 @@ for(i in 1:nrow(site_coords)){
 
   tn_df$month_of <- month(tn_df$date_of)
   tn_df <- suppressMessages(inner_join(tn_df, tn_avg))
-  tn_df$var <- "t_min"
+  tn_df$var <- "tmin"
 
   temp <- bind_rows(ta_df, tx_df, tn_df)
 
@@ -434,7 +434,7 @@ at <- at_sites_f %>%
   mutate(year_of = year(date_of),
          t_anomaly = as.numeric(t_anom),
          t_monthly = t_monthly + t_anom,
-         var = factor(var, levels = c("t_max", "t_avg", "t_min"))) %>%
+         var = factor(var, levels = c("tmax", "tavg", "tmin"))) %>%
   select(site, date_of, year_of, month_of, t_anomaly, t_monthly, var)
 
 at$month_of <- factor(at$month_of, labels = month.abb)
@@ -479,7 +479,7 @@ ggplot(at, aes(x = month_of, y = year_of, fill = t_monthly)) +
 
 # TMAX only
 
-temp <- filter(at, var == "t_max")
+temp <- filter(at, var == "tmax")
 
 ggplot(temp, aes(x = month_of, y = year_of, fill = t_anomaly)) +
   geom_tile() +
@@ -610,6 +610,12 @@ rppn <- rppn %>%
   arrange(date_of) %>%
   select(year_of, rainfall, date_of, type, site)
 
+# If no access to PACE DB, use the csv file:
+ssr <- read.csv("data/rain_csv/ssr.csv") %>%
+  tbl_df() %>%
+  select(-X) %>%
+  mutate(date_of = ymd(date_of))
+
 
 # ---- load_pace_data -----------------------------------------------------
 
@@ -633,12 +639,6 @@ ssr <- ssr %>%
          site = "ssr") %>%
   arrange(date_of) %>%
   select(year_of, rainfall, date_of, type, site)
-
-# If no access to PACE DB, use the csv file:
-# ssr <- read.csv("data/rain_csv/ssr.csv") %>%
-#   tbl_df() %>%
-#   select(-X) %>%
-#   mutate(date_of = ymd(date_of))
 
 
 # ---- gpcp_satellite_station_data ----------------------------------------
@@ -725,7 +725,6 @@ rain_sat_gpcp$data_source <- "satellite_gpcp"
 rain_sat_trmm <- bind_rows(sat_trmm)
 rain_sat_trmm$data_source <- "satellite_trmm"
 
-# Get precip_sites from gridded_rainfall.R
 rain_gpcc <- precip_sites %>%
   rename(rainfall = precip) %>%
   select(year_of, rainfall, date_of, site)
@@ -760,6 +759,7 @@ rain_monthly <- inner_join(rain_monthly, study_durations, by = c("site" = "Study
 
 # ---- select_final_rainfall_data -----------------------------------------
 
+# Assign data source priority and remove years before min_entry - 5 years
 rain_monthly <- rain_monthly %>%
   mutate(date_of = ymd(paste(year_of, month_of, "01", sep = "-")),
          priority = ifelse(data_source == "rain_gauge", 1,
@@ -769,6 +769,7 @@ rain_monthly <- rain_monthly %>%
                                                 4))))) %>%
   filter(date_of > min_entry - years(5))
 
+# Grouping by site, year, and month, take data source with smallest priority number
 rain_selected <- rain_monthly %>%
   ungroup() %>%
   filter(is_complete == TRUE) %>%
@@ -778,103 +779,8 @@ rain_selected <- rain_monthly %>%
             data_source = first(data_source),
             recording_interval = first(recording_interval),
             n_measurements = first(n_measurements),
-            date_of = min(date_of))
-
-rain_ltm <- rain_selected %>%
-  ungroup() %>%
-  group_by(site, month_of) %>%
-  summarise(rain_ltm = mean(rain_monthly_mm))
-
-rain_selected <- inner_join(rain_selected, rain_ltm) %>%
-  mutate(rain_anomaly = rain_monthly_mm - rain_ltm)
-
-
-# ---- plot_rainfall_summaries --------------------------------------------
-
-rain_selected$site <- factor(rain_selected$site,
-                             levels = c("rppn-fma", "amboseli", "kakamega",
-                                        "gombe", "karisoke",
-                                        "beza", "ssr"))
-
-study_durations$site <- study_durations$Study.Id
-
-rain_selected$month_of <- factor(rain_selected$month_of, labels = month.abb)
-
-rain_selected$data_source <- factor(rain_selected$data_source,
-                                    levels = c("rain_gauge", "nearby_station",
-                                               "satellite_trmm", "satellite_gpcp",
-                                               "gpcc"))
-
-# Accumulated monthly rainfall
-ggplot() +
-  geom_tile(data = rain_selected,
-            aes(x = month_of, y = year_of,
-                fill = rain_monthly_mm)) +
-  scale_fill_gradientn(colours = brewer.pal(9, "Blues"),
-                       name = "Rainfall Total (mm)",
-                       guide = FALSE,
-                       trans = "cubroot") +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  labs(x = "Month", y = "Year") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.position = "bottom",
-        strip.background = element_blank(),
-        axis.line = element_blank(),
-        strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(4, "cm"),
-        panel.margin = unit(1, "lines")) +
-  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
-
-# Data sources
-ggplot() +
-  geom_tile(data = rain_selected,
-            aes(x = month_of, y = year_of,
-                fill = data_source),
-            colour = "gray70") +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  labs(x = "Month", y = "Year") +
-  scale_fill_brewer(name = "Data Source",
-                    guide = FALSE,
-                    palette = "Dark2") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.position = "bottom",
-        strip.background = element_blank(),
-        axis.line = element_blank(),
-        strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
-        panel.margin = unit(1, "lines")) +
-  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
-
-# Rainfall anomalies
-ggplot() +
-  geom_tile(data = rain_selected,
-            aes(x = month_of, y = year_of,
-                fill = rain_anomaly),
-            colour = "gray70") +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  labs(x = "Month", y = "Year") +
-  scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
-                       name = "Rainfall Anomaly (mm)",
-                       trans = "sqrt_sign",
-                       # guide = FALSE,
-                       limits = c(-1308, 1308)) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.position = "bottom",
-        strip.background = element_blank(),
-        axis.line = element_blank(),
-        strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(4, "cm"),
-        panel.margin = unit(1, "lines")) +
-  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
-
-
-# ---- write_rainfall_selected_data ---------------------------------------
-
-# Write to csv file for later convenience
-# write.csv(rain_selected, "data/rain_csv/rain_selected.csv", row.names = FALSE)
+            date_of = min(date_of),
+            min_entry = min(min_entry))
 
 
 # ---- rainfall_source_comparisons ----------------------------------------
@@ -884,9 +790,12 @@ rain_monthly$site <- factor(rain_monthly$site,
                                        "gombe", "karisoke", "karisoke_airstrip",
                                        "beza", "ssr"))
 
+# Convert from long to wide format
 source_comp <- rain_monthly %>%
+  filter(is_complete == TRUE) %>%
   ungroup %>%
-  dcast(site + date_of ~ data_source, value.var = "rain_monthly_mm")
+  dcast(site + date_of ~ data_source, value.var = "rain_monthly_mm") %>%
+  tbl_df()
 
 # Station rain gauges vs. gpcc
 source_comp %>%
@@ -1009,6 +918,161 @@ source_comp %>%
 #        width = 12, height = 9, units = "in")
 
 
+# ---- predict_rain_gauge_data --------------------------------------------
+
+# Model rain gauge value on missing days by regressing GPCC data
+mod_gpcc <- source_comp %>%
+  filter((!is.na(rain_gauge) | !is.na(nearby_station)) & !is.na(gpcc)) %>%
+  group_by(site, date_of) %>%
+  mutate(month_of = month(date_of),
+         new_gauge = ifelse(!is.na(rain_gauge), rain_gauge, nearby_station)) %>%
+  select(site, date_of, month_of, nearby_station, rain_gauge, new_gauge, gpcc) %>%
+  ungroup() %>%
+  group_by(site, month_of) %>%
+  do(mod = lm(new_gauge ~ gpcc, data = .))
+
+# Predict rain gauge data for days with GPCC data but no (or incomplete) rain gauge data
+site_set <- levels(factor(mod_gpcc$site))
+
+temp <- rain_selected %>%
+  filter(as.character(site) %in% site_set & data_source == "gpcc") %>%
+  rename(gpcc = rain_monthly_mm)
+
+p <- list()
+count <- 1
+# Predict rain gauge data for days with GPCC data but no rain gauge or TRMM data
+for(i in 1:length(site_set)){
+
+  current_site <- levels(factor(mod_gpcc$site))[i]
+
+  for(j in 1:12){
+
+    df <- filter(temp, site == current_site & month_of == j)
+
+    df$rain_predicted <- predict(mod_gpcc[mod_gpcc$site == current_site & mod_gpcc$month_of == j, ]$mod[[1]], newdata = df)
+
+    p[[count]] <- df
+
+    count <- count + 1
+  }
+}
+
+p <- bind_rows(p)
+
+p <- select(p, site, year_of, month_of, rain_predicted)
+
+rain_selected <- left_join(rain_selected, p)
+
+rain_selected$data_source <- as.character(rain_selected$data_source)
+rain_selected[which(!is.na(rain_selected$rain_predicted)), ]$rain_monthly_mm <- rain_selected[which(!is.na(rain_selected$rain_predicted)), ]$rain_predicted
+rain_selected[which(!is.na(rain_selected$rain_predicted)), ]$data_source <- "predicted_from_gpcc"
+
+rain_selected[which(rain_selected$rain_monthly_mm < 0), ]$rain_monthly_mm <- 0
+
+
+# ---- long_term_means ----------------------------------------------------
+
+# Calculate long term mean using time period used for rain_selected.
+# Not using same period as for temperature (1951 to 1980) because that would be
+# mostly GPCC data, which consistently overestimates rainfall for some sites
+# like Amboseli
+rain_ltm <- rain_selected %>%
+  ungroup() %>%
+  group_by(site, month_of) %>%
+  summarise(rain_ltm = mean(rain_monthly_mm))
+
+rain_selected <- inner_join(rain_selected, rain_ltm) %>%
+  mutate(rain_anomaly = rain_monthly_mm - rain_ltm)
+
+
+# ---- plot_rainfall_summaries --------------------------------------------
+
+rain_selected$site <- factor(rain_selected$site,
+                             levels = c("rppn-fma", "amboseli", "kakamega",
+                                        "gombe", "karisoke",
+                                        "beza", "ssr"))
+
+study_durations$site <- study_durations$Study.Id
+
+rain_selected$month_of <- factor(rain_selected$month_of, labels = month.abb)
+
+rain_selected$data_source <- factor(rain_selected$data_source,
+                                    levels = c("rain_gauge", "nearby_station",
+                                               "satellite_trmm", "satellite_gpcp",
+                                               "gpcc", "predicted_from_gpcc"))
+
+# Accumulated monthly rainfall
+ggplot() +
+  geom_tile(data = rain_selected,
+            aes(x = month_of, y = year_of,
+                fill = rain_monthly_mm)) +
+  scale_fill_gradientn(colours = brewer.pal(9, "Blues"),
+                       name = "Rainfall Total (mm)",
+                       guide = FALSE,
+                       trans = "cubroot") +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  labs(x = "Month", y = "Year") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.width = unit(4, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
+
+# Data sources
+ggplot() +
+  geom_tile(data = rain_selected,
+            aes(x = month_of, y = year_of,
+                fill = data_source),
+            colour = "gray70") +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  labs(x = "Month", y = "Year") +
+  scale_fill_brewer(name = "Data Source",
+                    guide = FALSE,
+                    palette = "Dark2") +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.width = unit(2, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
+
+# Rainfall anomalies
+ggplot() +
+  geom_tile(data = rain_selected,
+            aes(x = month_of, y = year_of,
+                fill = rain_anomaly),
+            colour = "gray70") +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  labs(x = "Month", y = "Year") +
+  scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
+                       name = "Rainfall Anomaly (mm)",
+                       trans = "sqrt_sign",
+                       # guide = FALSE,
+                       limits = c(-1308, 1308)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.width = unit(4, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
+
+
+# ---- write_rainfall_selected_data ---------------------------------------
+
+# Write to csv file for later convenience
+write.csv(rain_selected, "data/rain_csv/rain_selected.csv", row.names = FALSE)
+
+
 
 # ==== OSCILLATION_ANALYSIS ===============================================
 
@@ -1047,87 +1111,9 @@ ggplot() +
   labs(x = "Year", y = "Value")
 
 
-# ---- rainfall_stl -------------------------------------------------------
-
-# rain_selected from "standardize_rainfall.R"
-rain_site <- dlply(rain_selected, .(site))
-
-rain_sites_ts <- list()
-
-for(j in 1:length(rain_site)){
-  rain_temp <- rain_site[[j]]
-  temp <- zoo(rain_temp$rain_anomaly, rain_temp$date_of, frequency = 12)
-  rain_ts <- ts(coredata(temp), freq = frequency(temp),
-                start = c(year(start(temp)), month(start(temp))),
-                end = c(year(end(temp)), month(end(temp))))
-  stl_dates <- floor_date(ymd(rownames(data.frame(temp))),
-                          unit = "month") + days(15)
-  rain_stl <- data.frame(stl_dates)
-
-  stl_res <- list()
-
-  for(i in 4:37){
-    temp <- data.frame(stl(rain_ts,
-                           s.window = "periodic",
-                           t.window = i,
-                           t.degree = 0)$time.series)
-    temp <- cbind(rain_stl, temp) %>%
-      gather(component, value, -stl_dates) %>%
-      rename(date_of = stl_dates)
-    temp$n_months <- i
-    temp$site <- rain_site[[j]]$site[1]
-
-    stl_res[[i]] <- temp
-  }
-
-  rain_sites_ts[[j]] <- bind_rows(stl_res)
-}
-
-rain_sites_df <- bind_rows(rain_sites_ts)
-
-rain_trend <- filter(rain_sites_df, component == "trend")
-
-ggplot(rain_trend, aes(x = date_of, y = value,
-                       color = n_months, group = n_months)) +
-  geom_line() +
-  scale_color_gradientn(colours = rev(heat_grad),
-                        name = "Sliding window \nlength (months)") +
-  theme_bw() +
-  scale_x_datetime(breaks = date_breaks(width = "2 years"),
-                   labels = date_format("%Y")) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.position = "bottom",
-        strip.background = element_blank(),
-        axis.line = element_blank(),
-        strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
-        panel.margin = unit(1, "lines")) +
-  labs(x = "Date", y = "Rainfall trend") +
-  facet_grid(site ~ ., scales = "free_y")
-
-rain_trend_18 <- filter(rain_trend, n_months == 18)
-
-ggplot(rain_trend_18,
-       aes(x = date_of, y = value,
-           color = n_months, group = n_months)) +
-  geom_line(color = "#00AAFF", size = 0.8) +
-  theme_bw() +
-  scale_x_datetime(breaks = date_breaks(width = "2 years"),
-                   labels = date_format("%Y")) +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.position = "bottom",
-        strip.background = element_blank(),
-        axis.line = element_blank(),
-        strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(2, "cm"),
-        panel.margin = unit(1, "lines")) +
-  labs(x = "Date", y = "Rainfall trend (18-month smooth)") +
-  facet_grid(site ~ ., scales = "free_y")
-
-
 # ---- temperature_stl ----------------------------------------------------
 
-tavg_site <- dlply(filter(at, var == "t_avg"), .(site))
+tavg_site <- dlply(filter(at, var == "tavg"), .(site))
 
 tavg_sites_ts <- list()
 
@@ -1145,63 +1131,23 @@ for(j in 1:length(tavg_site)){
                           unit = "month") + days(15)
   tavg_stl <- data.frame(stl_dates)
 
-  stl_res <- list()
+  # Try out different smooths for extracting the temperature trend
+  # Use 20-year smooth
+  # Do this by setting t.window to # of months + 1 (i.e., 241)
+  temp <- data.frame(stl(tavg_ts,
+                         s.window = "periodic",
+                         t.window = 241,
+                         t.degree = 0)$time.series)
+  temp <- cbind(tavg_stl, temp) %>%
+    gather(component, value, -stl_dates) %>%
+    rename(date_of = stl_dates)
+  temp$n_months <- 240
+  temp$site <- tavg_site[[j]]$site[1]
 
-  for(i in 4:121){
-    temp <- data.frame(stl(tavg_ts,
-                           s.window = "periodic",
-                           t.window = i,
-                           t.degree = 0)$time.series)
-    temp <- cbind(tavg_stl, temp) %>%
-      gather(component, value, -stl_dates) %>%
-      rename(date_of = stl_dates)
-    temp$n_months <- i
-    temp$site <- tavg_site[[j]]$site[1]
-
-    stl_res[[i]] <- temp
-  }
-
-  tavg_sites_ts[[j]] <- bind_rows(stl_res)
+  tavg_sites_ts[[j]] <- temp
 }
 
 tavg_sites_df <- bind_rows(tavg_sites_ts)
-
-
-# ---- index_stl ----------------------------------------------------------
-
-indices_ts <- list()
-
-for(j in 1:length(ind)){
-  ind_temp <- ind[[j]]
-  temp <- zoo(ind_temp$value, ind_temp$date_of, frequency = 12)
-  ind_ts <- ts(coredata(temp), freq = frequency(temp),
-               start = c(year(start(temp)), month(start(temp))),
-               end = c(year(end(temp)), month(end(temp))))
-  stl_dates <- floor_date(ymd(rownames(data.frame(temp))),
-                          unit = "month") + days(15)
-  ind_stl <- data.frame(stl_dates)
-
-  stl_res <- list()
-
-  for(i in 4:37){
-    temp <- data.frame(stl(ind_ts,
-                           s.window = "periodic",
-                           t.window = i,
-                           t.degree = 0)$time.series)
-    temp$actual <- ind_ts
-    temp <- cbind(ind_stl, temp) %>%
-      gather(component, value, -stl_dates) %>%
-      rename(date_of = stl_dates)
-    temp$n_months <- i
-    temp$index <- ind[[j]]$index[1]
-
-    stl_res[[i]] <- temp
-  }
-
-  indices_ts[[j]] <- bind_rows(stl_res)
-}
-
-indices_df <- bind_rows(indices_ts)
 
 
 # ---- combine_rain_temp_data ---------------------------------------------
@@ -1210,7 +1156,7 @@ temp1 <- rain_selected %>%
   select(site:rain_monthly_mm, date_of, rain_anomaly)
 
 temp2 <- at %>%
-  filter(var == "t_avg") %>%
+  filter(var == "tavg") %>%
   select(-date_of)
 
 temp3 <- temp2 %>%
@@ -1222,22 +1168,16 @@ temp3$var <- str_replace(temp3$var, "_t_", "_")
 
 temp3 <- temp3 %>% spread(var, value)
 
-temp4 <- rain_sites_df %>%
-  filter(n_months == 18 & component == "remainder") %>%
-  rename(rain_detrended = value) %>%
-  select(site, date_of, rain_detrended)
-
-temp5 <- tavg_sites_df %>%
-  filter(n_months == 121 & (component == "remainder" | component == "seasonal")) %>%
+temp4 <- tavg_sites_df %>%
+  filter(component == "remainder" | component == "seasonal") %>%
   spread(component, value) %>%
   mutate(tavg_detrended = seasonal + remainder) %>%
   select(site, date_of, tavg_detrended)
 
 climates <- temp1 %>%
   mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"))) %>%
-  inner_join(temp4) %>%
   inner_join(temp3) %>%
-  inner_join(temp5) %>%
+  inner_join(temp4) %>%
   select(site, date_of, year_of, month_of, rain_monthly_mm,
          rain_anomaly:tavg_detrended)
 
@@ -1352,35 +1292,35 @@ temp <- bind_rows(temp)
 
 monthly_anom <- climates %>%
   ungroup() %>%
-  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly, t_avg_monthly) %>%
+  select(site, date_of, month_of, rain_anomaly, tavg_anomaly, tavg_monthly) %>%
   inner_join(temp) %>%
   group_by(site, month_of) %>%
-  mutate(new_tavg_med = median(t_avg_monthly),
-         new_tavg_anom = t_avg_monthly - new_tavg_med) %>%
+  mutate(new_tavg_med = median(tavg_monthly),
+         new_tavg_anom = tavg_monthly - new_tavg_med) %>%
   ungroup() %>%
   group_by(site, month_of, index, phase) %>%
   summarise(mean_rain_anomaly = mean(rain_anomaly, na.rm = TRUE),
             med_rain_anomaly = median(rain_anomaly, na.rm = TRUE),
-            mean_tavg_anomaly = mean(t_avg_anomaly, na.rm = TRUE),
-            med_tavg_anomaly = median(t_avg_anomaly, na.rm = TRUE),
+            mean_tavg_anomaly = mean(tavg_anomaly, na.rm = TRUE),
+            med_tavg_anomaly = median(tavg_anomaly, na.rm = TRUE),
             new_med_tavg_anomaly = median(new_tavg_anom, na.rm = TRUE),
             n = n())
 
 temp3 <- climates %>%
   ungroup() %>%
-  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly, t_avg_monthly) %>%
+  select(site, date_of, month_of, rain_anomaly, tavg_anomaly, tavg_monthly) %>%
   inner_join(temp) %>%
   group_by(site, month_of) %>%
-  mutate(new_tavg_med = median(t_avg_monthly),
-         new_tavg_anom = t_avg_monthly - new_tavg_med)
+  mutate(new_tavg_med = median(tavg_monthly),
+         new_tavg_anom = tavg_monthly - new_tavg_med)
 
 for(i in 1:length(levels(monthly_anom$site))){
 
   current_site <- levels(monthly_anom$site)[i]
 
-  t_min <- min(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
-  t_max <- max(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
-  lim <- max(abs(t_min), abs(t_max))
+  tmin <- min(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
+  tmax <- max(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
+  lim <- max(abs(tmin), abs(tmax))
 
   # TAVG
   p <- ggplot() +
@@ -1467,15 +1407,15 @@ lim <-  max(c(abs(min(phase_anom$diff, na.rm = TRUE)),
 
 temp <- climates %>%
   group_by(site, month_of) %>%
-  summarise(new_tavg_med = median(t_avg_monthly),
+  summarise(new_tavg_med = median(tavg_monthly),
             detrended_tavg_med = median(tavg_detrended))
 
 phase_cor <- climates %>%
-  select(site, date_of, month_of, rain_anomaly, t_avg_anomaly,
-         t_avg_monthly, tavg_detrended) %>%
+  select(site, date_of, month_of, rain_anomaly, tavg_anomaly,
+         tavg_monthly, tavg_detrended) %>%
   inner_join(ind_df) %>%
   inner_join(temp) %>%
-  mutate(new_tavg_anom = t_avg_monthly - new_tavg_med,
+  mutate(new_tavg_anom = tavg_monthly - new_tavg_med,
          detrended_tavg_anom = tavg_detrended - detrended_tavg_med) %>%
   group_by(site, month_of, index) %>%
   arrange(year_of) %>%
