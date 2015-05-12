@@ -1,7 +1,7 @@
 Sys.setenv(TZ = 'UTC')
-list.of.packages <- list("plyr", "reshape2", "ncdf4", "lubridate", "ggplot2",
-                         "RColorBrewer", "grid", "stringr", "scales", "tidyr",
-                         "grid", "zoo", "dplyr", "plhdbR")
+list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4", "lubridate",
+                         "ggplot2", "RColorBrewer", "grid", "stringr", "scales",
+                         "tidyr", "grid", "zoo", "dplyr", "plhdbR")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
@@ -45,13 +45,14 @@ study_durations <- lh %>%
 
 # Downloaded from http://www.esrl.noaa.gov/psd/data/gridded/data.gpcc.html
 
-# GPCC total monthly precipitation
+# GPCC total monthly precipitation (1901 to 2010)
 # 0.5 degree latitude x 0.5 degree longitude global grid
 # ftp://ftp.cdc.noaa.gov/Datasets/gpcc/full_v6/precip.mon.total.v6.nc
 t <- nc_open("data/grids/gpcc/precip.mon.total.v6.nc")
 
 longitude <- ncvar_get(t, varid = "lon")
 latitude <- ncvar_get(t, varid = "lat")
+time <- ncvar_get(t, varid = "time")
 
 inds_lon <- (1:dim(longitude))
 inds_lat <- (1:dim(latitude))
@@ -94,10 +95,12 @@ precip_sites_f <- precip_sites_f %>%
          precip = as.numeric(precip)) %>%
   select(site, date_of, year_of, month_of, precip)
 
+rm(list = c("t", "longitude", "latitude", "time"))
+
 
 # ---- gpcc_monitoring_data -----------------------------------------------
 
-# Monitoring data set
+# Monitoring data set (2011 to present)
 # GPCC total monthly precipitation montoring data set
 # 1 degree latitude x 1 degree longitude global grid
 # ftp://ftp.cdc.noaa.gov/Datasets/gpcc/monitor/precip.monitor.mon.total.1x1.v4.nc
@@ -105,6 +108,7 @@ m <- nc_open("data/grids/gpcc/precip.monitor.mon.total.1x1.v4.nc")
 
 longitude <- ncvar_get(m, varid = "lon")
 latitude <- ncvar_get(m, varid = "lat")
+time <- ncvar_get(m, varid = "time")
 
 inds_lon <- (1:dim(longitude))
 inds_lat <- (1:dim(latitude))
@@ -172,10 +176,13 @@ ggplot(precip_sites, aes(x = factor(month_of), y = year_of, fill = precip)) +
         legend.key.width = unit(2, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
+  labs(x = "Month", y = "Year", title = "GPCC Rainfall Data\n")
+
+rm(list = c("m", "longitude", "latitude", "time", "precip_sites_m",
+            "precip_sites_f"))
 
 
-# ---- gcc_long_term_mean -------------------------------------------------
+# ---- gpcc_long_term_mean ------------------------------------------------
 
 # ftp://ftp.cdc.noaa.gov/Datasets/gpcc/full_v6/precip.mon.1981-2010.ltm.v6.nc
 ltm <- nc_open("data/grids/gpcc/precip.mon.1981-2010.ltm.v6.nc")
@@ -248,8 +255,9 @@ ggplot(precip_combined, aes(x = factor(month_of), y = year_of, fill = precip_ano
         legend.key.width = unit(2, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
+  labs(x = "Month", y = "Year", title = "GPCC Rainfall Anomalies\n")
 
+rm(list = c("ltm", "longitude", "latitude", "precip_ltm", "precip_combined"))
 
 
 # ==== GRIDDED_TEMPERATURE_DATA ===========================================
@@ -264,6 +272,7 @@ t <- nc_open("data/grids/GHCN_CAMS/air.mon.mean.nc")
 
 lon <- ncvar_get(t, varid = "lon")
 lat <- ncvar_get(t, varid = "lat")
+time <- ncvar_get(t, varid = "time")
 
 inds_lon <- (1:dim(lon))
 inds_lat <- (1:dim(lat))
@@ -323,6 +332,8 @@ ggplot(at, aes(x = factor(month_of), y = year_of, fill = air_temp)) +
   scale_y_continuous(breaks = seq(1945, 2015, by = 5)) +
   labs(x = "Month", y = "Year", title = "GHCN CAMS Temperature Data\n")
 
+rm(list = c("t", "lon", "lat", "time", "at_sites_f"))
+
 
 # ---- berkeley_tavg_anom -------------------------------------------------
 
@@ -339,6 +350,9 @@ tn <- nc_open("data/grids/Berkeley/Complete_TMIN_LatLong1.nc")
 
 lon <- ncvar_get(ta, varid = "longitude")
 lat <- ncvar_get(ta, varid = "latitude")
+time_a <- ncvar_get(ta, varid = "time")
+time_x <- ncvar_get(tx, varid = "time")
+time_n <- ncvar_get(tn, varid = "time")
 
 inds_lon <- (1:dim(lon))
 inds_lat <- (1:dim(lat))
@@ -432,17 +446,37 @@ at_sites_f <- bind_rows(at_sites_f)
 
 at <- at_sites_f %>%
   mutate(year_of = year(date_of),
-         t_anomaly = as.numeric(t_anom),
          t_monthly = t_monthly + t_anom,
+         t_anomaly = as.numeric(t_anom),
          var = factor(var, levels = c("tmax", "tavg", "tmin"))) %>%
-  select(site, date_of, year_of, month_of, t_anomaly, t_monthly, var)
+  select(site, date_of, year_of, month_of, t_monthly, t_anomaly, var)
 
 at$month_of <- factor(at$month_of, labels = month.abb)
+
+rm(list = c("ta", "tx", "tn", "lon", "lat", "time_a", "time_x", "time_n",
+            "ta_anom", "ta_avg", "ta_df", "tx_anom", "tx_avg", "tx_df",
+            "tn_anom", "tn_avg", "tn_df", "at_sites_f"))
 
 
 # ---- plot_berkeley_data -------------------------------------------------
 
-# All variables
+# Temperature, all T variables
+ggplot(at, aes(x = month_of, y = year_of, fill = t_monthly)) +
+  geom_tile() +
+  facet_grid(var ~ site) +
+  scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"),
+                       name = "Temperature") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.width = unit(4, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
+  labs(x = "Month", y = "Year", title = "Berkeley Earth Temperature Data\n")
+
 ggplot(at, aes(x = month_of, y = year_of, fill = t_anomaly)) +
   geom_tile() +
   facet_grid(var ~ site) +
@@ -458,29 +492,14 @@ ggplot(at, aes(x = month_of, y = year_of, fill = t_anomaly)) +
         legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
-
-ggplot(at, aes(x = month_of, y = year_of, fill = t_monthly)) +
-  geom_tile() +
-  facet_grid(var ~ site) +
-  scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"),
-                       name = "Temperature") +
-  theme_bw() +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-        legend.position = "bottom",
-        strip.background = element_blank(),
-        axis.line = element_blank(),
-        strip.text = element_text(face = "bold", size = 11),
-        legend.key.width = unit(4, "cm"),
-        panel.margin = unit(1, "lines")) +
-  scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
+  labs(x = "Month", y = "Year", title = "Berkeley Earth Temperature Anomalies\n")
 
 
 # TMAX only
 
 temp <- filter(at, var == "tmax")
 
+# TMAX Anomalies
 ggplot(temp, aes(x = month_of, y = year_of, fill = t_anomaly)) +
   geom_tile() +
   facet_grid(. ~ site) +
@@ -496,13 +515,13 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_anomaly)) +
         legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year")
+  labs(x = "Month", y = "Year", title = "Berkeley Earth TMAX Anomalies\n")
 
 ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
   geom_tile() +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"),
-                       # guide = FALSE,
+                       guide = FALSE,
                        name = "Temperature") +
   theme_bw() +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
@@ -513,7 +532,7 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
         legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year", title = "Berkeley Earth Temperature Data\n")
+  labs(x = "Month", y = "Year", title = "Berkeley Earth TMAX \n")
 
 
 
@@ -709,6 +728,8 @@ sat_trmm <- sat_trmm %>%
          rainfall = as.numeric(as.character(rainfall))) %>%
   arrange(date_of) %>%
   select(year_of, rainfall, date_of, type, site)
+
+rm(list = c("d", "s", "f"))
 
 
 # ---- combine_site_data --------------------------------------------------
@@ -969,6 +990,8 @@ rain_selected[which(!is.na(rain_selected$rain_predicted)), ]$data_source <- "pre
 
 rain_selected[which(rain_selected$rain_monthly_mm < 0), ]$rain_monthly_mm <- 0
 
+rm(list = c("mod_gpcc", "p", "temp"))
+
 
 # ---- long_term_means ----------------------------------------------------
 
@@ -1008,11 +1031,11 @@ ggplot() +
                 fill = rain_monthly_mm)) +
   scale_fill_gradientn(colours = brewer.pal(9, "Blues"),
                        name = "Rainfall Total (mm)",
-                       guide = FALSE,
+                       # guide = FALSE,
                        trans = "cubroot") +
   facet_grid(. ~ site) +
   theme_bw() +
-  labs(x = "Month", y = "Year") +
+  labs(x = "Month", y = "Year", title = "Total Monthly Rainfall\n") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
         legend.position = "bottom",
         strip.background = element_blank(),
@@ -1030,9 +1053,9 @@ ggplot() +
             colour = "gray70") +
   facet_grid(. ~ site) +
   theme_bw() +
-  labs(x = "Month", y = "Year") +
+  labs(x = "Month", y = "Year", title = "Data Sources for Composite Rainfall Set\n") +
   scale_fill_brewer(name = "Data Source",
-                    guide = FALSE,
+                    # guide = FALSE,
                     palette = "Dark2") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
         legend.position = "bottom",
@@ -1051,7 +1074,7 @@ ggplot() +
             colour = "gray70") +
   facet_grid(. ~ site) +
   theme_bw() +
-  labs(x = "Month", y = "Year") +
+  labs(x = "Month", y = "Year", title = "Rainfall Anomalies\n") +
   scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
                        name = "Rainfall Anomaly (mm)",
                        trans = "sqrt_sign",
@@ -1108,172 +1131,106 @@ ggplot() +
 
   theme_bw() +
   theme(strip.background = element_blank()) +
-  labs(x = "Year", y = "Value")
+  labs(x = "Year", y = "Value", title = "Climate Oscillations\n")
+
+rm(list = c("ind_pos", "ind_neg"))
 
 
 # ---- temperature_stl ----------------------------------------------------
 
-tavg_site <- dlply(filter(at, var == "tavg"), .(site))
+current_t <- list()
 
-tavg_sites_ts <- list()
+for(i in 1:length(levels(at$var))){
 
-for(j in 1:length(tavg_site)){
-  tavg_temp <- tavg_site[[j]]
-  tavg_temp <- tavg_temp %>%
-    filter(year_of >= 1945) %>%
-    mutate(date_of = as.Date(paste(year_of, month(date_of), "16", sep = "-")))
+  current_var <- levels(at$var)[i]
 
-  temp <- zoo(tavg_temp$t_anomaly, tavg_temp$date_of, frequency = 12)
-  tavg_ts <- ts(coredata(temp), freq = frequency(temp),
-                start = c(year(start(temp)), month(start(temp))),
-                end = c(year(end(temp)), month(end(temp))))
-  stl_dates <- floor_date(ymd(rownames(data.frame(temp))),
-                          unit = "month") + days(15)
-  tavg_stl <- data.frame(stl_dates)
+  t_site <- dlply(filter(at, var == current_var), .(site))
 
-  # Try out different smooths for extracting the temperature trend
-  # Use 20-year smooth
-  # Do this by setting t.window to # of months + 1 (i.e., 241)
-  temp <- data.frame(stl(tavg_ts,
-                         s.window = "periodic",
-                         t.window = 241,
-                         t.degree = 0)$time.series)
-  temp <- cbind(tavg_stl, temp) %>%
-    gather(component, value, -stl_dates) %>%
-    rename(date_of = stl_dates)
-  temp$n_months <- 240
-  temp$site <- tavg_site[[j]]$site[1]
+  t_sites_ts <- list()
 
-  tavg_sites_ts[[j]] <- temp
+  for(j in 1:length(t_site)){
+    t_temp <- t_site[[j]]
+    t_temp <- t_temp %>%
+      filter(year_of >= 1945) %>%
+      mutate(date_of = as.Date(paste(year_of, month(date_of), "16", sep = "-")))
+
+    temp <- zoo(t_temp$t_anomaly, t_temp$date_of, frequency = 12)
+    t_ts <- ts(coredata(temp), freq = frequency(temp),
+                  start = c(year(start(temp)), month(start(temp))),
+                  end = c(year(end(temp)), month(end(temp))))
+    stl_dates <- floor_date(ymd(rownames(data.frame(temp))),
+                            unit = "month") + days(15)
+    t_stl <- data.frame(stl_dates)
+
+    # Need to specify the smoothing window for extracting the temperature trend
+    # For now, use 20-year smooth (might want to adjust later)
+    # Do this by setting t.window in the stl function to # of months + 1 (i.e., 241)
+    temp <- data.frame(stl(t_ts,
+                           s.window = "periodic",
+                           t.window = 241,
+                           t.degree = 0,
+                           na.action = na.approx)$time.series)
+    temp <- cbind(t_stl, temp) %>%
+      gather(component, value, -stl_dates) %>%
+      rename(date_of = stl_dates)
+    temp$n_months <- 240
+    temp$site <- t_site[[j]]$site[1]
+    temp$variable <- current_var
+
+    t_sites_ts[[j]] <- temp
+  }
+
+  current_t[[i]] <- bind_rows(t_sites_ts)
 }
 
-tavg_sites_df <- bind_rows(tavg_sites_ts)
+t_sites_df <- bind_rows(current_t)
+
+t_sites_df$variable <- factor(t_sites_df$variable,
+                              levels = c("tmin", "tavg", "tmax"))
+
+rm(list = c("t_site", "t_sites_ts", "t_temp", "t_ts", "stl_dates",
+            "t_stl"))
 
 
 # ---- combine_rain_temp_data ---------------------------------------------
 
 temp1 <- rain_selected %>%
-  select(site:rain_monthly_mm, date_of, rain_anomaly)
+  select(site:month_of, date_of, rain_monthly_mm, rain_anomaly, data_source) %>%
+  rename(rain_data_source = data_source)
 
 temp2 <- at %>%
-  filter(var == "tavg") %>%
-  select(-date_of)
-
-temp3 <- temp2 %>%
-  gather(measurement, value, t_anomaly:t_monthly) %>%
+  select(-date_of) %>%
+  gather(measurement, value, t_monthly:t_anomaly) %>%
   unite(variable, var, measurement) %>%
   rename(var = variable)
 
-temp3$var <- str_replace(temp3$var, "_t_", "_")
+temp2$var <- str_replace(temp2$var, "_t_", "_")
 
-temp3 <- temp3 %>% spread(var, value)
+temp2 <- temp2 %>% spread(var, value)
 
-temp4 <- tavg_sites_df %>%
+temp3 <- t_sites_df %>%
   filter(component == "remainder" | component == "seasonal") %>%
-  spread(component, value) %>%
-  mutate(tavg_detrended = seasonal + remainder) %>%
-  select(site, date_of, tavg_detrended)
+  unite(v, variable, component) %>%
+  spread(v, value) %>%
+  mutate(tmin_detrended = tmin_seasonal + tmin_remainder,
+         tavg_detrended = tavg_seasonal + tavg_remainder,
+         tmax_detrended = tmax_seasonal + tmax_remainder) %>%
+  select(site, date_of, contains("detrended"))
 
 climates <- temp1 %>%
   mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"))) %>%
+  inner_join(temp2) %>%
   inner_join(temp3) %>%
-  inner_join(temp4) %>%
-  select(site, date_of, year_of, month_of, rain_monthly_mm,
-         rain_anomaly:tavg_detrended)
+  select(site, date_of, year_of, month_of, contains("rain"),
+         contains("tmin"), contains("tavg"), contains("tmax"))
 
-climates_tidy <- gather(climates, var, value, rain_monthly_mm:tavg_detrended)
+climates_tidy <- climates %>%
+  select(-rain_data_source) %>%
+  gather(var, value, rain_monthly_mm:tmax_detrended)
 
 rm(temp1)
 rm(temp2)
 rm(temp3)
-rm(temp4)
-rm(temp5)
-
-
-# ---- anomaly_index_ccf --------------------------------------------------
-
-clim_site <- dlply(filter(climates_tidy, var == "rain_anomaly"), .(site))
-
-clim_anom <- list()
-
-for(i in 1:length(clim_site)){
-
-  clim_anom_test <- list()
-  clim_set <- tbl_df(clim_site[[i]])
-  current_site <- as.character(clim_set[1, ]$site)
-
-  for(j in 1:length(ind)){
-
-    current_ind <- as.character(ind[[j]]$index[1])
-
-    ind_set <- indices_df %>%
-      filter(index == current_ind & n_months == 4 & component == "trend")
-
-    ind_ts <- zoo(ind_set$value, ind_set$date_of, frequency = 12)
-    clim_ts <- zoo(clim_set$value, clim_set$date_of, frequency = 12)
-
-    # Start and end dates of period in which the time series overlap
-    s <- c(year(max(clim_set[1, ]$date_of, ind_set[1, ]$date_of)),
-           month(max(clim_set[1, ]$date_of, ind_set[1, ]$date_of)))
-    e <- c(year(min(clim_set[nrow(clim_set), ]$date_of,
-                    ind_set[nrow(ind_set), ]$date_of)),
-           month(min(clim_set[nrow(clim_set), ]$date_of,
-                     ind_set[nrow(ind_set), ]$date_of)))
-
-    ind_ts <- ts(coredata(ind_ts),
-                 freq = frequency(ind_ts),
-                 start = s,
-                 end = e)
-
-    clim_ts <- ts(coredata(clim_ts),
-                  freq = frequency(clim_ts),
-                  start = s,
-                  end = e)
-
-    temp <- ccf(ind_ts, clim_ts, plot = FALSE, lag.max = 24)
-    temp <- data.frame(site = current_site,
-                       index = current_ind,
-                       acf = temp$acf,
-                       lag = temp$lag,
-                       ci = acf_ci(ccf(ind_ts, clim_ts, plot = FALSE,
-                                       lag.max = 24)))
-
-    clim_anom_test[[j]] <- temp
-  }
-  clim_anom[[i]] <- bind_rows(clim_anom_test)
-}
-
-clim_anom <- bind_rows(clim_anom)
-
-clim_anom$index <- factor(clim_anom$index, levels = levels(ind_df$index))
-clim_anom$site <- factor(clim_anom$site, levels = levels(rain_selected$site))
-
-
-for(i in 1:length(levels(rain_anom$site))){
-
-  current_site <- levels(rain_anom$site)[i]
-
-  p <- ggplot(filter(clim_anom, site == current_site)) +
-    geom_segment(aes(x = lag, y = acf,
-                     xend = lag, yend = 0),
-                 size = 1) +
-    geom_hline(aes(yintercept = ci), lty = 2, color = "blue") +
-    geom_hline(aes(yintercept = -ci), lty = 2, color = "blue") +
-    geom_ribbon(aes(x = lag, ymin = -ci, ymax = ci),
-                fill = "blue", alpha = 0.1) +
-    geom_hline(yintercept = 0) +
-    geom_vline(xintercept = 0) +
-    theme_bw() +
-    scale_x_continuous(breaks = seq(-2, 2, length.out = 17),
-                       labels = seq(-24, 24, by = 3)) +
-    labs(x = "Lag (months)", y = "Cross-correlation") +
-    facet_grid(index ~ .)
-
-  f <- paste(i, "_", current_site, ".pdf", sep = "")
-
-  ggsave(filename = f, plot = p, path = "plots/ccf_plots/rain_anomalies",
-         width = 8, height = 12, units = "in")
-}
 
 
 # ---- anomaly_phase_analysis ---------------------------------------------
@@ -1287,59 +1244,48 @@ get_phase <- function(df){
   return(df)
 }
 
-temp <- dlply(ind_df, .(index), function(x) get_phase(x))
-temp <- bind_rows(temp)
+ind_phases <- dlply(ind_df, .(index), function(x) get_phase(x))
+ind_phases <- bind_rows(ind_phases)
 
 monthly_anom <- climates %>%
   ungroup() %>%
-  select(site, date_of, month_of, rain_anomaly, tavg_anomaly, tavg_monthly) %>%
-  inner_join(temp) %>%
-  group_by(site, month_of) %>%
-  mutate(new_tavg_med = median(tavg_monthly),
-         new_tavg_anom = tavg_monthly - new_tavg_med) %>%
-  ungroup() %>%
-  group_by(site, month_of, index, phase) %>%
-  summarise(mean_rain_anomaly = mean(rain_anomaly, na.rm = TRUE),
-            med_rain_anomaly = median(rain_anomaly, na.rm = TRUE),
-            mean_tavg_anomaly = mean(tavg_anomaly, na.rm = TRUE),
-            med_tavg_anomaly = median(tavg_anomaly, na.rm = TRUE),
-            new_med_tavg_anomaly = median(new_tavg_anom, na.rm = TRUE),
-            n = n())
+  select(site, date_of, month_of, contains("anomaly"), contains("detrended")) %>%
+  inner_join(ind_phases) %>%
+  arrange(site, date_of, index, phase)
 
-temp3 <- climates %>%
-  ungroup() %>%
-  select(site, date_of, month_of, rain_anomaly, tavg_anomaly, tavg_monthly) %>%
-  inner_join(temp) %>%
-  group_by(site, month_of) %>%
-  mutate(new_tavg_med = median(tavg_monthly),
-         new_tavg_anom = tavg_monthly - new_tavg_med)
+monthly_anom_summary <- monthly_anom %>%
+  group_by(site, month_of, index, phase) %>%
+  summarise(med_rain_anomaly = median(rain_anomaly, na.rm = TRUE),
+            med_tmin_anomaly = median(tmin_anomaly, na.rm = TRUE),
+            med_tavg_anomaly = median(tavg_anomaly, na.rm = TRUE),
+            med_tmax_anomaly = median(tmax_anomaly, na.rm = TRUE),
+            med_tmin_detrended = median(tmin_detrended, na.rm = TRUE),
+            med_tavg_detrended = median(tavg_detrended, na.rm = TRUE),
+            med_tmax_detrended = median(tmax_detrended, na.rm = TRUE),
+            n = n())
 
 for(i in 1:length(levels(monthly_anom$site))){
 
   current_site <- levels(monthly_anom$site)[i]
 
-  tmin <- min(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
-  tmax <- max(filter(monthly_anom, site == current_site)$new_med_tavg_anomaly)
-  lim <- max(abs(tmin), abs(tmax))
+  # TMIN
+  lt <- min(filter(monthly_anom_summary, site == current_site)$med_tmin_detrended)
+  ut <- max(filter(monthly_anom_summary, site == current_site)$med_tmin_detrended)
+  lim <- max(abs(lt), abs(ut))
 
-  # TAVG
   p <- ggplot() +
-    geom_bar(data = filter(monthly_anom, site == current_site),
-             aes(x = month_of, y = new_med_tavg_anomaly,
-                 fill = new_med_tavg_anomaly),
+    geom_bar(data = filter(monthly_anom_summary, site == current_site),
+             aes(x = month_of, y = med_tmin_detrended,
+                 fill = med_tmin_detrended),
              stat = "identity", position = "dodge",
              width = 0.8, size = 0.1, color = "black") +
-    stat_summary(data = filter(temp3, site == current_site),
-                 aes(x = month_of, y = new_tavg_anom),
+    stat_summary(data = filter(monthly_anom, site == current_site),
+                 aes(x = month_of, y = tmin_detrended),
                  fun.data = mean_cl_boot, geom = "errorbar",
-                 width = 0.3, color = "black", alpha= 0) +
-    stat_summary(data = filter(temp3, site == current_site),
-                 aes(x = month_of, y = new_tavg_anom),
-                 fun.y = median, geom = "point",
-                 size = 2, color = "black", alpha= 0) +
+                 width = 0.3, color = "black", alpha = 0.4) +
     geom_hline(yintercept = 0, size = 0.1) +
     facet_grid(index ~ phase) +
-    labs(y = expression("Median Temperature Anomaly"), x = "Month") +
+    labs(y = expression("Median TMIN Anomaly"), x = "Month") +
     theme_bw() +
     scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
                          name = "Median Anomaly",
@@ -1353,25 +1299,92 @@ for(i in 1:length(levels(monthly_anom$site))){
   f <- paste(i, "_", current_site, ".pdf", sep = "")
 
   ggsave(filename = f, plot = p,
-         path = "plots/phase_anomaly_plots/tavg_anomalies2",
+         path = "plots/phase_anomaly_plots/tmin_anomalies",
          width = 12, height = 12, units = "in")
 
+  # TAVG
+  lt <- min(filter(monthly_anom_summary, site == current_site)$med_tavg_detrended)
+  ut <- max(filter(monthly_anom_summary, site == current_site)$med_tavg_detrended)
+  lim <- max(abs(lt), abs(ut))
+
+  p <- ggplot() +
+    geom_bar(data = filter(monthly_anom_summary, site == current_site),
+             aes(x = month_of, y = med_tavg_detrended,
+                 fill = med_tavg_detrended),
+             stat = "identity", position = "dodge",
+             width = 0.8, size = 0.1, color = "black") +
+    stat_summary(data = filter(monthly_anom, site == current_site),
+                 aes(x = month_of, y = tavg_detrended),
+                 fun.data = mean_cl_boot, geom = "errorbar",
+                 width = 0.3, color = "black", alpha = 0.4) +
+    geom_hline(yintercept = 0, size = 0.1) +
+    facet_grid(index ~ phase) +
+    labs(y = expression("Median TAVG Anomaly"), x = "Month") +
+    theme_bw() +
+    scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
+                         name = "Median Anomaly",
+                         limits = c(-lim, lim)) +
+    theme(strip.background = element_blank(),
+          legend.position = "bottom",
+          legend.key.width=unit(2, "cm"),
+          legend.key.height=unit(0.2, "cm"),
+          axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+  f <- paste(i, "_", current_site, ".pdf", sep = "")
+
+  ggsave(filename = f, plot = p,
+         path = "plots/phase_anomaly_plots/tavg_anomalies",
+         width = 12, height = 12, units = "in")
+
+  # TMAX
+  lt <- min(filter(monthly_anom_summary, site == current_site)$med_tmax_detrended)
+  ut <- max(filter(monthly_anom_summary, site == current_site)$med_tmax_detrended)
+  lim <- max(abs(lt), abs(ut))
+
+  p <- ggplot() +
+    geom_bar(data = filter(monthly_anom_summary, site == current_site),
+             aes(x = month_of, y = med_tmax_detrended,
+                 fill = med_tmax_detrended),
+             stat = "identity", position = "dodge",
+             width = 0.8, size = 0.1, color = "black") +
+    stat_summary(data = filter(monthly_anom, site == current_site),
+                 aes(x = month_of, y = tmax_detrended),
+                 fun.data = mean_cl_boot, geom = "errorbar",
+                 width = 0.3, color = "black", alpha = 0.4) +
+    geom_hline(yintercept = 0, size = 0.1) +
+    facet_grid(index ~ phase) +
+    labs(y = expression("Median TMAX Anomaly"), x = "Month") +
+    theme_bw() +
+    scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
+                         name = "Median Anomaly",
+                         limits = c(-lim, lim)) +
+    theme(strip.background = element_blank(),
+          legend.position = "bottom",
+          legend.key.width=unit(2, "cm"),
+          legend.key.height=unit(0.2, "cm"),
+          axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+  f <- paste(i, "_", current_site, ".pdf", sep = "")
+
+  ggsave(filename = f, plot = p,
+         path = "plots/phase_anomaly_plots/tmax_anomalies",
+         width = 12, height = 12, units = "in")
 
   # RAIN
   p <- ggplot() +
-    geom_bar(data = filter(monthly_anom, site == current_site),
+    geom_bar(data = filter(monthly_anom_summary, site == current_site),
              aes(x = month_of, y = med_rain_anomaly,
                  fill = med_rain_anomaly),
              stat = "identity", position = "dodge",
              width = 0.8, size = 0.1, color = "black") +
-    stat_summary(data = filter(temp3, site == current_site),
+    stat_summary(data = filter(monthly_anom, site == current_site),
                  aes(x = month_of, y = rain_anomaly),
                  fun.data = mean_cl_boot, geom = "errorbar",
-                 width = 0.3, color = "black", alpha= 0) +
-    stat_summary(data = filter(temp3, site == current_site),
+                 width = 0.3, color = "black", alpha = 0.4) +
+    stat_summary(data = filter(monthly_anom, site == current_site),
                  aes(x = month_of, y = rain_anomaly),
                  fun.y = median, geom = "point",
-                 size = 2, color = "black", alpha= 0) +
+                 size = 2, color = "black", alpha = 0.4) +
     geom_hline(yintercept = 0, size = 0.1) +
     facet_grid(index ~ phase) +
     labs(y = expression("Median Rainfall Anomaly (mm)"), x = "Month") +
@@ -1388,7 +1401,7 @@ for(i in 1:length(levels(monthly_anom$site))){
   f <- paste(i, "_", current_site, ".pdf", sep = "")
 
   ggsave(filename = f, plot = p,
-         path = "plots/phase_anomaly_plots/rain_anomalies2",
+         path = "plots/phase_anomaly_plots/rain_anomalies",
          width = 12, height = 12, units = "in")
 
 }
@@ -1396,48 +1409,43 @@ for(i in 1:length(levels(monthly_anom$site))){
 
 # ---- index_correlations -------------------------------------------------
 
-phase_anom <- monthly_anom %>%
-  ungroup() %>%
-  select(1:4, med_rain_anomaly) %>%
-  spread(phase, med_rain_anomaly) %>%
-  mutate(diff = `Positive Phase` - `Negative Phase`)
-
-lim <-  max(c(abs(min(phase_anom$diff, na.rm = TRUE)),
-              abs(max(phase_anom$diff, na.rm = TRUE))))
-
-temp <- climates %>%
-  group_by(site, month_of) %>%
-  summarise(new_tavg_med = median(tavg_monthly),
-            detrended_tavg_med = median(tavg_detrended))
-
 phase_cor <- climates %>%
-  select(site, date_of, month_of, rain_anomaly, tavg_anomaly,
-         tavg_monthly, tavg_detrended) %>%
+  select(site, date_of, month_of, contains("anomaly"), contains("detrended")) %>%
   inner_join(ind_df) %>%
-  inner_join(temp) %>%
-  mutate(new_tavg_anom = tavg_monthly - new_tavg_med,
-         detrended_tavg_anom = tavg_detrended - detrended_tavg_med) %>%
   group_by(site, month_of, index) %>%
   arrange(year_of) %>%
   summarise(ind_rain_cor = cor(value, rain_anomaly),
             ind_rain_p = cor.test(value, rain_anomaly)$p.value,
-            ind_tavg_cor = cor(value, new_tavg_anom),
-            d_ind_tavg_cor = cor(value, detrended_tavg_anom),
-            ind_tavg_p = cor.test(value, new_tavg_anom)$p.value,
-            d_ind_tavg_p = cor.test(value, detrended_tavg_anom)$p.value,
+            ind_tmin_cor = cor(value, tmin_anomaly),
+            ind_tmin_p = cor.test(value, tmin_anomaly)$p.value,
+            ind_tavg_cor = cor(value, tavg_anomaly),
+            ind_tavg_p = cor.test(value, tavg_anomaly)$p.value,
+            ind_tmax_cor = cor(value, tmax_anomaly),
+            ind_tmax_p = cor.test(value, tmax_anomaly)$p.value,
+            ind_tmin_d_cor = cor(value, tmin_detrended),
+            ind_tmin_d_p = cor.test(value, tmin_detrended)$p.value,
+            ind_tavg_d_cor = cor(value, tavg_detrended),
+            ind_tavg_d_p = cor.test(value, tavg_detrended)$p.value,
+            ind_tmax_d_cor = cor(value, tmax_detrended),
+            ind_tmax_d_p = cor.test(value, tmax_detrended)$p.value,
             n = n())
 
 phase_cor <- phase_cor %>%
   mutate(new_rain_cor = ifelse(ind_rain_p >= .05, 0, ind_rain_cor),
-         new_tavg_cor = ifelse(ind_tavg_p >= .05, 0, ind_tavg_cor))
+         new_tmin_cor = ifelse(ind_tmin_p >= .05, 0, ind_tmin_cor),
+         new_tavg_cor = ifelse(ind_tavg_p >= .05, 0, ind_tavg_cor),
+         new_tmax_cor = ifelse(ind_tmax_p >= .05, 0, ind_tmax_cor),
+         new_tmin_d_cor = ifelse(ind_tmin_d_p >= .05, 0, ind_tmin_d_cor),
+         new_tavg_d_cor = ifelse(ind_tavg_d_p >= .05, 0, ind_tavg_d_cor),
+         new_tmax_d_cor = ifelse(ind_tmax_d_p >= .05, 0, ind_tmax_d_cor))
 
-d_phase_cor <- phase_cor %>%
-  mutate(new_rain_cor = ifelse(ind_rain_p >= .05, 0, ind_rain_cor),
-         new_tavg_cor = ifelse(d_ind_tavg_p >= .05, 0, d_ind_tavg_cor))
 
+
+# Rain
 lim <-  max(c(abs(min(phase_cor$ind_rain_cor, na.rm = TRUE)),
               abs(max(phase_cor$ind_rain_cor, na.rm = TRUE))))
 
+# All
 ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_rain_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
@@ -1453,6 +1461,11 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_rain_cor)) +
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
 
+ggsave(filename = "all_rain.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# p < 0.05
 ggplot(phase_cor, aes(x = index, y = month_of, fill = new_rain_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
@@ -1468,13 +1481,61 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = new_rain_cor)) +
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
 
+ggsave(filename = "sig_rain.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
 
+
+
+# TMIN
+lim <-  max(c(abs(min(phase_cor$ind_tmin_cor, na.rm = TRUE)),
+              abs(max(phase_cor$ind_tmin_cor, na.rm = TRUE))))
+
+# All
+ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tmin_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and TMIN anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "all_tmin.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# < 0.05
+ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tmin_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and TMIN anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "sig_tmin.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# TAVG
 lim <-  max(c(abs(min(phase_cor$ind_tavg_cor, na.rm = TRUE)),
               abs(max(phase_cor$ind_tavg_cor, na.rm = TRUE))))
 
-d_lim <-  max(c(abs(min(d_phase_cor$d_ind_tavg_cor, na.rm = TRUE)),
-              abs(max(d_phase_cor$d_ind_tavg_cor, na.rm = TRUE))))
-
+# All
 ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tavg_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
@@ -1483,28 +1544,18 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tavg_cor)) +
                        limits = c(-lim, lim)) +
   theme_bw() +
   labs(x = "Climate Oscillation Index", y = "Month",
-       title = "Correlation between climate indices and monthly temperature anomalies") +
+       title = "Correlation between climate indices and tavg anomalies") +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
         legend.key.width=unit(2, "cm"),
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
 
-ggplot(d_phase_cor, aes(x = index, y = month_of, fill = d_ind_tavg_cor)) +
-  geom_tile(size = 0.1, color = "black") +
-  facet_grid(. ~ site) +
-  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
-                       name = "Correlation Coefficient",
-                       limits = c(-d_lim, d_lim)) +
-  theme_bw() +
-  labs(x = "Climate Oscillation Index", y = "Month",
-       title = "Correlation between climate indices and monthly temperature anomalies") +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width=unit(2, "cm"),
-        legend.key.height=unit(0.2, "cm"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5))
+ggsave(filename = "all_tavg.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
 
+# < 0.05
 ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tavg_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
@@ -1513,24 +1564,194 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tavg_cor)) +
                        limits = c(-lim, lim)) +
   theme_bw() +
   labs(x = "Climate Oscillation Index", y = "Month",
-       title = "Correlation between climate indices and monthly temperature anomalies") +
+       title = "Correlation between climate indices and tavg anomalies") +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
         legend.key.width=unit(2, "cm"),
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
 
-ggplot(d_phase_cor, aes(x = index, y = month_of, fill = new_tavg_cor)) +
+ggsave(filename = "sig_tavg.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+
+
+# TMAX
+lim <-  max(c(abs(min(phase_cor$ind_tmax_cor, na.rm = TRUE)),
+              abs(max(phase_cor$ind_tmax_cor, na.rm = TRUE))))
+
+# All
+ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tmax_cor)) +
   geom_tile(size = 0.1, color = "black") +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
                        name = "Correlation Coefficient",
-                       limits = c(-d_lim, d_lim)) +
+                       limits = c(-lim, lim)) +
   theme_bw() +
   labs(x = "Climate Oscillation Index", y = "Month",
-       title = "Correlation between climate indices and monthly temperature anomalies") +
+       title = "Correlation between climate indices and tmax anomalies") +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
         legend.key.width=unit(2, "cm"),
         legend.key.height=unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "all_tmax.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# < 0.05
+ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tmax_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and tmax anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "sig_tmax.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+
+# TMIN detrended
+lim <-  max(c(abs(min(phase_cor$ind_tmin_d_cor, na.rm = TRUE)),
+              abs(max(phase_cor$ind_tmin_d_cor, na.rm = TRUE))))
+
+# All
+ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tmin_d_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and detrended TMIN anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "all_tmin_detrended.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# < 0.05
+ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tmin_d_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and detrended TMIN anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "sig_tmin_detrended.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# TAVG detrended
+lim <-  max(c(abs(min(phase_cor$ind_tavg_d_cor, na.rm = TRUE)),
+              abs(max(phase_cor$ind_tavg_d_cor, na.rm = TRUE))))
+
+# All
+ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tavg_d_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and detrended tavg anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "all_tavg_detrended.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# < 0.05
+ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tavg_d_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and detrended tavg anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "sig_tavg_detrended.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+
+
+# TMAX detrended
+lim <-  max(c(abs(min(phase_cor$ind_tmax_d_cor, na.rm = TRUE)),
+              abs(max(phase_cor$ind_tmax_d_cor, na.rm = TRUE))))
+
+# All
+ggplot(phase_cor, aes(x = index, y = month_of, fill = ind_tmax_d_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and detrended tmax anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "all_tmax_detrended.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")
+
+# < 0.05
+ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tmax_d_cor)) +
+  geom_tile(size = 0.1, color = "black") +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  labs(x = "Climate Oscillation Index", y = "Month",
+       title = "Correlation between climate indices and detrended tmax anomalies") +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width=unit(2, "cm"),
+        legend.key.height=unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+ggsave(filename = "sig_tmax_detrended.pdf", plot = last_plot(),
+       path = "plots/index_anomaly_correlations",
+       width = 12, height = 4.5, units = "in")

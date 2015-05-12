@@ -35,16 +35,16 @@ The functions `read_bio_table` and `read_fert_table` read csv files of biography
 ### Biography data
 
 ```{r}
-  # Assuming your file is called "biography_2015_03_17.csv"
-  lh <- read_bio_table("../data/biography_2015_03_17.csv")
+  # Assuming your file is called "biography_2015_05_11.csv"
+  lh <- read_bio_table("../data/biography_2015_05_11.csv")
   summary(lh)
 ```
 
 ### Fertility data
 
 ```{r}
-  # Assuming your file is called "fertility_2015_03_17.csv"
-  fert <- read_fert_table("../data/fertility_2015_03_17.csv")
+  # Assuming your file is called "fertility_2015_05_11.csv"
+  fert <- read_fert_table("../data/fertility_2015_05_11.csv")
   summary(fert)
 ```
 
