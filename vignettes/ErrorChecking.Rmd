@@ -35,16 +35,16 @@ The functions `read_bio_table` and `read_fert_table` read csv files of biography
 ### Biography data
 
 ```{r}
-  # Assuming your file is called "biography_2015_05_11.csv"
-  lh <- read_bio_table("../data/biography_2015_05_11.csv")
+  # Assuming your file is called "biography_2015_05_20.csv"
+  lh <- read_bio_table("../data/biography_2015_05_20.csv")
   summary(lh)
 ```
 
 ### Fertility data
 
 ```{r}
-  # Assuming your file is called "fertility_2015_05_11.csv"
-  fert <- read_fert_table("../data/fertility_2015_05_11.csv")
+  # Assuming your file is called "fertility_2015_05_20.csv"
+  fert <- read_fert_table("../data/fertility_2015_05_20.csv")
   summary(fert)
 ```
 
@@ -59,35 +59,23 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
   bio_errors <- find_bio_errors(lh)
   bio_errors$error_dates
   bio_errors$error_duplicates
-  
-  # There is currently an error for animal "AKI" in the Karisoke data
-  # Look at AKI's data
-  lh %>% filter(Animal.Id == "AKI") %>% glimpse()
-
-  # Fix error
-  lh[lh$Animal.Id == "AKI", ]$Max.Birth.Date <- ymd("2007-11-26")
-
-  # Check again
-  find_bio_errors(lh)$error_dates
 
   # Check the fertility data for errors
   fert_errors <- find_fert_errors(fert)
   fert_errors$error_dates
-  
-  # Currently no date/time errors in the fertility data
 ```
 
 ### Problems with the Mom.Id field in the biography table
 
 The function `find_mom_id_errors` checks to see if all the animals listed in Mom.Id
-in the biography table for a given study have a corresponding record in Animal.Id.
+in the biography table for a given study have a corresponding record in Animal.Id. 
+It is important to note that _not all of these are errors!_ In some studies, the 
+mother can be known but excluded from the biography table for a variety of reasons. 
+It would be a good idea to double-check the cases listed below.
 
 ```{r}
   find_mom_id_errors(lh)
 ```
-
-We can see from this that there are 40 Mom.ID records that don't match any entry
-in Animal.Id and therefore need to be corrected.
 
 ### Problems with animals that are supposed to be first-born offspring
 

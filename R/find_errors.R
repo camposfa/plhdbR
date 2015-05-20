@@ -163,6 +163,10 @@ find_first_born_errors <- function(x){
     dplyr::filter(First.Born == "Y") %>%
     dplyr::select(Study.Id, Mom.Id, Animal.Id, Animal.Name, Birth.Date, First.Born)
 
+  # Filter out special case of twins at Karisoke
+  fb_multiple <- fb_multiple %>%
+    dplyr::filter(!(Study.Id == "karisoke" & (Animal.Id == "I81" | Animal.Id == "I82")))
+
   if(nrow(fb_multiple) > 0){
     problems[["multiple_first_born"]] <- fb_multiple
   }

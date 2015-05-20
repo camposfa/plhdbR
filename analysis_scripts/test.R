@@ -22,14 +22,14 @@ dmi <- load_climate_index("dmi")
 indices <- load_climate_index(c("nao", "pdo"))
 
 
-f <- "data/biography_2015_03_17.csv"
+f <- "data/biography_2015_05_20.csv"
 lh <- read_bio_table(f)
 summary(lh)
 
 filter(lh, as.Date(Max.Birth.Date) > Sys.Date())
 
 
-f <- "data/fertility_2015_03_17.csv"
+f <- "data/fertility_2015_05_20.csv"
 fert <- read_fert_table(f)
 summary(fert)
 
@@ -53,6 +53,12 @@ ggplot(m, aes(x = year_of, y = s)) +
 
 
 
+filter(lh, as.Date(Max.Birth.Date) > Sys.Date())
+
+filter(lh, as.Date(Entry.Date) > Sys.Date())
+filter(lh, as.Date(Depart.Date) > Sys.Date())
+filter(lh, as.Date(Min.Birth.Date) > Sys.Date())
+filter(lh, as.Date(Birth.Date) > Sys.Date())
 filter(lh, as.Date(Max.Birth.Date) > Sys.Date())
 
 # Duplicate animals
