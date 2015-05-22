@@ -40,7 +40,7 @@ lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-1
 b <- lh
 
 m <- stage_specific_survival(b)
-msummary(m)
+summary(m)
 
 ggplot(m, aes(x = year_of, y = s)) +
   geom_line() +
