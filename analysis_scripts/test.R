@@ -2,6 +2,8 @@ devtools::install_github("camposfa/plhdbR")
 
 
 library(plhdbR)
+library(ggplot2)
+library(htmlTable)
 Sys.setenv(TZ = 'UTC')
 
 load(".RData")
@@ -26,9 +28,6 @@ f <- "data/biography_2015_05_20.csv"
 lh <- read_bio_table(f)
 summary(lh)
 
-filter(lh, as.Date(Max.Birth.Date) > Sys.Date())
-
-
 f <- "data/fertility_2015_05_20.csv"
 fert <- read_fert_table(f)
 summary(fert)
@@ -40,13 +39,26 @@ lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-1
 
 b <- lh
 
-m <- stage_specific_mortality(b)
-summary(m)
+m <- stage_specific_survival(b)
+msummary(m)
 
 ggplot(m, aes(x = year_of, y = s)) +
   geom_line() +
   facet_grid(Study.Id ~ age_class) +
   theme_bw()
+
+
+temp <- m %>%
+  ungroup() %>%
+  select(1:6, 8:9) %>%
+  rename(site = Study.Id, weighted_prob_of_survival = s) %>%
+  mutate(site = as.character(site)) %>%
+  arrange(site, age_class, year_of)
+
+htmlTable(txtRound(temp, 2, excl.cols = c(1:4, 7:8)),
+          col.rgroup = c("none", "#F7F7F7"),
+          rnames = FALSE,
+          align = "lclcrrcc")
 
 
 # more --------------------------------------------------------------------

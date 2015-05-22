@@ -1,0 +1,41 @@
+---
+output: html_document
+---
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+library(plhdbR)
+library(ggplot2)
+library(htmlTable)
+
+Sys.setenv(TZ = 'UTC')
+load_plhdb_packages()
+
+f <- "../data/biography_2015_05_20.csv"
+lh <- read_bio_table(f)
+
+f <- "../data/fertility_2015_05_20.csv"
+fert <- read_fert_table(f)
+
+b <- lh
+
+m <- stage_specific_survival(b)
+
+temp <- m %>%
+  ungroup() %>%
+  select(1:6, 8:9) %>%
+  arrange(Study.Id, age_class, year_of) %>% 
+  mutate(Study.Id = as.character(Study.Id))
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, cache=TRUE}
+htmlTable(txtRound(temp, 2, excl.cols = c(1:4, 7:8)),
+          col.rgroup = c("none", "#F7F7F7"),
+          header = c("Site", "Year", "Age.Class", "N.Animals",
+                     "Indiv.Years", "Weighted.Prob.Surv",
+                     "Trials", "Successes"),
+          rnames = FALSE,
+          align = "lclcrrcc",
+          align.header = "lclcrrcc",
+          css.cell = "padding-left: 1em; padding-right: 1em;")
+```
