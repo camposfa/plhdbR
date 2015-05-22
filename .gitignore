@@ -15,3 +15,5 @@ supporting/*
 vignettes/VitalRates_cache/
 
 analysis_scripts/old/*
+
+test/*
