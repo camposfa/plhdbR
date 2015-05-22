@@ -50,10 +50,11 @@ ggplot(m, aes(x = year_of, y = s)) +
 
 temp <- m %>%
   ungroup() %>%
-  select(1:6, 8:9) %>%
   rename(site = Study.Id, weighted_prob_of_survival = s) %>%
   mutate(site = as.character(site)) %>%
   arrange(site, age_class, year_of)
+
+write.csv(temp, "data/multiyear_survivorship.csv", row.names = FALSE)
 
 htmlTable(txtRound(temp, 2, excl.cols = c(1:4, 7:8)),
           col.rgroup = c("none", "#F7F7F7"),
