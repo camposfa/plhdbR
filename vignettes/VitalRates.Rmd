@@ -14,6 +14,8 @@ knitr::opts_chunk$set(
   fig.path = "Vitals-",
   cache = TRUE
 )
+
+options(dplyr.width = Inf)
 ```
 
 [Back to Respository](https://github.com/camposfa/plhdbR)
@@ -28,11 +30,9 @@ knitr::opts_chunk$set(
   library(plhdbR)
   load_plhdb_packages()
 
-  lh <- read_bio_table("../data/biography_2015_03_17.csv")
-  fert <- read_fert_table("../data/fertility_2015_03_17.csv")
+  lh <- read_bio_table("../data/biography_2015_05_20.csv")
+  fert <- read_fert_table("../data/fertility_2015_05_20.csv")
   
-  # Need to fix a presumed error in the beza data before calculating vital rates
-  lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
 ```
 
 It's a good idea to [error-check](ErrorChecking.md) the data extensively before 
@@ -40,25 +40,11 @@ running the fuctions below.
 
 ## Median age at first reproduction
 
-The function `median_age_first_rep` uses the biography data to calculate the
-median age at first reproduction for each study species.
+The function `age_first_rep` uses the biography data to calculate the
+minimum, maximum, and median age at first reproduction for each study species.
 
 ```{r}
-  median_age_first_rep(lh)
-```
-
-## Age-specific fertility
-
-The function `age_specific_fertility` uses the biography and fertility tables to
-calculate age-specific fertility separately for each study species using discrete
-age-classes. The procedure follows the instructions provided by Bill Morris in the
-"Methods for calculating vital rates" Word file available on the PLHDB Wiki.
-
-_Warning: this function takes ~1 minute to run._
-
-```{r}
-  asf <- age_specific_fertility(lh, fert)
-  asf
+  age_first_rep(lh)
 ```
 
 ## Stage-specific fertility between censuses

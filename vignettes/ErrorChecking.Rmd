@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "README-"
 )
+
+options(dplyr.width = Inf)
 ```
 
 [Back to Respository](https://github.com/camposfa/plhdbR)
@@ -63,7 +65,7 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
   # Check the biography data for errors
   bio_errors <- find_bio_errors(lh)
   
-  bio_errors$error_dates
+  bio_errors$error_dates %>% data.frame()
   
   bio_errors$error_duplicates
 

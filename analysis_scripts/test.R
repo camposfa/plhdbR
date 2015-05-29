@@ -35,12 +35,28 @@ summary(fert)
 
 # ---- fix_errors ---------------------------------------------------------
 
-lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
+# lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
 
 b <- lh
 
 m <- stage_specific_survival(b)
 summary(m)
+
+m %>% filter(Study.Id == "ssr" & age_class == "adult")
+
+test_year <- 1994
+
+lh %>%
+  filter(Study.Id == "ssr" & year(Birth.Date) == test_year &
+           year(Entry.Date) <= test_year) %>%
+  select(1:4, 13:16)
+
+ps_ages %>%
+  filter(Study.Id == "ssr" & year(census_date) == test_year &
+           age_class == "adult") %>%
+  select(-4, -6, -8)
+
+
 
 ggplot(m, aes(x = year_of, y = s)) +
   geom_line() +

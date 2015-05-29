@@ -112,9 +112,7 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
   # Check the biography data for errors
   bio_errors <- find_bio_errors(lh)
   
-  bio_errors$error_dates
-#> Source: local data frame [18 x 8]
-#> 
+  bio_errors$error_dates %>% data.frame()
 #>    Study.Id Animal.Id Mom.Id Birth.Date Min.Birth.Date Max.Birth.Date
 #> 1  karisoke       IZI    IZU 2005-09-02           <NA>           <NA>
 #> 2  karisoke    FATINF    FAT 2014-09-18           <NA>           <NA>
@@ -134,7 +132,25 @@ The functions `find_bio_errors` and `find_fert_errors` scan the loaded biography
 #> 16 karisoke    MAHINF    MAH 2015-03-10           <NA>           <NA>
 #> 17 karisoke    KRDINF    KRD 2015-01-02           <NA>           <NA>
 #> 18 karisoke    TAMINF    TAM 2014-04-14           <NA>           <NA>
-#> Variables not shown: Entry.Date (time), Depart.Date (time)
+#>    Entry.Date Depart.Date
+#> 1  2013-08-10  2015-04-30
+#> 2  2014-09-18  2015-04-30
+#> 3  2014-03-15  2014-09-04
+#> 4  2013-08-10  2015-04-30
+#> 5  2014-04-24  2015-04-30
+#> 6  2014-12-25  2015-02-23
+#> 7  2013-09-17  2015-04-30
+#> 8  2014-10-22  2014-10-30
+#> 9  2015-12-23  2015-04-30
+#> 10 2014-11-17  2015-01-30
+#> 11 2013-10-21  2015-04-30
+#> 12 2013-11-01  2015-04-30
+#> 13 2015-02-24  2015-04-30
+#> 14 2014-03-31  2014-04-22
+#> 15 2014-05-24  2014-10-01
+#> 16 2015-03-10  2015-04-30
+#> 17 2015-01-02  2015-03-21
+#> 18 2014-04-14  2014-05-26
   
   bio_errors$error_duplicates
 #> Source: local data frame [1 x 3]

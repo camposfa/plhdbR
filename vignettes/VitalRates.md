@@ -12,11 +12,9 @@ Prepare workspace and read biography and fertility data
   library(plhdbR)
   load_plhdb_packages()
 
-  lh <- read_bio_table("../data/biography_2015_03_17.csv")
-  fert <- read_fert_table("../data/fertility_2015_03_17.csv")
+  lh <- read_bio_table("../data/biography_2015_05_20.csv")
+  fert <- read_fert_table("../data/fertility_2015_05_20.csv")
   
-  # Need to fix a presumed error in the beza data before calculating vital rates
-  lh[lh$Animal.Id == "247" & lh$Study.Id == "beza", ]$Entry.Date <- ymd("1984-07-15")
 ```
 
 It's a good idea to [error-check](ErrorChecking.md) the data extensively before running the fuctions below.
@@ -24,47 +22,28 @@ It's a good idea to [error-check](ErrorChecking.md) the data extensively before 
 Median age at first reproduction
 --------------------------------
 
-The function `median_age_first_rep` uses the biography data to calculate the median age at first reproduction for each study species.
+The function `age_first_rep` uses the biography data to calculate the minimum, maximum, and median age at first reproduction for each study species.
 
 ``` r
-  median_age_first_rep(lh)
-#> Source: local data frame [7 x 4]
+  age_first_rep(lh)
+#> Source: local data frame [7 x 8]
 #> 
-#>   Study.Id median_age_days median_age_years n_first_births
-#> 1 rppn-fma          3210.5         8.789870             58
-#> 2 amboseli          2181.0         5.971253            193
-#> 3 kakamega          2665.0         7.296372            117
-#> 4    gombe          5544.5        15.180014             54
-#> 5 karisoke          3601.0         9.859001             55
-#> 6     beza          2191.0         5.998631             80
-#> 7      ssr          2363.5         6.470910             32
-```
-
-Age-specific fertility
-----------------------
-
-The function `age_specific_fertility` uses the biography and fertility tables to calculate age-specific fertility separately for each study species using discrete age-classes. The procedure follows the instructions provided by Bill Morris in the "Methods for calculating vital rates" Word file available on the PLHDB Wiki.
-
-*Warning: this function takes ~1 minute to run.*
-
-``` r
-  asf <- age_specific_fertility(lh, fert)
-  asf
-#> Source: local data frame [266 x 5]
-#> Groups: Study.Id
-#> 
-#>    Study.Id Discrete.Age.Class n_animals female_years         f
-#> 1  rppn-fma                  0        83     79.77687 0.0000000
-#> 2  rppn-fma                  1        90     77.35181 0.0000000
-#> 3  rppn-fma                  2        75     67.61123 0.0000000
-#> 4  rppn-fma                  3        62     59.33812 0.0000000
-#> 5  rppn-fma                  4        61     57.40315 0.0000000
-#> 6  rppn-fma                  5        83     59.59343 0.0000000
-#> 7  rppn-fma                  6        68     46.35866 0.0000000
-#> 8  rppn-fma                  7        42     37.68857 0.2122659
-#> 9  rppn-fma                  8        38     36.10267 0.3593069
-#> 10 rppn-fma                  9        35     34.04107 0.2350103
-#> ..      ...                ...       ...          ...       ...
+#>   Study.Id median_age_days median_age_years minimum_age_days
+#> 1 rppn-fma            3202         8.766598             2542
+#> 2 amboseli            2181         5.971253             1735
+#> 3 kakamega            2665         7.296372             1678
+#> 4    gombe            5544        15.178645             4059
+#> 5 karisoke            3611         9.886379             2923
+#> 6     beza            2191         5.998631             1081
+#> 7      ssr            2375         6.502396             2116
+#>   minimum_age_years maximum_age_days maximum_age_years n_first_births
+#> 1          6.959617             4513         12.355921             60
+#> 2          4.750171             3157          8.643395            193
+#> 3          4.594114             4004         10.962355            117
+#> 4         11.112936             8452         23.140315             55
+#> 5          8.002738             6786         18.579055             57
+#> 6          2.959617             4022         11.011636             79
+#> 7          5.793292             2901          7.942505             33
 ```
 
 Stage-specific fertility between censuses
@@ -83,21 +62,33 @@ The optional logical argument `annual` determines whether fertilities are calcul
 ``` r
   ssf <- stage_specific_fertility(lh, fert, annual = TRUE)
   ssf
-#> Source: local data frame [713 x 6]
+#> Source: local data frame [730 x 8]
 #> Groups: Study.Id, year_of
 #> 
-#>    Study.Id year_of age_class n_animals female_years         f
-#> 1  rppn-fma    1983     adult         7   3.64134155 0.0000000
-#> 2  rppn-fma    1983  juvenile         6   2.68583162 0.1936799
-#> 3  rppn-fma    1983   newborn         1   0.41889117 0.0000000
-#> 4  rppn-fma    1984     adult         7   3.77549624 0.4285714
-#> 5  rppn-fma    1984  juvenile         8   4.16153320 0.0000000
-#> 6  rppn-fma    1984   newborn         1   0.07392197 0.0000000
-#> 7  rppn-fma    1986     adult         8   4.09582478 0.3750000
-#> 8  rppn-fma    1986  juvenile        11   5.59069131 0.0000000
-#> 9  rppn-fma    1986   newborn         2   0.81861739 0.0000000
-#> 10 rppn-fma    1987     adult         8   8.00000000 0.1250000
-#> ..      ...     ...       ...       ...          ...       ...
+#>    Study.Id year_of age_class n_animals female_years         f trials
+#> 1  rppn-fma    1983     adult         7   3.64134155 0.0000000      4
+#> 2  rppn-fma    1983  juvenile         6   2.68583162 0.1936799      3
+#> 3  rppn-fma    1983   newborn         1   0.41889117 0.0000000      0
+#> 4  rppn-fma    1984     adult         7   3.77549624 0.4285714      4
+#> 5  rppn-fma    1984  juvenile         8   4.16153320 0.0000000      4
+#> 6  rppn-fma    1984   newborn         1   0.07392197 0.0000000      0
+#> 7  rppn-fma    1986     adult         8   4.09582478 0.3750000      4
+#> 8  rppn-fma    1986  juvenile        11   5.59069131 0.0000000      6
+#> 9  rppn-fma    1986   newborn         2   0.81861739 0.0000000      1
+#> 10 rppn-fma    1987     adult         8   8.00000000 0.1250000      8
+#> ..      ...     ...       ...       ...          ...       ...    ...
+#>    successes
+#> 1          0
+#> 2          1
+#> 3          0
+#> 4          2
+#> 5          0
+#> 6          0
+#> 7          2
+#> 8          0
+#> 9          0
+#> 10         1
+#> ..       ...
 ```
 
 Stage-specific survival
@@ -114,21 +105,33 @@ The function `stage_specific_survival` uses the biography table to calculate sta
 ``` r
   ssm <- stage_specific_survival(lh)
   ssm
-#> Source: local data frame [798 x 6]
+#> Source: local data frame [812 x 9]
 #> Groups: Study.Id, year_of
 #> 
-#>    Study.Id year_of age_class n_animals individual_years s
-#> 1  rppn-fma    1983     adult        12          6.24230 1
-#> 2  rppn-fma    1983  juvenile        11          5.28679 1
-#> 3  rppn-fma    1983   newborn         1          1.00000 1
-#> 4  rppn-fma    1984     adult        12         12.00000 1
-#> 5  rppn-fma    1984  juvenile        13         12.84873 1
-#> 6  rppn-fma    1984   newborn         1          1.00000 1
-#> 7  rppn-fma    1985     adult        14         14.00000 1
-#> 8  rppn-fma    1985  juvenile        14         12.52293 1
-#> 9  rppn-fma    1985   newborn         1          1.00000 1
-#> 10 rppn-fma    1986     adult        14         14.00000 1
-#> ..      ...     ...       ...       ...              ... .
+#>    Study.Id year_of age_class n_animals individual_years s deaths trials
+#> 1  rppn-fma    1983     adult        12          6.24230 1      0      6
+#> 2  rppn-fma    1983  juvenile        11          5.28679 1      0      5
+#> 3  rppn-fma    1983   newborn         1          1.00000 1      0      1
+#> 4  rppn-fma    1984     adult        12         12.00000 1      0     12
+#> 5  rppn-fma    1984  juvenile        13         12.84873 1      0     13
+#> 6  rppn-fma    1984   newborn         1          1.00000 1      0      1
+#> 7  rppn-fma    1985     adult        14         14.00000 1      0     14
+#> 8  rppn-fma    1985  juvenile        14         12.52293 1      0     13
+#> 9  rppn-fma    1985   newborn         1          1.00000 1      0      1
+#> 10 rppn-fma    1986     adult        14         14.00000 1      0     14
+#> ..      ...     ...       ...       ...              ... .    ...    ...
+#>    successes
+#> 1          6
+#> 2          5
+#> 3          1
+#> 4         12
+#> 5         13
+#> 6          1
+#> 7         14
+#> 8         13
+#> 9          1
+#> 10        14
+#> ..       ...
   
   # Visualize changes over time (not adjusted for sampling effort!!!)
   library(ggplot2)
@@ -140,4 +143,4 @@ The function `stage_specific_survival` uses the biography table to calculate sta
   theme_bw()
 ```
 
-![](Vitals-unnamed-chunk-6-1.png)
+![](Vitals-unnamed-chunk-5-1.png)

@@ -21,34 +21,42 @@ get_trials <- function(df){
   return(fates)
 }
 
-temp <- bind_rows(dlply(filter(sss, trials != 0), .(Study.Id, age_class), get_trials))
+m <- stage_specific_survival(lh)
 
-temp$age_class <- factor(temp$age_class, levels = c("newborn", "juvenile", "adult"))
+surv_trials <- bind_rows(dlply(filter(m, trials != 0), .(Study.Id, age_class), get_trials))
 
-models <- list()
-count <- 1
+surv_trials$age_class <- factor(surv_trials$age_class, levels = c("newborn", "juvenile", "adult"))
 
-for(i in 1:length(levels(temp$Study.Id))){
 
-  current_study <- levels(temp$Study.Id)[i]
 
-  for(j in 1:length(levels(factor(temp$age_class)))){
-    current_ac <- levels(temp$age_class)[j]
 
-    set <- temp %>%
-      filter(Study.Id == current_study & age_class == current_ac) %>%
-      data.frame()
 
-    models[[count]] <- glmer(fate ~ 1 + (1 | year_of), data = set, family = "binomial")
 
-    count <- count + 1
-  }
 
-}
-
-out <- models[[19]]
-
-x=coef(out)$year_of
-x=as.vector(x[,1])
-x=exp(x)/(1+exp(x))
+# models <- list()
+# count <- 1
+#
+# for(i in 1:length(levels(temp$Study.Id))){
+#
+#   current_study <- levels(temp$Study.Id)[i]
+#
+#   for(j in 1:length(levels(factor(temp$age_class)))){
+#     current_ac <- levels(temp$age_class)[j]
+#
+#     set <- temp %>%
+#       filter(Study.Id == current_study & age_class == current_ac) %>%
+#       data.frame()
+#
+#     models[[count]] <- glmer(fate ~ 1 + (1 | year_of), data = set, family = "binomial")
+#
+#     count <- count + 1
+#   }
+#
+# }
+#
+# out <- models[[19]]
+#
+# x=coef(out)$year_of
+# x=as.vector(x[,1])
+# x=exp(x)/(1+exp(x))
 

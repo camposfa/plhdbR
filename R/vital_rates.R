@@ -238,7 +238,7 @@ stage_specific_survival <- function(b){
           # Individual survives to next census
           if(temp_set[j, ]$Depart.Date > temp_set[j, ]$census_date + lubridate::years(1)){
 
-            # Weight is one if entry data equals census date
+            # Weight is 1 if entry date equals census date
             if(temp_set[j, ]$Entry.Date == temp_set[j, ]$census_date){
               w <- 1
             }
@@ -275,12 +275,16 @@ stage_specific_survival <- function(b){
           # Infant not present at next census
           # This means there is only one entry for the animal, i.e. nrow(temp_set) == 1
           else{
-            w <- difftime(temp_set[j, ]$Depart.Date,
-                          temp_set[j, ]$census_date,
-                          units = "days") / 365.25
+            if(temp_set[j, ]$Depart.Type %in% c("E", "O", "P")){
+
+              w <- difftime(temp_set[j, ]$Depart.Date,
+                            temp_set[j, ]$census_date,
+                            units = "days") / 365.25
+            }
 
             # Infant died before next census
-            if(temp_set[j, ]$Depart.Type == "D"){
+            else if(temp_set[j, ]$Depart.Type == "D"){
+              w <- 1
               temp_set[j, ]$Deaths <- w
             }
           }
@@ -440,8 +444,8 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
 #' age_class <- get_age_class(5.1, 8.78589)
 get_age_class <- function(age_years, mafr){
 
-  res <- ifelse(age_years < 0, "newborn",
-                ifelse(age_years >= 0 & age_years < mafr, "juvenile", "adult"))
+  res <- ifelse(age_years <= 0, "newborn",
+                ifelse(age_years > 0 & age_years < mafr, "juvenile", "adult"))
 
   return(res)
 }
