@@ -1,7 +1,7 @@
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4", "lubridate",
                          "ggplot2", "RColorBrewer", "grid", "stringr", "scales",
-                         "tidyr", "grid", "zoo", "dplyr", "plhdbR")
+                         "tidyr", "grid", "zoo", "dplyr", "plhdbR", "vegan")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
@@ -1755,3 +1755,27 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tmax_d_cor)) +
 ggsave(filename = "sig_tmax_detrended.pdf", plot = last_plot(),
        path = "plots/index_anomaly_correlations",
        width = 12, height = 4.5, units = "in")
+
+
+
+# ---- annual_climate_variables -------------------------------------------
+
+ann_mean <- climates %>%
+  select(-date_of, -month_of, -rain_data_source) %>%
+  summarise_each(funs(mean)) %>%
+  setNames(c(names(.)[c(1:2)], paste0(names(.)[-c(1:2)],"_mean")))
+
+ann_div <- climates %>%
+  mutate(rain_adj = ifelse(rain_monthly_mm == 0, .001, rain_monthly_mm)) %>%
+  summarise(shannon_rain = diversity(rain_adj, index = "shannon"),
+            simpson_rain = diversity(rain_adj, index = "simpson"),
+            invsimpson_rain = diversity(rain_adj, index = "invsimpson"),
+            cov_rain = sd(rain_monthly_mm, na.rm = TRUE) /
+              mean(rain_monthly_mm, na.rm = TRUE))%>%
+  ungroup()
+
+temp2 <- gather(temp, index, value, 3:5)
+
+ggplot(temp2, aes(x = year_of, y = value, color = index)) +
+  geom_line() +
+  facet_wrap(~site)
