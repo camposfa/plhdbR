@@ -103,8 +103,8 @@ The function `stage_specific_survival` uses the biography table to calculate sta
 *Warning: this function takes ~1 minute to run.*
 
 ``` r
-  ssm <- stage_specific_survival(lh)
-  ssm
+  sss <- stage_specific_survival(lh)
+  sss
 #> Source: local data frame [812 x 9]
 #> Groups: Study.Id, year_of
 #> 
@@ -136,7 +136,7 @@ The function `stage_specific_survival` uses the biography table to calculate sta
   # Visualize changes over time (not adjusted for sampling effort!!!)
   library(ggplot2)
   
-  ggplot(ssm, aes(x = year_of, y = s)) +
+  ggplot(sss, aes(x = year_of, y = s)) +
   geom_line() +
   facet_grid(Study.Id ~ age_class) +
   labs(x = "Year", y = "Probability of Survival") + 
@@ -144,3 +144,24 @@ The function `stage_specific_survival` uses the biography table to calculate sta
 ```
 
 ![](Vitals-unnamed-chunk-5-1.png)
+
+``` r
+  
+  # Convert to trials / successes
+  surv_trials <- make_survivorship_trials(sss)
+  surv_trials
+#> Source: local data frame [29,862 x 4]
+#> 
+#>    Study.Id year_of age_class fate
+#> 1  rppn-fma    1983     adult    1
+#> 2  rppn-fma    1983     adult    1
+#> 3  rppn-fma    1983     adult    1
+#> 4  rppn-fma    1983     adult    1
+#> 5  rppn-fma    1983     adult    1
+#> 6  rppn-fma    1983     adult    1
+#> 7  rppn-fma    1984     adult    1
+#> 8  rppn-fma    1984     adult    1
+#> 9  rppn-fma    1984     adult    1
+#> 10 rppn-fma    1984     adult    1
+#> ..      ...     ...       ...  ...
+```
