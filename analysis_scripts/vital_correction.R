@@ -18,6 +18,8 @@ get_trials <- function(df){
 
   fates <- bind_rows(fates)
 
+  fates <- select(fates, 2:4, 1)
+
   return(fates)
 }
 
@@ -27,8 +29,17 @@ surv_trials <- bind_rows(dlply(filter(m, trials != 0), .(Study.Id, age_class), g
 
 surv_trials$age_class <- factor(surv_trials$age_class, levels = c("newborn", "juvenile", "adult"))
 
+write.csv(temp, "data/multiyear_survivorship_trials.csv", row.names = FALSE)
 
 
+# Test
+
+filter(m, Study.Id == "ssr" & year_of == 2014)
+
+surv_trials %>%
+  filter(Study.Id == "ssr" & year_of == 2014) %>%
+  group_by(age_class, fate) %>%
+  tally()
 
 
 

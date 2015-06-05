@@ -18,6 +18,6 @@ Calculate stage-specific survival
 Based on Bill Morris' methods for calculating vital rates, available on the Wiki.
 }
 \examples{
-ssm <- stage_specific_survival(lh)
+sss <- stage_specific_survival(lh)
 }
 
