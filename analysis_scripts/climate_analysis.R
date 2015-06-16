@@ -535,8 +535,80 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
   labs(x = "Month", y = "Year", title = "Berkeley Earth TMAX \n")
 
 
+# ==== GRIDDED_DROUGHT_INDEX_DATA =========================================
 
-# ==== RAIN_GAUGE_DATA====================================================
+# ---- Standardized Precipitation Evapotranspiration Index (SPEI) ---------
+
+# Global SPEI database
+# 0.5 degree latitude x 0.5 degree longitude global grid
+# http://sac.csic.es/spei/database.html
+
+# Try 6-month drought condition data
+t <- nc_open("data/grids/SPEI/SPEI_06.nc")
+
+lon <- ncvar_get(t, varid = "lon")
+lat <- ncvar_get(t, varid = "lat")
+time <- ncvar_get(t, varid = "time")
+
+inds_lon <- (1:dim(lon))
+inds_lat <- (1:dim(lat))
+
+site_coords <- read.csv("data/site_coords.csv")
+names(site_coords)[2] <- "long_name"
+site_list <- c("rppn-fma", "amboseli", "kakamega", "gombe", "karisoke", "beza", "ssr")
+site_coords$site <- site_list
+site_coords$site <- factor(site_coords$site, levels = site_list)
+site_coords <- mutate(site_coords, lat_ind = 0, lon_ind = 0)
+
+for(i in 1:nrow(site_coords)){
+  site_coords[i, ]$lat_ind <- which.min(abs(site_coords[i, ]$Lat - lat))
+  site_coords[i, ]$lon_ind <- which.min(abs(site_coords[i, ]$Long - lon))
+}
+
+spei_sites_f <- list()
+
+for(i in 1:nrow(site_coords)){
+  temp <- ncvar_get(t, varid = "spei",
+                    start = c(site_coords[i, ]$lon_ind,
+                              site_coords[i, ]$lat_ind,
+                              1),
+                    count = c(1, 1, -1))
+  spei_sites_f[[i]] <- tbl_df(data.frame(d = time,
+                                       spei = temp,
+                                       site = site_coords[i, ]$site))
+}
+
+spei_sites_f <- bind_rows(spei_sites_f)
+
+spei <- spei_sites_f %>%
+  mutate(date_of = ymd_hms("1900-01-01 00:00:00") + days(d),
+         year_of = year(date_of),
+         month_of = month(date_of),
+         spei = as.numeric(spei)) %>%
+  select(site, date_of, year_of, month_of, spei)
+
+spei$month_of <- factor(spei$month_of, labels = month.abb)
+
+# Plot data
+ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei)) +
+  geom_tile() +
+  facet_grid(. ~ site) +
+  scale_fill_gradientn(colours = brewer.pal(11, "PuOr"), name = "SPEI") +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.width = unit(4, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1945, 2015), breaks = seq(1945, 2015, by = 5)) +
+  labs(x = "Month", y = "Year", title = "SPEI Drought Index\n")
+
+rm(list = c("t", "lon", "lat", "time", "spei_sites_f"))
+
+
+# ==== RAIN_GAUGE_DATA=====================================================
 
 # ---- read_rain_data -----------------------------------------------------
 
@@ -1217,16 +1289,20 @@ temp3 <- t_sites_df %>%
          tmax_detrended = tmax_seasonal + tmax_remainder) %>%
   select(site, date_of, contains("detrended"))
 
+temp4 <- spei %>%
+  select(site, year_of, month_of, spei)
+
 climates <- temp1 %>%
   mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"))) %>%
   inner_join(temp2) %>%
   inner_join(temp3) %>%
+  left_join(temp4) %>%
   select(site, date_of, year_of, month_of, contains("rain"),
-         contains("tmin"), contains("tavg"), contains("tmax"))
+         contains("tmin"), contains("tavg"), contains("tmax"), spei)
 
 climates_tidy <- climates %>%
   select(-rain_data_source) %>%
-  gather(var, value, rain_monthly_mm:tmax_detrended)
+  gather(var, value, rain_monthly_mm:spei)
 
 rm(temp1)
 rm(temp2)
@@ -1762,20 +1838,29 @@ ggsave(filename = "sig_tmax_detrended.pdf", plot = last_plot(),
 
 ann_mean <- climates %>%
   select(-date_of, -month_of, -rain_data_source) %>%
-  summarise_each(funs(mean)) %>%
+  summarise_each(funs(mean(., na.rm = TRUE))) %>%
   setNames(c(names(.)[c(1:2)], paste0(names(.)[-c(1:2)],"_mean")))
 
 ann_div <- climates %>%
   mutate(rain_adj = ifelse(rain_monthly_mm == 0, .001, rain_monthly_mm)) %>%
-  summarise(shannon_rain = diversity(rain_adj, index = "shannon"),
+  summarise(n_months = n(),
+            shannon_rain = diversity(rain_adj, index = "shannon"),
             simpson_rain = diversity(rain_adj, index = "simpson"),
             invsimpson_rain = diversity(rain_adj, index = "invsimpson"),
             cov_rain = sd(rain_monthly_mm, na.rm = TRUE) /
               mean(rain_monthly_mm, na.rm = TRUE))%>%
-  ungroup()
+  ungroup() %>%
+  filter(n_months == 12)
 
-temp2 <- gather(temp, index, value, 3:5)
+# Plot all diversity indices
+temp2 <- ann_div %>%
+  mutate_each(funs(scale), ends_with("rain")) %>%
+  gather(index, value, 4:7)
 
 ggplot(temp2, aes(x = year_of, y = value, color = index)) +
   geom_line() +
-  facet_wrap(~site)
+  facet_wrap(~site) +
+  geom_hline(aes(yintercept = 0), lty = 2)
+
+# Use Shannon
+ann_mean <- left_join(ann_mean, select(ann_div, site, year_of, shannon_rain))
