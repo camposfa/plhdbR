@@ -1836,10 +1836,25 @@ ggsave(filename = "sig_tmax_detrended.pdf", plot = last_plot(),
 
 # ---- annual_climate_variables -------------------------------------------
 
-ann_mean <- climates %>%
+
+ind_wide <- ind_df %>%
+  mutate(year_of = year(date_of)) %>%
+  spread(index, value) %>%
+  select(-date_of)
+
+climates_combined <- full_join(climates, ind_wide)
+
+ann_mean <- climates_combined %>%
   select(-date_of, -month_of, -rain_data_source) %>%
   summarise_each(funs(mean(., na.rm = TRUE))) %>%
   setNames(c(names(.)[c(1:2)], paste0(names(.)[-c(1:2)],"_mean")))
+
+ann_mean <- climates_combined %>%
+  select(-date_of, -month_of, -rain_data_source) %>%
+  summarise_each(funs(mean(., na.rm = TRUE), n())) %>%
+  rename(n_months = rain_monthly_mm_n) %>%
+  select(-ends_with("_n")) %>%
+  filter(n_months == 12)
 
 ann_div <- climates %>%
   mutate(rain_adj = ifelse(rain_monthly_mm == 0, .001, rain_monthly_mm)) %>%
@@ -1862,5 +1877,5 @@ ggplot(temp2, aes(x = year_of, y = value, color = index)) +
   facet_wrap(~site) +
   geom_hline(aes(yintercept = 0), lty = 2)
 
-# Use Shannon
+# Use Shannon diversity index and combine with other climate variables
 ann_mean <- left_join(ann_mean, select(ann_div, site, year_of, shannon_rain))
