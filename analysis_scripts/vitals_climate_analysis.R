@@ -1,42 +1,38 @@
-devtools::install_github("camposfa/plhdbR")
+# devtools::install_github("camposfa/plhdbR")
+#
+# library(ggplot2)
+# library(lme4)
+# library(MuMIn)
+# library(plhdbR)
 
-library(ggplot2)
-library(lme4)
-library(plhdbR)
+# Sys.setenv(TZ = 'UTC')
+#
+# load(".RData")
+# `%ni%` = Negate(`%in%`)
+#
+# load_plhdb_packages()
 
-Sys.setenv(TZ = 'UTC')
-
-load(".RData")
-`%ni%` = Negate(`%in%`)
-
-load_plhdb_packages()
-
-f <- "data/biography_2015_06_17.csv"
-lh <- read_bio_table(f)
-summary(lh)
-
-
-
-# Fix errors
-
-find_bio_errors(lh)
-
-# Duplicate entries for Karisoke "SUS"
-lh <- lh %>%
-  filter(!(Animal.Id == "SUS" & (year(Birth.Date) == 2014 | year(Entry.Date) == 2014)))
-
-# Date error for "TEKINF"
-lh[lh$Animal.Id == "TEKINF", ]$Entry.Date <- ymd("2014-12-23")
-
-
-
-
-
-f <- "data/fertility_2015_06_17.csv"
-fert <- read_fert_table(f)
-summary(fert)
-
-find_fert_errors(fert)
+# f <- "data/biography_2015_06_17.csv"
+# lh <- read_bio_table(f)
+# summary(lh)
+#
+# # Fix errors
+#
+# find_bio_errors(lh)
+#
+# # Duplicate entries for Karisoke "SUS"
+# lh <- lh %>%
+#   filter(!(Animal.Id == "SUS" & (year(Birth.Date) == 2014 | year(Entry.Date) == 2014)))
+#
+# # Date error for "TEKINF"
+# lh[lh$Animal.Id == "TEKINF", ]$Entry.Date <- ymd("2014-12-23")
+#
+#
+# f <- "data/fertility_2015_06_17.csv"
+# fert <- read_fert_table(f)
+# summary(fert)
+#
+# find_fert_errors(fert)
 
 # Takes about 1 minute
 m <- stage_specific_survival(lh)
@@ -45,14 +41,23 @@ summary(m)
 # Make trials
 surv_trials <- make_survivorship_trials(m)
 
+# Lag scenarios
+temp <- ann_mean %>%
+  group_by(site) %>%
+  arrange(year_of) %>%
+  select(-n_months) %>%
+  mutate_each(funs(lag), -year_of) %>%
+  setNames(c(names(.)[c(1:2)], paste0(names(.)[-c(1:2)],"_lag1"))) %>%
+  left_join(ann_mean, .)
 
 # Models
 mod_df <- surv_trials %>%
   rename(site = Study.Id) %>%
-  left_join(ann_mean) %>%
-  gather(var, value, contains("mean"), shannon_rain)
+  left_join(temp) %>%
+  gather(var, value, contains("mean"), shannon_rain, contains("lag1"))
 
 mod <- mod_df %>%
+  ungroup() %>%
   group_by(site, age_class, var) %>%
   do(climate_mod = glmer(fate ~ value + (1 | year_of), data = ., family = "binomial"))
 
@@ -77,10 +82,23 @@ mod_glance$var <- mod$var
 
 mod_sel <- mod %>%
   group_by(site, age_class) %>%
-  filter() %>%
   do(m_table = model.sel(.$climate_mod),
      vars = data.frame(var = .$var))
 
+# mod_glance %>%
+#   group_by(site, age_class) %>%
+#   top_n(2, -AIC) %>%
+#   select(site, age_class, var, AIC) %>%
+#   mutate(delta = round(AIC - lag(AIC), 3)) %>%
+#   View()
+
+mod_glance %>%
+  group_by(site, age_class) %>%
+  arrange(AIC) %>%
+  mutate(delta = round(lead(AIC) - AIC, 3)) %>%
+  top_n(1) %>%
+  select(site, age_class, var, AIC, delta) %>%
+  View()
 
 # models <- list()
 # count <- 1

@@ -1,7 +1,8 @@
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4", "lubridate",
                          "ggplot2", "RColorBrewer", "grid", "stringr", "scales",
-                         "tidyr", "grid", "zoo", "dplyr", "plhdbR", "vegan")
+                         "tidyr", "grid", "zoo", "dplyr", "MuMIn", "plhdbR",
+                         "vegan", "lme4", "broom")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
@@ -23,12 +24,19 @@ sqrt_sign_trans <-  function(){
 
 # ---- prep ---------------------------------------------------------------
 
-f <- "data/biography_2015_05_11.csv"
+f <- "data/biography_2015_06_17.csv"
 lh <- read_bio_table(f)
 
 
-f <- "data/fertility_2015_05_11.csv"
+f <- "data/fertility_2015_06_17.csv"
 fert <- read_fert_table(f)
+
+# Duplicate entries for Karisoke "SUS"
+lh <- lh %>%
+  filter(!(Animal.Id == "SUS" & (year(Birth.Date) == 2014 | year(Entry.Date) == 2014)))
+
+# Date error for "TEKINF"
+lh[lh$Animal.Id == "TEKINF", ]$Entry.Date <- ymd("2014-12-23")
 
 study_durations <- lh %>%
   group_by(Study.Id) %>%
@@ -1307,6 +1315,7 @@ climates_tidy <- climates %>%
 rm(temp1)
 rm(temp2)
 rm(temp3)
+rm(temp4)
 
 
 # ---- anomaly_phase_analysis ---------------------------------------------
@@ -1838,19 +1847,20 @@ ggsave(filename = "sig_tmax_detrended.pdf", plot = last_plot(),
 
 
 ind_wide <- ind_df %>%
-  mutate(year_of = year(date_of)) %>%
-  spread(index, value) %>%
-  select(-date_of)
+  spread(index, value)
 
-climates_combined <- full_join(climates, ind_wide)
+climates_combined <- climates %>%
+  full_join(ind_wide) %>%
+  filter(!is.na(site))
+
+# ann_mean <- climates_combined %>%
+#   select(-date_of, -month_of, -rain_data_source) %>%
+#   summarise_each(funs(mean(., na.rm = TRUE))) %>%
+#   setNames(c(names(.)[c(1:2)], paste0(names(.)[-c(1:2)],"_mean")))
 
 ann_mean <- climates_combined %>%
   select(-date_of, -month_of, -rain_data_source) %>%
-  summarise_each(funs(mean(., na.rm = TRUE))) %>%
-  setNames(c(names(.)[c(1:2)], paste0(names(.)[-c(1:2)],"_mean")))
-
-ann_mean <- climates_combined %>%
-  select(-date_of, -month_of, -rain_data_source) %>%
+  group_by(site, year_of) %>%
   summarise_each(funs(mean(., na.rm = TRUE), n())) %>%
   rename(n_months = rain_monthly_mm_n) %>%
   select(-ends_with("_n")) %>%
@@ -1866,16 +1876,6 @@ ann_div <- climates %>%
               mean(rain_monthly_mm, na.rm = TRUE))%>%
   ungroup() %>%
   filter(n_months == 12)
-
-# Plot all diversity indices
-temp2 <- ann_div %>%
-  mutate_each(funs(scale), ends_with("rain")) %>%
-  gather(index, value, 4:7)
-
-ggplot(temp2, aes(x = year_of, y = value, color = index)) +
-  geom_line() +
-  facet_wrap(~site) +
-  geom_hline(aes(yintercept = 0), lty = 2)
 
 # Use Shannon diversity index and combine with other climate variables
 ann_mean <- left_join(ann_mean, select(ann_div, site, year_of, shannon_rain))
