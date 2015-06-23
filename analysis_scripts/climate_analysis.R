@@ -1867,6 +1867,7 @@ ann_mean <- climates_combined %>%
   filter(n_months == 12)
 
 ann_div <- climates %>%
+  group_by(site, year_of) %>%
   mutate(rain_adj = ifelse(rain_monthly_mm == 0, .001, rain_monthly_mm)) %>%
   summarise(n_months = n(),
             shannon_rain = diversity(rain_adj, index = "shannon"),
@@ -1877,5 +1878,25 @@ ann_div <- climates %>%
   ungroup() %>%
   filter(n_months == 12)
 
+ann_total <- climates %>%
+  group_by(site, year_of) %>%
+  summarise(rain_total_mm = sum(rain_monthly_mm),
+            n_months = n()) %>%
+  filter(n_months == 12)
+
+ann_extremes <- climates %>%
+  group_by(site, year_of) %>%
+  summarise(coldest_tmin_anomaly = min(tmin_anomaly),
+            hottest_tmax_anomaly = max(tmax_anomaly),
+            wettest_anomaly = max(rain_anomaly),
+            driest_anomaly = min(rain_anomaly),
+            n_months = n()) %>%
+  filter(n_months == 12)
+
+
 # Use Shannon diversity index and combine with other climate variables
-ann_mean <- left_join(ann_mean, select(ann_div, site, year_of, shannon_rain))
+climate_predictors <- ann_mean %>%
+  left_join(select(ann_total, -n_months)) %>%
+  left_join(select(ann_extremes, -n_months)) %>%
+  left_join(select(ann_div, site, year_of, shannon_rain))
+
