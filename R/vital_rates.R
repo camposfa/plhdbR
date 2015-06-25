@@ -87,7 +87,7 @@ age_specific_fertility <- function(b, f){
   asf <- list()
 
   # Loop through all entries in working data frame
-  for(i in 1:nrow(temp)){
+  for (i in 1:nrow(temp)){
 
     # Store these values temporarily for future use in matching
     s <- temp[i, ]$Study.Id
@@ -103,7 +103,7 @@ age_specific_fertility <- function(b, f){
 
     # If the date of end birthday is before the date of study end,
     # add one year to the end birthday
-    if(temp[i, ]$Study.End > end_bd){
+    if (temp[i, ]$Study.End > end_bd){
       end_bd <- end_bd + lubridate::years(1)
     }
 
@@ -135,18 +135,18 @@ age_specific_fertility <- function(b, f){
                         Num.Offspring = NA)
 
     # Calculate weight of first year based on fraction of year actually observed
-    if(asf_i[1, ]$Last.BD < asf_i[1, ]$Start.Date){
+    if (asf_i[1, ]$Last.BD < asf_i[1, ]$Start.Date){
       asf_i[1, ]$Weight <- (asf_i[1, ]$Next.BD - asf_i[1, ]$Start.Date) / 365.25
     }
 
     # Calcualte weight of last year based on fraction of year actually observed
     k <- nrow(asf_i)
-    if(asf_i[k, ]$Next.BD > asf_i[k, ]$Stop.Date){
+    if (asf_i[k, ]$Next.BD > asf_i[k, ]$Stop.Date){
       asf_i[k, ]$Weight <- (asf_i[k, ]$Stop.Date - asf_i[k, ]$Last.BD) / 365.25
     }
 
     # Set all other weights to 1 because fertility was observed for complete year
-    if(nrow(asf_i[is.na(asf_i$Weight), ]) > 0){
+    if (nrow(asf_i[is.na(asf_i$Weight), ]) > 0){
       asf_i[is.na(asf_i$Weight), ]$Weight <- 1
     }
 
@@ -155,7 +155,7 @@ age_specific_fertility <- function(b, f){
 
     # Loop over current female's birthdays and add up number of individuals born
     # to that female in that year
-    for(j in 1:nrow(asf_i)){
+    for (j in 1:nrow(asf_i)){
       asf_i[j, ]$Num.Offspring <- b %>%
         dplyr::filter(Study.Id == s & Mom.Id == m &
                         Birth.Date >= asf_i[j, ]$Last.BD &
@@ -189,7 +189,11 @@ age_specific_fertility <- function(b, f){
 #' @export
 #' @examples
 #' sss <- stage_specific_survival(lh)
-stage_specific_survival <- function(b){
+stage_specific_survival <- function(b, adult_definition = "median"){
+
+  if (!adult_definition %in% c("median", "minimum")){
+    stop("Unrecognized definition for adult females (must be 'median' or 'minimum').")
+  }
 
   b$Animal.Id <- as.character(b$Animal.Id)
 
@@ -200,7 +204,7 @@ stage_specific_survival <- function(b){
 
   # Get life history stage (newborn, juvenile, or adult) of each animal at each
   # pseudocensus date during the study
-  ps_ages <- pseudocensus_ages(b)
+  ps_ages <- pseudocensus_ages(b, adult_definition)
 
   # Remove years for which census_end < Entry.Date or census_date > Depart.Date
   ps_ages <- ps_ages %>%
@@ -214,7 +218,7 @@ stage_specific_survival <- function(b){
 
   m <- list()
 
-  for(i in 1:nrow(animals)){
+  for (i in 1:nrow(animals)){
 
     temp_study <- animals[i, ]$Study.Id
     temp_animal <- animals[i, ]$Animal.Id
@@ -224,22 +228,22 @@ stage_specific_survival <- function(b){
       mutate(Alive = 0, Deaths = 0) %>%
       arrange(census_date)
 
-    for(j in 1:nrow(temp_set)){
+    for (j in 1:nrow(temp_set)){
 
       # Weight starts at zero
       w <- 0
 
       # MinCensus is a special case for which the weight has to be adjusted
-      if(j == 1){
+      if (j == 1){
 
         # Non-newborns
-        if(temp_set[j, ]$discrete_age_class != 0){
+        if (temp_set[j, ]$discrete_age_class != 0){
 
           # Individual survives to next census
-          if(temp_set[j, ]$Depart.Date > temp_set[j, ]$census_date + lubridate::years(1)){
+          if (temp_set[j, ]$Depart.Date > temp_set[j, ]$census_date + lubridate::years(1)){
 
             # Weight is 1 if entry date equals census date
-            if(temp_set[j, ]$Entry.Date == temp_set[j, ]$census_date){
+            if (temp_set[j, ]$Entry.Date == temp_set[j, ]$census_date){
               w <- 1
             }
             # Otherwise, weight is next census date - entry date / 365.25
@@ -258,24 +262,24 @@ stage_specific_survival <- function(b){
                           units = "days") / 365.25
 
             # Individual died before next census
-            if(temp_set[j, ]$Depart.Type == "D"){
+            if (temp_set[j, ]$Depart.Type == "D"){
               temp_set[j, ]$Deaths <- w
             }
           }
         }
 
         # Newborns
-        else if(temp_set[j, ]$discrete_age_class == 0){
+        else if (temp_set[j, ]$discrete_age_class == 0){
 
           # Infant survives to next census
-          if(temp_set[j, ]$Depart.Date >= temp_set[j, ]$census_date + lubridate::years(1)){
+          if (temp_set[j, ]$Depart.Date >= temp_set[j, ]$census_date + lubridate::years(1)){
             w <- 1
           }
 
           # Infant not present at next census
           # This means there is only one entry for the animal, i.e. nrow(temp_set) == 1
           else{
-            if(temp_set[j, ]$Depart.Type %in% c("E", "O", "P")){
+            if (temp_set[j, ]$Depart.Type %in% c("E", "O", "P")){
 
               w <- difftime(temp_set[j, ]$Depart.Date,
                             temp_set[j, ]$census_date,
@@ -283,7 +287,7 @@ stage_specific_survival <- function(b){
             }
 
             # Infant died before next census
-            else if(temp_set[j, ]$Depart.Type == "D"){
+            else if (temp_set[j, ]$Depart.Type == "D"){
               w <- 1
               temp_set[j, ]$Deaths <- w
             }
@@ -293,7 +297,7 @@ stage_specific_survival <- function(b){
 
       # MaxCensus (when nrow(temp_set) > 1)
       else if (j > 1 & j == nrow(temp_set)){
-        if(temp_set[j, ]$Depart.Type == "D"){
+        if (temp_set[j, ]$Depart.Type == "D"){
           w <- 1
           temp_set[j, ]$Deaths <- w
         }
@@ -340,7 +344,11 @@ stage_specific_survival <- function(b){
 #' @export
 #' @examples
 #' ssf <- stage_specific_fertility(lh, fert)
-stage_specific_fertility <- function(b, f, annual = TRUE){
+stage_specific_fertility <- function(b, f, adult_definition = "median", annual = TRUE){
+
+  if (!adult_definition %in% c("median", "minimum")){
+    stop("Unrecognized definition for adult females (must be 'median' or 'minimum').")
+  }
 
   f$Animal.Id <- as.character(f$Animal.Id)
   b$Animal.Id <- as.character(b$Animal.Id)
@@ -352,7 +360,7 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
 
   # Get life history stage (newborn, juvenile, or adult) of each animal at each
   # pseudocensus date during the study
-  ps_ages <- pseudocensus_ages(temp)
+  ps_ages <- pseudocensus_ages(temp, adult_definition)
 
   # Join to fertility data to get start and stop dates
   ps_ages <- dplyr::inner_join(ps_ages, f, by = c("Study.Id" = "Study.Id",
@@ -377,14 +385,14 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
     m <- as.character(ps_ages[i, ]$Animal.Id)
 
     # If start date and end date fully encompass census year, weight is 1
-    if(ps_ages[i, ]$census_date >= ps_ages[i, ]$Start.Date &
+    if (ps_ages[i, ]$census_date >= ps_ages[i, ]$Start.Date &
        ps_ages[i, ]$census_end <= ps_ages[i, ]$Stop.Date){
       ps_ages[i, ]$Weight <- 1
     }
 
     # Else if census date before start date, fertility observation is censored
     # Get length between start date and min of {census end, stop date}
-    else if(ps_ages[i, ]$census_date < ps_ages[i, ]$Start.Date){
+    else if (ps_ages[i, ]$census_date < ps_ages[i, ]$Start.Date){
       ps_ages[i, ]$Weight <- (min(c(ps_ages[i, ]$census_end,
                                     ps_ages[i, ]$Stop.Date)) -
                                 ps_ages[i, ]$Start.Date) / 365.25
@@ -392,7 +400,7 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
 
     # Else if stop date is before next census, fertility observation is censored
     # Get length between max of {census start, start date} and stop date
-    else if(ps_ages[i, ]$Stop.Date < ps_ages[i, ]$census_end){
+    else if (ps_ages[i, ]$Stop.Date < ps_ages[i, ]$census_end){
       ps_ages[i, ]$Weight <- (ps_ages[i, ]$Stop.Date -
         (max(c(ps_ages[i, ]$census_date, ps_ages[i, ]$Start.Date)))) / 365.25
     }
@@ -407,7 +415,7 @@ stage_specific_fertility <- function(b, f, annual = TRUE){
       nrow()
   }
 
-  if(annual){
+  if (annual){
     # Compute annual stage-specific per-capita fertility
     ssf_summary <- ps_ages %>%
       dplyr::mutate(year_of = lubridate::year(census_date)) %>%
@@ -458,7 +466,11 @@ get_age_class <- function(age_years, mafr){
 #' @export
 #' @examples
 #' ages <- pseudocensus_ages(lh)
-pseudocensus_ages <- function(b){
+pseudocensus_ages <- function(b, adult_definition = "median"){
+
+  if (!adult_definition %in% c("median", "minimum")){
+    stop("Unrecognized definition for adult females (must be 'median' or 'minimum').")
+  }
 
   # pseudocensus
   census <- b %>%
@@ -476,10 +488,6 @@ pseudocensus_ages <- function(b){
 
   census <- suppressMessages(dplyr::inner_join(census, census_end))
 
-  # Fix two special cases where only one animal recorded in first year(s)
-  # census[census$Study.Id == "beza", ]$census_start <- lubridate::ymd("1984-01-01")
-  # census[census$Study.Id == "kakamega", ]$census_start <- lubridate::ymd("1980-01-01")
-
   census_seq <- function(df) {
     seq(df$census_start, df$census_end, "1 year")
   }
@@ -490,16 +498,20 @@ pseudocensus_ages <- function(b){
 
   # For each census date, calculate the age of each animal present
   age_df <- list()
-  for(j in 1:7){
+  for (j in 1:7){
     site <- as.character(census[j, ]$Study.Id)
     site_seq <- census_dates[[site]]
     temp_lh <- b %>%
       dplyr::filter(Study.Id == site)
 
-    temp_mafr <- mafr[mafr$Study.Id == site, ]$median_age_years
+    if (adult_definition == "median"){
+      temp_mafr <- mafr[mafr$Study.Id == site, ]$median_age_years
+    } else if (adult_definition == "minimum"){
+      temp_mafr <- mafr[mafr$Study.Id == site, ]$minimum_age_years
+    }
 
     ages <- list()
-    for(i in 1:length(site_seq)){
+    for (i in 1:length(site_seq)){
       # For each date, extract subset of animals present or born before the next census
       t <- site_seq[i]
 
