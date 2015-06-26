@@ -546,12 +546,11 @@ lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
               abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
 
 ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
-# ggplot(temp, aes(x = var, y = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
-                       limits = c(-lim, lim),
-                       trans = sqrt_sign_trans()) +
+                       trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
   theme(strip.background = element_blank(),
