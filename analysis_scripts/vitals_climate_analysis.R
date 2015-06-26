@@ -12,7 +12,7 @@ surv_trials <- filter(surv_trials, year_of < 2015)
 temp <- climate_predictors %>%
   select(-n_months) %>%
   ungroup() %>%
-  mutate_each(funs(scale), 3:27) %>%
+  mutate_each(funs(scale), -site, -year_of) %>%
   group_by(site) %>%
   gather(var, lag0, -site, -year_of) %>%
   group_by(site, var) %>%
@@ -63,7 +63,7 @@ mod4[mod4$scenario == "mod_null", ]$var <- "null"
 
 mod_sel <- mod4 %>%
   group_by(site, age_class) %>%
-  do(m_table = model.sel(.$model),
+  do(m_table = model.sel(.$model, extra = c("BIC", "DIC")),
      vars = data.frame(var = .$var),
      scenarios = data.frame(scenario = .$scenario),
      deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
@@ -91,7 +91,7 @@ for(i in 1:nrow(mod_sel)){
   temp1$rank <- as.numeric(rownames(temp1))
 
   temp1 <- temp1 %>%
-    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:9)
+    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:10)
 
   temp[[i]] <- temp1
 
@@ -121,7 +121,8 @@ surv_models <- inner_join(surv_models, null_aic)
 surv_models$var <- factor(surv_models$var,
                           levels = c("rain_total_mm", "rain_anomaly_mean",
                                      "wettest_anomaly", "driest_anomaly",
-                                     "shannon_rain", "spei_mean", "tmax_anomaly_mean",
+                                     "shannon_rain", "spei_01_mean", "spei_03_mean",
+                                     "spei_06_mean", "tmax_anomaly_mean",
                                      "tmax_detrended_mean", "hottest_tmax_anomaly",
                                      "tmin_anomaly_mean", "tmin_detrended_mean",
                                      "coldest_tmin_anomaly", "amo_mean", "nao_mean",
@@ -137,7 +138,8 @@ surv_models$scenario <- factor(surv_models$scenario,
 
 surv_models %>%
   group_by(site, age_class) %>%
-  filter(scenario == "Lag 1") %>%
+  filter(scenario != "Lag 0 + Lag 1") %>%
+  # filter(str_detect(var, "spei")) %>%
   top_n(1, -rank) %>%
   mutate(evidence_vs_null = weight / null_weight,
          delta_AICc_vs_null = AICc - null_AICc,
@@ -147,20 +149,49 @@ surv_models %>%
 
 best_surv_scenarios <- surv_models %>%
   group_by(site, age_class, var) %>%
+  filter(scenario != "Lag 0 + Lag 1") %>%
   top_n(1, -rank) %>%
   ungroup() %>%
   group_by(site, age_class) %>%
-  top_n(20, -rank) %>%
+  top_n(1, -rank) %>%
   mutate(evidence_vs_null = weight / null_weight,
          delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance)) %>%
   select(-null_AICc, -null_delta, -null_weight, -null_deviance)
 
 
+# All lag scenarios
+
+temp <- surv_models %>%
+  filter(var %ni% c("null", "spei_03_mean", "spei_06_mean"))
+
+lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
+              abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
+
+ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+                       name = expression(paste(Delta, "AICc relative to Null Model")),
+                       trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
+  facet_wrap(site ~ age_class, nrow = 7) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
+
+ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
+       width = 16, height = 10, units = "in")
+
+
 # Plot Deviance
 
 temp <- surv_models %>%
-  filter(var != "null" & scenario == "Lag 1") %>%
+  filter(var %ni% c("null", "spei_03_mean", "spei_06_mean")) %>%
   mutate(evidence_vs_null = weight / null_weight,
          delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
@@ -168,13 +199,13 @@ temp <- surv_models %>%
 lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
               abs(max(temp$D, na.rm = TRUE))))
 
-ggplot(temp, aes(x = var, y = site, fill = D)) +
+ggplot(temp, aes(x = var, y = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdGy")),
+  scale_fill_gradientn(colours = rev(brewer.pal(9, "RdGy")),
                        name = "Proportional Reduction in Deviance",
-                       limits = c(-lim, lim),
-                       trans = sqrt_sign_trans()) +
-  facet_wrap(~ age_class) +
+                       # trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
+  facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
@@ -183,34 +214,37 @@ ggplot(temp, aes(x = var, y = site, fill = D)) +
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "\nClimate Variable", y = "Population\n")
 
+ggsave("plots/models/Survival_AllLagScenarios_Deviance.pdf",
+       width = 16, height = 10, units = "in")
+
 
 # Plot delta AICc
 
-temp <- surv_models %>%
-  filter(scenario == "Lag 1" & var %ni% c("null"))
-
-lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
-              abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
-
-ggplot(temp, aes(x = var, y = age_class, fill = (AICc - null_AICc))) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = expression(paste(Delta, "AICc relative to Null Model")),
-                       limits = c(-lim, lim),
-                       trans = sqrt_sign_trans()) +
-  facet_grid(site ~ .) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nClimate Variable", y = "Population\n",
-       title = "Lag-1 Models of Stage-specific Survival\n")
-
-ggsave("plots/models/Survival_Lag1_AIC.pdf",
-       width = 8, height = 11, units = "in")
+# temp <- surv_models %>%
+#   filter(scenario == "Lag 1" & var %ni% c("null"))
+#
+# lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
+#               abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
+#
+# ggplot(temp, aes(x = var, y = age_class, fill = (AICc - null_AICc))) +
+#   geom_tile(size = 0.1, color = "black") +
+#   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+#                        name = expression(paste(Delta, "AICc relative to Null Model")),
+#                        limits = c(-lim, lim),
+#                        trans = sqrt_sign_trans()) +
+#   facet_grid(site ~ .) +
+#   theme_bw() +
+#   theme(strip.background = element_blank(),
+#         legend.position = "bottom",
+#         legend.key.width = unit(2, "cm"),
+#         legend.key.height = unit(0.2, "cm"),
+#         panel.grid = element_blank(),
+#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+#   labs(x = "\nClimate Variable", y = "Population\n",
+#        title = "Lag-1 Models of Stage-specific Survival\n")
+#
+# ggsave("plots/models/Survival_Lag1_AIC.pdf",
+#        width = 8, height = 11, units = "in")
 
 
 # All CIs / SEs
@@ -229,7 +263,7 @@ temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
 temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
 
 temp_lag0 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag0)[20:22] <- c("se", "lower_ci", "upper_ci")
+names(temp_lag0)[(ncol(temp_lag0) - 2):ncol(temp_lag0)] <- c("se", "lower_ci", "upper_ci")
 
 temp <- mod4 %>%
   filter(scenario == "mod_1" & var %ni% c("null"))
@@ -245,7 +279,7 @@ temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
 temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
 
 temp_lag1 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag1)[20:22] <- c("se", "lower_ci", "upper_ci")
+names(temp_lag1)[(ncol(temp_lag1) - 2):ncol(temp_lag1)] <- c("se", "lower_ci", "upper_ci")
 
 temp <- bind_rows(temp_lag0, temp_lag1)
 
@@ -260,28 +294,6 @@ t$lag <- mapvalues(t$lag,
 
 lim <-  max(c(abs(min(t$null_AICc - t$AICc, na.rm = TRUE)),
               abs(max(t$null_AICc - t$AICc, na.rm = TRUE))))
-
-# Lag 1 only
-ggplot(filter(t, lag == "Lag 1"),
-       aes(x = estimate, y = var, color = (AICc - null_AICc))) +
-  geom_point(size = 3) +
-  geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
-                 height = 0.3, size = 0.75) +
-  scale_color_gradientn(colours = brewer.pal(11, "RdGy"),
-                        name = expression(paste(Delta, "AICc relative to Null Model")),
-                        limits = c(-lim, lim),
-                        trans = sqrt_sign_trans()) +
-  geom_vline(xintercept = 0, lty = 2) +
-  facet_grid(age_class ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        # panel.grid.y = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  labs(x = "\nCoefficient Estimate", y = "Population\n")
-
 
 
 # Plot coefficients separately for each population
@@ -328,7 +340,7 @@ for(i in 1:length(levels(t$site))){
 
   current_site = levels(t$site)[i]
 
-  temp4 <- filter(t, site == current_site)
+  temp4 <- filter(t, site == current_site & var %ni% c("spei_03_mean", "spei_06_mean"))
 
   lim <-  max(c(abs(min(temp4$null_AICc - temp4$AICc, na.rm = TRUE)),
                 abs(max(temp4$null_AICc - temp4$AICc, na.rm = TRUE))))
@@ -361,97 +373,6 @@ for(i in 1:length(levels(t$site))){
 }
 
 
-# Coefficient estimates for SPEI
-
-# temp <- surv_models %>%
-#   filter(scenario == "Lag 1" & var == "spei_mean")
-#
-# temp1 <- mod4 %>%
-#   filter(var == "spei_mean" & scenario == "mod_1")
-#
-# # temp1 <- cbind(temp1[, 1:2], ldply(temp1$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
-# temp1 <- cbind(temp1[, 1:2],
-#                suppressWarnings(ldply(temp1$model,
-#                      .fun = function(x) confint(x, method = "boot", boot.type = "perc")["lag1", ])))
-#
-# temp <- inner_join(temp, temp1)
-# names(temp)[20:21] <- c("lower_ci", "upper_ci")
-#
-# lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
-#               abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
-#
-# ggplot(temp, aes(x = lag1, y = site, color = (AICc - null_AICc))) +
-#   geom_point(size = 4) +
-#   geom_errorbarh(aes(xmin = lower_ci, xmax = upper_ci),
-#                  height = 0.2, size = 0.75) +
-#   scale_color_gradientn(colours = brewer.pal(11, "RdGy"),
-#                        name = expression(paste(Delta, "AICc relative to Null Model")),
-#                        limits = c(-lim, lim),
-#                        trans = sqrt_sign_trans()) +
-#   geom_vline(xintercept = 0, lty = 2) +
-#   facet_wrap(~age_class) +
-#   theme_bw() +
-#   theme(strip.background = element_blank(),
-#         legend.position = "bottom",
-#         legend.key.width = unit(2, "cm"),
-#         legend.key.height = unit(0.2, "cm"),
-#         # panel.grid.y = element_blank(),
-#         axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-#   labs(x = "\nCoefficient Estimate", y = "Population\n")
-
-
-# All lag scenarios
-
-temp <- surv_models %>%
-  filter(var %ni% c("null"))
-
-lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
-              abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
-
-ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = expression(paste(Delta, "AICc relative to Null Model")),
-                       limits = c(-lim, lim),
-                       trans = sqrt_sign_trans()) +
-  facet_wrap(site ~ age_class, nrow = 7) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
-
-ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
-       width = 16, height = 10, units = "in")
-
-
-# Plot evidence ratios
-
-# temp <- surv_models %>%
-#   filter(scenario == "Lag 1" & var %ni% c("null"))
-#
-# lim <-  max(c(abs(min(temp$weight / temp$null_weight, na.rm = TRUE)),
-#               abs(max(temp$weight / temp$null_weight, na.rm = TRUE))))
-#
-# ggplot(temp, aes(x = var, y = site, fill = log((weight / null_weight)))) +
-#   geom_tile(size = 0.1, color = "black") +
-#   scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
-#                        name = "Log Evidence Ratio") +
-#   facet_wrap(~age_class) +
-#   theme_bw() +
-#   theme(strip.background = element_blank(),
-#         legend.position = "bottom",
-#         legend.key.width = unit(2, "cm"),
-#         legend.key.height = unit(0.2, "cm"),
-#         panel.grid = element_blank(),
-#         axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-#   labs(x = "\nClimate Variable", y = "Population\n")
-
-
-
 
 
 # ---- fertility ----------------------------------------------------------
@@ -467,7 +388,7 @@ fert_trials <- fert_trials %>%
 temp <- climate_predictors %>%
   select(-n_months) %>%
   ungroup() %>%
-  mutate_each(funs(scale), 3:27) %>%
+  mutate_each(funs(scale), -site, -year_of) %>%
   group_by(site) %>%
   gather(var, lag0, -site, -year_of) %>%
   group_by(site, var) %>%
@@ -518,7 +439,7 @@ mod5[mod5$scenario == "mod_null", ]$var <- "null"
 
 fert_mod_sel <- mod5 %>%
   group_by(site, age_class) %>%
-  do(m_table = model.sel(.$model),
+  do(m_table = model.sel(.$model, extra = c("BIC", "DIC")),
      vars = data.frame(var = .$var),
      scenarios = data.frame(scenario = .$scenario),
      deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
@@ -546,7 +467,7 @@ for(i in 1:nrow(fert_mod_sel)){
   temp1$rank <- as.numeric(rownames(temp1))
 
   temp1 <- temp1 %>%
-    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:9)
+    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:10)
 
   temp[[i]] <- temp1
 
@@ -577,7 +498,8 @@ fert_models <- inner_join(fert_models, null_aic)
 fert_models$var <- factor(fert_models$var,
                           levels = c("rain_total_mm", "rain_anomaly_mean",
                                      "wettest_anomaly", "driest_anomaly",
-                                     "shannon_rain", "spei_mean", "tmax_anomaly_mean",
+                                     "shannon_rain", "spei_01_mean", "spei_03_mean",
+                                     "spei_06_mean", "tmax_anomaly_mean",
                                      "tmax_detrended_mean", "hottest_tmax_anomaly",
                                      "tmin_anomaly_mean", "tmin_detrended_mean",
                                      "coldest_tmin_anomaly", "amo_mean", "nao_mean",
@@ -606,7 +528,7 @@ fert_models %>%
   top_n(1, -rank) %>%
   ungroup() %>%
   group_by(site, age_class) %>%
-  top_n(1, -rank) %>%
+  top_n(20, -rank) %>%
   mutate(evidence_vs_null = weight / null_weight,
          delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance)) %>%
@@ -617,12 +539,14 @@ fert_models %>%
 # Plot
 
 temp <- fert_models %>%
-  filter(var %ni% c("null"))
+  filter(var %ni% c("null", "spei_03_mean", "spei_06_mean")) %>%
+  mutate(D = 1 - (deviance / null_deviance))
 
 lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
               abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
 
 ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
+# ggplot(temp, aes(x = var, y = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
@@ -639,6 +563,34 @@ ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
   labs(x = "\nClimate Variable", y = "Lag Scenario\n")
 
 ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
+       width = 8, height = 12, units = "in")
+
+# Deviance
+
+temp <- fert_models %>%
+  filter(var %ni% c("null", "spei_03_mean", "spei_06_mean")) %>%
+  mutate(D = 1 - (deviance / null_deviance))
+
+lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
+              abs(max(temp$D, na.rm = TRUE))))
+
+ggplot(temp, aes(x = var, y = scenario, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = rev(brewer.pal(9, "RdGy")),
+                       name = expression(paste(Delta, "Proportional Reduction in Deviance")),
+                       # trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
+  facet_wrap(site ~ age_class, nrow = 7) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
+
+ggsave("plots/models/Fertility_AllLagScenarios_Deviance.pdf",
        width = 8, height = 12, units = "in")
 
 
@@ -690,7 +642,7 @@ for(i in 1:length(levels(t$site))){
 
   current_site = levels(t$site)[i]
 
-  temp4 <- filter(t, site == current_site)
+  temp4 <- filter(t, site == current_site & var %ni% c("spei_03_mean", "spei_06_mean"))
 
   lim <-  max(c(abs(min(temp4$null_AICc - temp4$AICc, na.rm = TRUE)),
                 abs(max(temp4$null_AICc - temp4$AICc, na.rm = TRUE))))

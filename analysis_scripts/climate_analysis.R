@@ -551,54 +551,69 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
 # 0.5 degree latitude x 0.5 degree longitude global grid
 # http://sac.csic.es/spei/database.html
 
-# Try 6-month drought condition data
-t <- nc_open("data/grids/SPEI/SPEI_06.nc")
+# Use 1, 3, and 6 month drought condition data
+f <- c("01", "03", "06")
 
-lon <- ncvar_get(t, varid = "lon")
-lat <- ncvar_get(t, varid = "lat")
-time <- ncvar_get(t, varid = "time")
+spei <- NULL
 
-inds_lon <- (1:dim(lon))
-inds_lat <- (1:dim(lat))
+for(j in 1:length(f)){
+  t <- nc_open(paste("data/grids/SPEI/SPEI_", f[j], ".nc", sep = ""))
 
-site_coords <- read.csv("data/site_coords.csv")
-names(site_coords)[2] <- "long_name"
-site_list <- c("rppn-fma", "amboseli", "kakamega", "gombe", "karisoke", "beza", "ssr")
-site_coords$site <- site_list
-site_coords$site <- factor(site_coords$site, levels = site_list)
-site_coords <- mutate(site_coords, lat_ind = 0, lon_ind = 0)
+  lon <- ncvar_get(t, varid = "lon")
+  lat <- ncvar_get(t, varid = "lat")
+  time <- ncvar_get(t, varid = "time")
 
-for(i in 1:nrow(site_coords)){
-  site_coords[i, ]$lat_ind <- which.min(abs(site_coords[i, ]$Lat - lat))
-  site_coords[i, ]$lon_ind <- which.min(abs(site_coords[i, ]$Long - lon))
+  inds_lon <- (1:dim(lon))
+  inds_lat <- (1:dim(lat))
+
+  site_coords <- read.csv("data/site_coords.csv")
+  names(site_coords)[2] <- "long_name"
+  site_list <- c("rppn-fma", "amboseli", "kakamega", "gombe", "karisoke", "beza", "ssr")
+  site_coords$site <- site_list
+  site_coords$site <- factor(site_coords$site, levels = site_list)
+  site_coords <- mutate(site_coords, lat_ind = 0, lon_ind = 0)
+
+  for(i in 1:nrow(site_coords)){
+    site_coords[i, ]$lat_ind <- which.min(abs(site_coords[i, ]$Lat - lat))
+    site_coords[i, ]$lon_ind <- which.min(abs(site_coords[i, ]$Long - lon))
+  }
+
+  spei_sites_f <- list()
+
+  for(i in 1:nrow(site_coords)){
+    temp <- ncvar_get(t, varid = "spei",
+                      start = c(site_coords[i, ]$lon_ind,
+                                site_coords[i, ]$lat_ind,
+                                1),
+                      count = c(1, 1, -1))
+    spei_sites_f[[i]] <- tbl_df(data.frame(d = time,
+                                           spei = temp,
+                                           site = site_coords[i, ]$site))
+  }
+
+  spei_sites_f <- bind_rows(spei_sites_f)
+
+  spei_temp <- spei_sites_f %>%
+    mutate(date_of = ymd_hms("1900-01-01 00:00:00") + days(d),
+           year_of = year(date_of),
+           month_of = month(date_of),
+           spei = as.numeric(spei)) %>%
+    select(site, date_of, year_of, month_of, spei)
+
+  spei_temp$month_of <- factor(spei_temp$month_of, labels = month.abb)
+  spei_temp$period <- as.numeric(f[j])
+
+  spei[[j]] <- spei_temp
+
 }
 
-spei_sites_f <- list()
+spei <- bind_rows(spei)
+spei <- spread(spei, period, spei)
+names(spei)[5:(5+length(f) - 1)] <- paste("spei", f, sep = "_")
 
-for(i in 1:nrow(site_coords)){
-  temp <- ncvar_get(t, varid = "spei",
-                    start = c(site_coords[i, ]$lon_ind,
-                              site_coords[i, ]$lat_ind,
-                              1),
-                    count = c(1, 1, -1))
-  spei_sites_f[[i]] <- tbl_df(data.frame(d = time,
-                                       spei = temp,
-                                       site = site_coords[i, ]$site))
-}
-
-spei_sites_f <- bind_rows(spei_sites_f)
-
-spei <- spei_sites_f %>%
-  mutate(date_of = ymd_hms("1900-01-01 00:00:00") + days(d),
-         year_of = year(date_of),
-         month_of = month(date_of),
-         spei = as.numeric(spei)) %>%
-  select(site, date_of, year_of, month_of, spei)
-
-spei$month_of <- factor(spei$month_of, labels = month.abb)
 
 # Plot data
-ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei)) +
+ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei_03)) +
   geom_tile() +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = brewer.pal(11, "PuOr"), name = "SPEI") +
@@ -613,7 +628,7 @@ ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei)) +
   scale_y_continuous(limits = c(1945, 2015), breaks = seq(1945, 2015, by = 5)) +
   labs(x = "Month", y = "Year", title = "SPEI Drought Index\n")
 
-rm(list = c("t", "lon", "lat", "time", "spei_sites_f"))
+rm(list = c("t", "lon", "lat", "time", "spei_sites_f", "spei_temp"))
 
 
 # ==== RAIN_GAUGE_DATA=====================================================
@@ -1298,7 +1313,7 @@ temp3 <- t_sites_df %>%
   select(site, date_of, contains("detrended"))
 
 temp4 <- spei %>%
-  select(site, year_of, month_of, spei)
+  select(-date_of)
 
 climates <- temp1 %>%
   mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"))) %>%
@@ -1306,11 +1321,11 @@ climates <- temp1 %>%
   inner_join(temp3) %>%
   left_join(temp4) %>%
   select(site, date_of, year_of, month_of, contains("rain"),
-         contains("tmin"), contains("tavg"), contains("tmax"), spei)
+         contains("tmin"), contains("tavg"), contains("tmax"), contains("spei"))
 
 climates_tidy <- climates %>%
   select(-rain_data_source) %>%
-  gather(var, value, rain_monthly_mm:spei)
+  gather(var, value, 5:ncol(.))
 
 rm(temp1)
 rm(temp2)
