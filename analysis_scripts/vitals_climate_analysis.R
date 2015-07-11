@@ -126,8 +126,8 @@ surv_models$var <- factor(surv_models$var,
                                      "tmax_detrended_mean", "hottest_tmax_anomaly",
                                      "tmin_anomaly_mean", "tmin_detrended_mean",
                                      "coldest_tmin_anomaly", "amo_mean", "nao_mean",
-                                     "oni_mean", "pdo_mean", "dmi_mean", "sam_mean",
-                                     "ao_mean", "null"))
+                                     "oni_mean", "soi_mean", "pdo_mean", "dmi_mean",
+                                     "sam_mean", "ao_mean", "null"))
 
 surv_models$scenario <- mapvalues(surv_models$scenario,
                                   from = c("mod_0", "mod_1", "mod_0_1"),
@@ -201,10 +201,12 @@ lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
 
 ggplot(temp, aes(x = var, y = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(brewer.pal(9, "RdGy")),
-                       name = "Proportional Reduction in Deviance",
-                       # trans = sqrt_sign_trans(),
-                       limits = c(-lim, lim)) +
+#   scale_fill_gradientn(colours = rev(brewer.pal(9, "RdGy")),
+#                        name = "Proportional Reduction in Deviance",
+#                        # trans = sqrt_sign_trans(),
+#                        limits = c(-lim, lim)) +
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "YlGnBu")),
+                       name = "Proportional Reduction in Deviance") +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -503,8 +505,8 @@ fert_models$var <- factor(fert_models$var,
                                      "tmax_detrended_mean", "hottest_tmax_anomaly",
                                      "tmin_anomaly_mean", "tmin_detrended_mean",
                                      "coldest_tmin_anomaly", "amo_mean", "nao_mean",
-                                     "oni_mean", "pdo_mean", "dmi_mean", "sam_mean",
-                                     "ao_mean", "null"))
+                                     "oni_mean", "soi_mean", "pdo_mean", "dmi_mean",
+                                     "sam_mean", "ao_mean", "null"))
 
 fert_models$scenario <- mapvalues(fert_models$scenario,
                                   from = c("mod_0", "mod_1", "mod_0_1"),
@@ -575,10 +577,12 @@ lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
 
 ggplot(temp, aes(x = var, y = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(brewer.pal(9, "RdGy")),
-                       name = expression(paste(Delta, "Proportional Reduction in Deviance")),
-                       # trans = sqrt_sign_trans(),
-                       limits = c(-lim, lim)) +
+#   scale_fill_gradientn(colours = rev(brewer.pal(9, "RdGy")),
+#                        name = expression(paste(Delta, "Proportional Reduction in Deviance")),
+#                        # trans = sqrt_sign_trans(),
+#                        limits = c(-lim, lim)) +
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "YlGnBu")),
+                       name = "Proportional Reduction in Deviance") +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -608,7 +612,7 @@ temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
 temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
 
 temp_lag0 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag0)[20:22] <- c("se", "lower_ci", "upper_ci")
+names(temp_lag0)[(ncol(temp_lag0) - 2):ncol(temp_lag0)] <- c("se", "lower_ci", "upper_ci")
 
 temp <- mod5 %>%
   filter(scenario == "mod_1" & var %ni% c("null"))
@@ -624,7 +628,7 @@ temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
 temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
 
 temp_lag1 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag1)[20:22] <- c("se", "lower_ci", "upper_ci")
+names(temp_lag1)[(ncol(temp_lag1) - 2):ncol(temp_lag1)] <- c("se", "lower_ci", "upper_ci")
 
 temp <- bind_rows(temp_lag0, temp_lag1)
 

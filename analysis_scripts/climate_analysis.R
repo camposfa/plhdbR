@@ -613,7 +613,7 @@ names(spei)[5:(5+length(f) - 1)] <- paste("spei", f, sep = "_")
 
 
 # Plot data
-ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei_03)) +
+ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei_01)) +
   geom_tile() +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = brewer.pal(11, "PuOr"), name = "SPEI") +
@@ -1196,14 +1196,15 @@ write.csv(rain_selected, "data/rain_csv/rain_selected.csv", row.names = FALSE)
 
 # ---- load_indices -------------------------------------------------------
 
-ind <- load_climate_index(c("pdo", "dmi", "oni", "amo", "nao", "sam", "ao"))
+ind <- load_climate_index(c("pdo", "dmi", "oni", "soi", "amo",
+                            "nao", "sam", "ao"))
 
 ind_df <- bind_rows(ind)
 
 ind_df <- filter(ind_df, date_of > ymd("1945-01-01"))
 
-ind_df$index <- factor(ind_df$index, levels = c("amo", "nao", "oni", "pdo",
-                                                "dmi", "sam", "ao"))
+ind_df$index <- factor(ind_df$index, levels = c("amo", "nao", "oni", "soi",
+                                                "pdo", "dmi", "sam", "ao"))
 
 ind_neg <- ind_df
 ind_neg[ind_neg$value > 0, ]$value <- 0
