@@ -205,7 +205,7 @@ ggplot(temp, aes(x = var, y = scenario, fill = D)) +
 #                        name = "Proportional Reduction in Deviance",
 #                        # trans = sqrt_sign_trans(),
 #                        limits = c(-lim, lim)) +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "YlGnBu")),
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Reds")),
                        name = "Proportional Reduction in Deviance") +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
@@ -581,7 +581,7 @@ ggplot(temp, aes(x = var, y = scenario, fill = D)) +
 #                        name = expression(paste(Delta, "Proportional Reduction in Deviance")),
 #                        # trans = sqrt_sign_trans(),
 #                        limits = c(-lim, lim)) +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "YlGnBu")),
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Reds")),
                        name = "Proportional Reduction in Deviance") +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
