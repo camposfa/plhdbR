@@ -626,7 +626,7 @@ ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei_01)) +
         legend.key.width = unit(4, "cm"),
         panel.margin = unit(1, "lines")) +
   scale_y_continuous(limits = c(1945, 2015), breaks = seq(1945, 2015, by = 5)) +
-  labs(x = "Month", y = "Year", title = "SPEI Drought Index\n")
+  labs(x = "Month", y = "Year", title = "1-Month SPEI Drought Index\n")
 
 rm(list = c("t", "lon", "lat", "time", "spei_sites_f", "spei_temp"))
 
