@@ -1,8 +1,10 @@
+# devtools::install_github("jjvanderwal/climates")
+
 Sys.setenv(TZ = 'UTC')
-list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4", "lubridate",
-                         "ggplot2", "RColorBrewer", "grid", "stringr", "scales",
-                         "tidyr", "grid", "zoo", "dplyr", "MuMIn", "plhdbR",
-                         "vegan", "lme4", "broom")
+list.of.packages <- list("climates", "Hmisc", "plyr", "reshape2", "ncdf4",
+                         "lubridate", "ggplot2", "RColorBrewer", "grid",
+                         "stringr", "scales", "tidyr", "grid", "zoo",
+                         "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
