@@ -10,7 +10,7 @@ mon_extremes <- function(df){
   temp <- data.frame(
     warmest_month = df[which(df$tmax_monthly ==
                                max(df$tmax_monthly)), ]$month_of,
-    coldest_month =  df[which(df$tmin_monthly ==
+    coldest_month = df[which(df$tmin_monthly ==
                                 min(df$tmin_monthly)), ]$month_of,
     wettest_month = df[which(df$rain_monthly_mm ==
                                max(df$rain_monthly_mm)), ]$month_of,
@@ -75,11 +75,15 @@ clim_extremes <- clim_extremes[, -1]
 source('analysis_scripts/bioclim.R')
 
 # Bioclim
+
 bioclim_df <- climates %>%
   inner_join(select(ann_total, site, year_of, n_months)) %>%
-  group_by(site, year_of) %>%
-  select(month_of, tmin_monthly, tmax_monthly, rain_monthly_mm, tavg_monthly) %>%
+  group_by(site) %>%
+  select(year_of, month_of, tmin_monthly, tmax_monthly, rain_monthly_mm, tavg_monthly) %>%
   do(get_bioclim_annual(., clim_extremes))
+
+bioclim_df <- bioclim_df %>%
+  gather(variable, value, -site, -year_of)
 
 bioclim_df$variable <- mapvalues(bioclim_df$variable,
                            from = c("bioclim_1", "bioclim_2", "bioclim_3",
@@ -100,7 +104,7 @@ bioclim_df$variable <- mapvalues(bioclim_df$variable,
                                   "v17_precip_driest_q", "v18_precip_warmest_q",
                                   "v19_precip_coldest_q"))
 
-temp <- spread(bioclim_df, variable, value)
+bioclim_df <- spread(bioclim_df, variable, value)
 
 ggplot() +
   geom_tile(data = temp,
@@ -128,7 +132,51 @@ ggplot() +
 
 indclim_df <- ind_df %>%
   mutate(year_of = year(date_of),
-         month_of = month(date_of)) %>%
-  group_by(index, year_of) %>%
+         month_of = factor(month.abb[month(date_of)], levels = month.abb)) %>%
+  group_by(index) %>%
   filter(year_of < 2015) %>%
-  do(get_indclim(., tmin, tmax, prec, tavg))
+  do(get_indclim(., clim_extremes))
+
+indclim_df <- indclim_df %>%
+  gather(var, value, -index, -site, -year_of)
+
+indclim_df$var <- mapvalues(indclim_df$var,
+                                 from = c("indclim_1", "indclim_2", "indclim_3",
+                                          "indclim_4", "indclim_5", "indclim_6",
+                                          "indclim_7", "indclim_8", "indclim_9"),
+                                 to = c("v01_annual_mean", "v02_seasonality",
+                                        "v03_max", "v04_min", "v05_annual_range",
+                                        "v06_mean_warmest_q", "v07_mean_coldest_q",
+                                        "v08_mean_wettest_q", "v09_mean_driest_q"))
+
+indclim_df <- unite(indclim_df, variable, index, var)
+
+indclim_df <- spread(indclim_df, variable, value)
+
+
+
+# spei_clim ---------------------------------------------------------------
+
+speiclim_df <- spei %>%
+  gather(period, value, -c(1:4)) %>%
+  group_by(site, period) %>%
+  filter(year_of < 2015) %>%
+  do(get_speiclim(., clim_extremes))
+
+speiclim_df <- speiclim_df %>%
+  gather(var, value, -period, -site, -year_of)
+
+speiclim_df$var <- mapvalues(speiclim_df$var,
+                            from = c("indclim_1", "indclim_2", "indclim_3",
+                                     "indclim_4", "indclim_5", "indclim_6",
+                                     "indclim_7", "indclim_8", "indclim_9"),
+                            to = c("v01_annual_mean", "v02_seasonality",
+                                   "v03_max", "v04_min", "v05_annual_range",
+                                   "v06_mean_warmest_q", "v07_mean_coldest_q",
+                                   "v08_mean_wettest_q", "v09_mean_driest_q"))
+
+speiclim_df <- unite(speiclim_df, variable, period, var)
+
+speiclim_df <- spread(speiclim_df, variable, value)
+
+

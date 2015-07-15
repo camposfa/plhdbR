@@ -44,8 +44,8 @@ mod3 <- mod_df %>%
 
 mod4 <- NULL
 k <- 1
-for(i in 1:nrow(mod3)){
-  for(j in 4:ncol(mod3)){
+for (i in 1:nrow(mod3)) {
+  for (j in 4:ncol(mod3)) {
     temp <- select(mod3[i, ], 1:3, j)
     temp$scenario <- names(temp)[4]
     names(temp)[4] <- "model"
@@ -70,7 +70,7 @@ mod_sel <- mod4 %>%
 
 temp <- NULL
 
-for(i in 1:nrow(mod_sel)){
+for (i in 1:nrow(mod_sel)) {
   m_table <- data.frame(mod_sel[i, ]$m_table[[1]])
   m_table$num <- rownames(m_table)
 
@@ -106,7 +106,7 @@ temp <- mod4 %>%
   summarise(intercept = lapply(lapply(model, summary), coef)[[1]][, "Estimate"]) %>%
   mutate(var = "null")
 
-for(i in 1:length(levels(surv_models$site))){
+for (i in 1:length(levels(surv_models$site))) {
   current_site <- levels(surv_models$site)[i]
   surv_models[surv_models$site == current_site & surv_models$var == "null", ]$X.Intercept. <- temp[temp$site == current_site, ]$intercept
 }
