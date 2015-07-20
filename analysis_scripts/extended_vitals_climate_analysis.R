@@ -45,6 +45,97 @@ mod_df <- mod_df %>%
                                       "local"))))
 
 
+# NULL MODELS
+n <- mod_df %>%
+  ungroup() %>%
+  filter(scale == "local" & var == levels(mod_df$var)[1]) %>%
+  arrange(site, age_class, var, year_of)
+
+n$var <- "null"
+
+n_models <- n %>%
+  ungroup() %>%
+  group_by(site, age_class, var) %>%
+  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"))
+
+n_models_sel <- NULL
+k <- 1
+for (i in 1:nrow(n_models)) {
+  for (j in 4:ncol(n_models)) {
+    temp <- select(n_models[i, ], 1:3, j)
+    temp$scenario <- names(temp)[4]
+    names(temp)[4] <- "model"
+    n_models_sel[[k]] <- temp
+    k <- k + 1
+  }
+}
+
+n_models_sel <- bind_rows(n_models_sel)
+
+var_levels <- c(levels(factor(n_models_sel$var)))
+n_models_sel$var <- factor(n_models_sel$var, levels = var_levels)
+
+n_mod_sel <- n_models_sel %>%
+  group_by(site, age_class) %>%
+  do(m_table = model.sel(.$model, extra = c("DIC", "AIC")),
+     vars = data.frame(var = .$var),
+     scenarios = data.frame(scenario = .$scenario),
+     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
+
+
+
+# Since MuMIn fails to get intercepts for null models
+temp <- n_models %>%
+  group_by(site, age_class) %>%
+  summarise(X.Intercept. = lapply(lapply(mod_null, summary), coef)[[1]][, "Estimate"]) %>%
+  mutate(var = "null")
+
+for (i in 1:nrow(n_mod_sel)) {
+  n_mod_sel[i, ]$m_table[[1]][, 1] <- temp[i, ]$X.Intercept.
+  names(n_mod_sel[i, ]$m_table[[1]])[1] <- "X.Intercept."
+}
+
+temp <- NULL
+
+for (i in 1:nrow(n_mod_sel)) {
+  m_table <- data.frame(n_mod_sel[i, ]$m_table[[1]])
+  m_table$num <- rownames(m_table)
+
+  vars <- n_mod_sel[i, ]$vars[[1]]
+  vars$num <- rownames(vars)
+
+  scenarios <- n_mod_sel[i, ]$scenarios[[1]]
+  scenarios$num <- rownames(scenarios)
+
+  deviance <- n_mod_sel[i, ]$deviance[[1]]
+  deviance$num <- rownames(deviance)
+
+  temp1 <- suppressMessages(inner_join(m_table, vars))
+  temp1 <- suppressMessages(inner_join(temp1, scenarios))
+  temp1 <- suppressMessages(inner_join(temp1, deviance))
+  temp1$site <- n_mod_sel[i, ]$site
+  temp1$age_class <- n_mod_sel[i, ]$age_class
+  temp1$rank <- as.numeric(rownames(temp1))
+
+  temp1 <- temp1 %>%
+    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:11)
+
+  temp[[i]] <- temp1
+
+}
+
+n_surv_models <- tbl_df(bind_rows(temp))
+
+n_models_sel$scenario <- factor(n_models_sel$scenario)
+
+n_best <- inner_join(n_surv_models, n_models_sel)
+
+rm(list = c("n_models", "n_models_sel", "n_mod_sel", "temp", "n_surv_models",
+            "m_table", "vars", "scenarios", "deviance", "temp1", "n"))
+
+
+
+
 # BEST GLOBAL MODEL
 # Find best model for each global climate oscillation index
 g <- filter(mod_df, scale == "global")
@@ -268,8 +359,66 @@ l_best <- filter(l_surv_models, rank == 1)
 l_models_sel$scenario <- factor(l_models_sel$scenario, levels = levels(l_best$scenario))
 l_best <- inner_join(l_best, l_models_sel)
 
-rm(list = c("l_models", "l_models_sel", "l_mod_sel", "temp", "l_surv_models",
-            "m_table", "vars", "scenarios", "deviance", "temp1", "l"))
+# Plot local variables
+temp <- l_surv_models %>%
+  select(-model_num, -delta, -weight) %>%
+  arrange(site, age_class, AICc)
+
+null_mods <- n_best %>%
+  group_by(site, age_class) %>%
+  filter(var == "null") %>%
+  select(null_AICc = AICc,
+         null_deviance = deviance)
+
+temp <- temp %>%
+  inner_join(null_mods)
+
+temp <- temp %>%
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
+         D = 1 - (deviance / null_deviance))
+
+temp1 <- filter(temp, site == "Muriqui")
+
+ggplot(temp1,
+       aes(x = var, y = scenario, fill = delta_AICc_vs_null)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
+                       name = expression(paste(Delta, "AICc relative to Null Model")),
+                       trans = sqrt_sign_trans()) +
+  facet_wrap(age_class ~ site, nrow = 7, drop = TRUE, scales = "free") +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nScale", y = "Climate Variable\n")
+
+lim <-  max(c(abs(min(temp1$D, na.rm = TRUE)),
+              abs(max(temp1$D, na.rm = TRUE))))
+
+ggplot(temp1,
+       aes(x = var, y = scenario, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdGy")),
+                       name = expression(paste(Delta, "Proportional Reduction in Deviance")),
+                       limits = c(-lim, lim),
+                       trans = sqrt_sign_trans()) +
+  facet_wrap(age_class ~ site, nrow = 7, drop = TRUE, scales = "free") +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nScale", y = "Climate Variable\n")
+
+# rm(list = c("l_models", "l_models_sel", "l_mod_sel", "temp", "l_surv_models",
+#             "m_table", "vars", "scenarios", "deviance", "temp1", "l"))
+
+
 
 
 # BEST DROUGHT MODEL
@@ -354,93 +503,7 @@ rm(list = c("d_models", "d_models_sel", "d_mod_sel", "temp", "d_surv_models",
 
 
 
-# NULL MODELS
-n <- mod_df %>%
-  ungroup() %>%
-  filter(scale == "local" & var == levels(mod_df$var)[1]) %>%
-  arrange(site, age_class, var, year_of)
 
-n$var <- "null"
-
-n_models <- n %>%
-  ungroup() %>%
-  group_by(site, age_class, var) %>%
-  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"))
-
-n_models_sel <- NULL
-k <- 1
-for (i in 1:nrow(n_models)) {
-  for (j in 4:ncol(n_models)) {
-    temp <- select(n_models[i, ], 1:3, j)
-    temp$scenario <- names(temp)[4]
-    names(temp)[4] <- "model"
-    n_models_sel[[k]] <- temp
-    k <- k + 1
-  }
-}
-
-n_models_sel <- bind_rows(n_models_sel)
-
-var_levels <- c(levels(factor(n_models_sel$var)))
-n_models_sel$var <- factor(n_models_sel$var, levels = var_levels)
-
-n_mod_sel <- n_models_sel %>%
-  group_by(site, age_class) %>%
-  do(m_table = model.sel(.$model, extra = c("DIC", "AIC")),
-     vars = data.frame(var = .$var),
-     scenarios = data.frame(scenario = .$scenario),
-     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
-
-
-
-# Since MuMIn fails to get intercepts for null models
-temp <- n_models %>%
-  group_by(site, age_class) %>%
-  summarise(X.Intercept. = lapply(lapply(mod_null, summary), coef)[[1]][, "Estimate"]) %>%
-  mutate(var = "null")
-
-for (i in 1:nrow(n_mod_sel)) {
-  n_mod_sel[i, ]$m_table[[1]][, 1] <- temp[i, ]$X.Intercept.
-  names(n_mod_sel[i, ]$m_table[[1]])[1] <- "X.Intercept."
-}
-
-temp <- NULL
-
-for (i in 1:nrow(n_mod_sel)) {
-  m_table <- data.frame(n_mod_sel[i, ]$m_table[[1]])
-  m_table$num <- rownames(m_table)
-
-  vars <- n_mod_sel[i, ]$vars[[1]]
-  vars$num <- rownames(vars)
-
-  scenarios <- n_mod_sel[i, ]$scenarios[[1]]
-  scenarios$num <- rownames(scenarios)
-
-  deviance <- n_mod_sel[i, ]$deviance[[1]]
-  deviance$num <- rownames(deviance)
-
-  temp1 <- suppressMessages(inner_join(m_table, vars))
-  temp1 <- suppressMessages(inner_join(temp1, scenarios))
-  temp1 <- suppressMessages(inner_join(temp1, deviance))
-  temp1$site <- n_mod_sel[i, ]$site
-  temp1$age_class <- n_mod_sel[i, ]$age_class
-  temp1$rank <- as.numeric(rownames(temp1))
-
-  temp1 <- temp1 %>%
-    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:11)
-
-  temp[[i]] <- temp1
-
-}
-
-n_surv_models <- tbl_df(bind_rows(temp))
-
-n_models_sel$scenario <- factor(n_models_sel$scenario)
-
-n_best <- inner_join(n_surv_models, n_models_sel)
-
-rm(list = c("n_models", "n_models_sel", "n_mod_sel", "temp", "n_surv_models",
-            "m_table", "vars", "scenarios", "deviance", "temp1", "n"))
 
 
 
@@ -496,9 +559,11 @@ temp <- temp %>%
   inner_join(null_aic) %>%
   inner_join(null_deviance)
 
+temp <- temp %>%
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
+         D = 1 - (deviance / null_deviance))
 
-
-ggplot(temp, aes(x = scale, y = var, fill = (AICc - null_AICc))) +
+ggplot(temp, aes(x = scale, y = var, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
@@ -512,9 +577,9 @@ ggplot(temp, aes(x = scale, y = var, fill = (AICc - null_AICc))) +
         legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
+  labs(x = "\nScale", y = "Climate Variable\n")
 
-ggplot(temp, aes(x = scale, y = age_class, fill = (AICc - null_AICc))) +
+ggplot(temp, aes(x = scale, y = age_class, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
@@ -528,6 +593,23 @@ ggplot(temp, aes(x = scale, y = age_class, fill = (AICc - null_AICc))) +
         legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
+  labs(x = "\nScale", y = "Age Class\n")
 
+lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
+                     abs(max(temp$D, na.rm = TRUE))))
 
+ggplot(temp, aes(x = scale, y = age_class, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdGy")),
+                       limits = c(-lim, lim),
+                       trans = sqrt_sign_trans(),
+                       name = "Proportional Reduction in Deviance") +
+  facet_wrap(~site, nrow = 7, drop = TRUE, scales = "free") +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nScale", y = "Age Class\n")
