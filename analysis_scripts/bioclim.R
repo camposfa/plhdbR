@@ -99,9 +99,9 @@ get_speiclim <- function(df, clim_extremes = NULL){
 
 }
 
-# Code written by Jeremy VanDerWal jjvanderwal@gmail.com
+# The function below was written by Jeremy VanDerWal jjvanderwal@gmail.com
 # In defunct "climates" package
-# I replaced annoying "print" command with "message", which can be suppressed
+# I just replaced annoying "print" command with "message", which can be suppressed
 bioclim <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL,
           vois = 1:19, cov = FALSE, t.as.int = TRUE, period = "month",
           annual = FALSE) {
@@ -280,7 +280,20 @@ bioclim <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL,
 }
 
 
-
+# The functions below were modified from code written by Jeremy VanDerWal
+# jjvanderwal@gmail.com
+# In defunct "climates" package
+#
+# The original function takes a series of climate measurements
+# and calculates the 19 Bioclimatic variables based for each location
+# over the entire time period
+#
+# The modified "bioclim_annual" function calculates the 19 variables
+# seperately for each year represented in the data
+#
+# It takes as an argument a data.frame produced by mon_extremes:
+# The normally coldest, warmest, wettest, and driest months and quarters based
+# on long-term data
 bioclim_annual <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL,
                      vois = 1:19, cov = FALSE, t.as.int = TRUE, period = "month",
                      clim = NULL)
