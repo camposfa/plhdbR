@@ -6,7 +6,7 @@ list.of.packages <- list("climates", "Hmisc", "plyr", "reshape2", "ncdf4",
                          "stringr", "scales", "tidyr", "grid", "zoo",
                          "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
-if(length(new.packages)) install.packages(unlist(new.packages))
+if (length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
 
 load(".RData")
@@ -16,11 +16,12 @@ load(".RData")
 # ---- scale_transform_functions ------------------------------------------
 
 cubroot_trans <-  function(){
-  trans_new('cubroot', transform= function(x) x^(1/3), inverse = function(x) x^3 )
+  trans_new('cubroot', transform = function(x) x^(1/3), inverse = function(x) x^3 )
 }
 
 sqrt_sign_trans <-  function(){
-  trans_new('sqrt_sign', transform= function(x) sign(x) * sqrt(abs(x)), inverse = function(x) sign(x) * x^2)
+  trans_new('sqrt_sign', transform = function(x) sign(x) * sqrt(abs(x)),
+            inverse = function(x) sign(x) * x^2)
 }
 
 

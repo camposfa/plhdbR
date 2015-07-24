@@ -6,11 +6,16 @@ m <- stage_specific_survival(lh)
 summary(m)
 
 # Make trials
-surv_trials <- make_survivorship_trials(m)
-surv_trials <- filter(surv_trials, year_of < 2015)
+surv_trials <- m %>%
+  ungroup() %>%
+  filter(year_of < 2015) %>%
+  mutate(successes = round(successes, 0),
+         deaths = round(deaths, 0)) %>%
+  select(site = Study.Id, year_of, age_class, successes, deaths)
+
 
 temp <- climate_predictors %>%
-  select(-n_months) %>%
+  select(-n_months, -matches("tavg"), -matches("monthly")) %>%
   ungroup() %>%
   mutate_each(funs(scale), -site, -year_of) %>%
   group_by(site) %>%
@@ -22,25 +27,23 @@ temp <- climate_predictors %>%
          lag3 = lag(lag0, n = 3))
 
 # Models
-mod_df <- surv_trials %>%
-  rename(site = Study.Id) %>%
+mod_df1 <- surv_trials %>%
   left_join(temp) %>%
   filter(!is.na(lag0))
 
-mod_df$site <- mapvalues(mod_df$site,
-                         from = levels(mod_df$site),
-                         to = c("Muriqui", "Baboon", "Blue Monkey",
-                                "Chimpanzee", "Gorilla", "Sifaka",
-                                "Capuchin"))
+mod_df1$site <- mapvalues(mod_df1$site,
+                          from = levels(mod_df1$site),
+                          to = c("Muriqui", "Baboon", "Blue Monkey",
+                                 "Chimpanzee", "Gorilla", "Sifaka",
+                                 "Capuchin"))
 
-mod3 <- mod_df %>%
+mod3 <- mod_df1 %>%
   ungroup() %>%
-  filter(!str_detect(var, "monthly") & !str_detect(var, "tavg")) %>%
   group_by(site, age_class, var) %>%
-  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0_1 = glmer(fate ~ lag0 + lag1 + (1 | year_of), data = ., family = "binomial"))
+  do(mod_null = glmer(cbind(successes, deaths) ~ 1 + (1 | year_of), data = ., family = "binomial"),
+     mod_0 = glmer(cbind(successes, deaths) ~ lag0 + (1 | year_of), data = ., family = "binomial"),
+     mod_1 = glmer(cbind(successes, deaths) ~ lag1 + (1 | year_of), data = ., family = "binomial"),
+     mod_2 = glmer(cbind(successes, deaths) ~ lag2 + (1 | year_of), data = ., family = "binomial"))
 
 mod4 <- NULL
 k <- 1
@@ -114,7 +117,7 @@ for (i in 1:length(levels(surv_models$site))) {
 null_aic <- surv_models %>%
   filter(var == "null") %>%
   select(site, age_class, null_AICc = AICc, null_delta = delta,
-         null_weight = weight, null_deviance = deviance)
+         null_deviance = deviance)
 
 surv_models <- inner_join(surv_models, null_aic)
 
@@ -130,40 +133,38 @@ surv_models$var <- factor(surv_models$var,
                                      "sam_mean", "ao_mean", "null"))
 
 surv_models$scenario <- mapvalues(surv_models$scenario,
-                                  from = c("mod_0", "mod_1", "mod_0_1"),
-                                  to = c("Lag 0", "Lag 1", "Lag 0 + Lag 1"))
+                                  from = c("mod_0", "mod_1", "mod_2", "mod_null"),
+                                  to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
 
 surv_models$scenario <- factor(surv_models$scenario,
-                               levels = rev(c("Lag 0", "Lag 1", "Lag 0 + Lag 1")))
+                               levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
 
 surv_models %>%
   group_by(site, age_class) %>%
-  filter(scenario != "Lag 0 + Lag 1") %>%
   # filter(str_detect(var, "spei")) %>%
   top_n(1, -rank) %>%
-  mutate(evidence_vs_null = weight / null_weight,
-         delta_AICc_vs_null = AICc - null_AICc,
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_weight, -null_deviance) %>%
+  select(-null_AICc, -null_delta, -null_deviance) %>%
   View()
 
 best_surv_scenarios <- surv_models %>%
   group_by(site, age_class, var) %>%
-  filter(scenario != "Lag 0 + Lag 1") %>%
+  # filter(scenario != "Lag 0 + Lag 1") %>%
   top_n(1, -rank) %>%
   ungroup() %>%
   group_by(site, age_class) %>%
   top_n(1, -rank) %>%
-  mutate(evidence_vs_null = weight / null_weight,
-         delta_AICc_vs_null = AICc - null_AICc,
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_weight, -null_deviance)
+  select(-null_AICc, -null_delta, -null_deviance)
 
 
 # All lag scenarios
 
 temp <- surv_models %>%
-  filter(var %ni% c("null", "spei_03_mean", "spei_06_mean"))
+  # filter(var %ni% c("null", "spei_03_mean", "spei_06_mean"))
+  filter(var %ni% c("null"))
 
 lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
               abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
@@ -172,7 +173,7 @@ ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
-                       trans = sqrt_sign_trans(),
+                       # trans = sqrt_sign_trans(),
                        limits = c(-lim, lim)) +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
@@ -192,8 +193,7 @@ ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
 
 temp <- surv_models %>%
   filter(var %ni% c("null", "spei_03_mean", "spei_06_mean")) %>%
-  mutate(evidence_vs_null = weight / null_weight,
-         delta_AICc_vs_null = AICc - null_AICc,
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
 
 lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
@@ -211,8 +211,8 @@ ggplot(temp, aes(x = var, y = scenario, fill = D)) +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
-        legend.key.width=unit(2, "cm"),
-        legend.key.height=unit(0.2, "cm"),
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(x = "\nClimate Variable", y = "Population\n")
 
@@ -338,11 +338,12 @@ for(i in 1:length(levels(temp$site))){
 
 # Plot both lag scenarios for each site separately
 
-for(i in 1:length(levels(t$site))){
+for (i in 1:length(levels(t$site))) {
 
   current_site = levels(t$site)[i]
 
-  temp4 <- filter(t, site == current_site & var %ni% c("spei_03_mean", "spei_06_mean"))
+  # temp4 <- filter(t, site == current_site & var %ni% c("spei_03_mean", "spei_06_mean"))
+  temp4 <- filter(t, site == current_site)
 
   lim <-  max(c(abs(min(temp4$null_AICc - temp4$AICc, na.rm = TRUE)),
                 abs(max(temp4$null_AICc - temp4$AICc, na.rm = TRUE))))
@@ -383,12 +384,13 @@ for(i in 1:length(levels(t$site))){
 f <- stage_specific_fertility(lh, fert)
 
 # Make trials
-fert_trials <- make_survivorship_trials(f)
-fert_trials <- fert_trials %>%
-  filter(year_of < 2015 & age_class == "adult")
+# fert_trials <- make_survivorship_trials(f)
+fert_trials <- f %>%
+  filter(year_of < 2015 & age_class == "adult") %>%
+  mutate(failures = trials - successes)
 
 temp <- climate_predictors %>%
-  select(-n_months) %>%
+  select(-n_months, -matches("tavg"), -matches("monthly")) %>%
   ungroup() %>%
   mutate_each(funs(scale), -site, -year_of) %>%
   group_by(site) %>%
@@ -415,15 +417,15 @@ mod <- fert_mod_df %>%
   ungroup() %>%
   filter(!str_detect(var, "monthly") & !str_detect(var, "tavg")) %>%
   group_by(site, age_class, var) %>%
-  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0_1 = glmer(fate ~ lag0 + lag1 + (1 | year_of), data = ., family = "binomial"))
+  do(mod_null = glmer(cbind(successes, failures) ~ 1 + (1 | year_of), data = ., family = "binomial"),
+     mod_0 = glmer(cbind(successes, failures) ~ lag0 + (1 | year_of), data = ., family = "binomial"),
+     mod_1 = glmer(cbind(successes, failures) ~ lag1 + (1 | year_of), data = ., family = "binomial"),
+     mod_2 = glmer(cbind(successes, failures) ~ lag2 + (1 | year_of), data = ., family = "binomial"))
 
 mod5 <- NULL
 k <- 1
-for(i in 1:nrow(mod)){
-  for(j in 4:ncol(mod)){
+for (i in 1:nrow(mod)) {
+  for (j in 4:ncol(mod)) {
     temp <- select(mod[i, ], 1:3, j)
     temp$scenario <- names(temp)[4]
     names(temp)[4] <- "model"
@@ -448,7 +450,7 @@ fert_mod_sel <- mod5 %>%
 
 temp <- NULL
 
-for(i in 1:nrow(fert_mod_sel)){
+for (i in 1:nrow(fert_mod_sel)) {
   m_table <- data.frame(fert_mod_sel[i, ]$m_table[[1]])
   m_table$num <- rownames(m_table)
 
@@ -484,7 +486,7 @@ temp <- mod5 %>%
   summarise(intercept = lapply(lapply(model, summary), coef)[[1]][, "Estimate"]) %>%
   mutate(var = "null")
 
-for(i in 1:length(levels(fert_models$site))){
+for (i in 1:length(levels(fert_models$site))) {
   current_site <- levels(fert_models$site)[i]
   fert_models[fert_models$site == current_site & fert_models$var == "null", ]$X.Intercept. <- temp[temp$site == current_site, ]$intercept
 }
@@ -493,7 +495,7 @@ for(i in 1:length(levels(fert_models$site))){
 null_aic <- fert_models %>%
   filter(var == "null") %>%
   select(site, age_class, null_AICc = AICc, null_delta = delta,
-         null_weight = weight, null_deviance = deviance)
+         null_deviance = deviance)
 
 fert_models <- inner_join(fert_models, null_aic)
 
@@ -509,11 +511,11 @@ fert_models$var <- factor(fert_models$var,
                                      "sam_mean", "ao_mean", "null"))
 
 fert_models$scenario <- mapvalues(fert_models$scenario,
-                                  from = c("mod_0", "mod_1", "mod_0_1"),
-                                  to = c("Lag 0", "Lag 1", "Lag 0 + Lag 1"))
+                                  from = c("mod_0", "mod_1", "mod_2", "mod_null"),
+                                  to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
 
 fert_models$scenario <- factor(fert_models$scenario,
-                               levels = rev(c("Lag 0", "Lag 1", "Lag 0 + Lag 1")))
+                               levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
 
 fert_models %>%
   group_by(site, age_class) %>%
@@ -551,7 +553,7 @@ ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
-                       trans = sqrt_sign_trans(),
+                       # trans = sqrt_sign_trans(),
                        limits = c(-lim, lim)) +
   facet_wrap(site ~ age_class, nrow = 7) +
   theme_bw() +
@@ -641,7 +643,7 @@ t$lag <- mapvalues(t$lag,
                    from = c("lag0", "lag1"),
                    to = c("Lag 0", "Lag 1"))
 
-for(i in 1:length(levels(t$site))){
+for (i in 1:length(levels(t$site))) {
 
   current_site = levels(t$site)[i]
 
@@ -696,8 +698,8 @@ mod3 <- mod_df %>%
 
 mod4 <- NULL
 k <- 1
-for(i in 1:nrow(mod3)){
-  for(j in 4:ncol(mod3)){
+for (i in 1:nrow(mod3)) {
+  for (j in 4:ncol(mod3)) {
     temp <- select(mod3[i, ], 1:3, j)
     temp$scenario <- names(temp)[4]
     names(temp)[4] <- "model"
@@ -722,7 +724,7 @@ mod_sel <- mod4 %>%
 
 temp <- NULL
 
-for(i in 1:nrow(mod_sel)){
+for (i in 1:nrow(mod_sel)) {
   m_table <- data.frame(mod_sel[i, ]$m_table[[1]])
   m_table$num <- rownames(m_table)
 
