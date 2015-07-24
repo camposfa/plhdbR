@@ -5,9 +5,18 @@
 m <- stage_specific_survival(lh)
 summary(m)
 
+climate_predictors2 <- bioclim_df %>%
+  left_join(select(ann_div, site, year_of, shannon_rain)) %>%
+  left_join(indclim_df) %>%
+  left_join(speiclim_df)
+
 # Make trials
-surv_trials <- make_survivorship_trials(m)
-surv_trials <- filter(surv_trials, year_of < 2015)
+surv_trials <- m %>%
+  ungroup() %>%
+  filter(year_of < 2015) %>%
+  mutate(successes = round(successes, 0),
+         deaths = round(deaths, 0)) %>%
+  select(site = Study.Id, year_of, age_class, successes, deaths)
 
 temp <- climate_predictors2 %>%
   ungroup() %>%
@@ -27,7 +36,6 @@ temp$site <- factor(temp$site,
 
 # Models
 mod_df <- surv_trials %>%
-  rename(site = Study.Id) %>%
   left_join(temp) %>%
   filter(!is.na(lag0)) %>%
   arrange(site, var, year_of)
@@ -45,6 +53,7 @@ mod_df <- mod_df %>%
                                       "local"))))
 
 
+
 # NULL MODELS
 n <- mod_df %>%
   ungroup() %>%
@@ -56,7 +65,8 @@ n$var <- "null"
 n_models <- n %>%
   ungroup() %>%
   group_by(site, age_class, var) %>%
-  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"))
+  do(mod_null = glmer(cbind(successes, deaths) ~ 1 + (1 | year_of),
+                      data = ., family = "binomial"))
 
 n_models_sel <- NULL
 k <- 1
@@ -130,39 +140,44 @@ n_models_sel$scenario <- factor(n_models_sel$scenario)
 
 n_best <- inner_join(n_surv_models, n_models_sel)
 
-rm(list = c("n_models", "n_models_sel", "n_mod_sel", "temp", "n_surv_models",
-            "m_table", "vars", "scenarios", "deviance", "temp1", "n"))
+# rm(list = c("n_models", "n_models_sel", "n_mod_sel", "temp", "n_surv_models",
+#             "m_table", "vars", "scenarios", "deviance", "temp1", "n"))
 
 
 
 
-# BEST GLOBAL MODEL
+
+# ---- BEST_GLOBAL_MODEL --------------------------------------------------
+
 # Find best model for each global climate oscillation index
 g <- filter(mod_df, scale == "global")
 g <- separate(g, var, c("index", "var"), 4)
 g$index <- substr(g$index, 1, 3)
 
 res <- list()
-c <- 1
+counter <- 1
 
-for (j in levels(factor(g$index))) {
+for (j in levels(factor(g$site))) {
 
-  current_ind <- as.character(j)
+  current_site <- as.character(j)
 
   g_models <- g %>%
-    filter(index == current_ind) %>%
+    filter(site == current_site) %>%
     ungroup() %>%
-    group_by(site, age_class, var) %>%
-    do(mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-       mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-       mod_2 = glmer(fate ~ lag2 + (1 | year_of), data = ., family = "binomial"))
+    group_by(index, age_class, var) %>%
+    do(mod_0 = glmer(cbind(successes, deaths) ~ lag0 + (1 | year_of),
+                     data = ., family = "binomial"),
+       mod_1 = glmer(cbind(successes, deaths) ~ lag1 + (1 | year_of),
+                     data = ., family = "binomial"),
+       mod_2 = glmer(cbind(successes, deaths) ~ lag2 + (1 | year_of),
+                     data = ., family = "binomial"))
 
 
   g_models_sel <- NULL
   k <- 1
   for (i in 1:nrow(g_models)) {
-    for (j in 4:ncol(g_models)) {
-      temp <- select(g_models[i, ], 1:3, j)
+    for (ii in 4:ncol(g_models)) {
+      temp <- select(g_models[i, ], 1:3, ii)
       temp$scenario <- names(temp)[4]
       names(temp)[4] <- "model"
       g_models_sel[[k]] <- temp
@@ -176,7 +191,7 @@ for (j in levels(factor(g$index))) {
   g_models_sel$var <- factor(g_models_sel$var, levels = var_levels)
 
   g_mod_sel <- g_models_sel %>%
-    group_by(site, age_class) %>%
+    group_by(index, age_class) %>%
     do(m_table = model.sel(.$model, extra = c("DIC", "AIC")),
        vars = data.frame(var = .$var),
        scenarios = data.frame(scenario = .$scenario),
@@ -200,12 +215,12 @@ for (j in levels(factor(g$index))) {
     temp1 <- suppressMessages(inner_join(m_table, vars))
     temp1 <- suppressMessages(inner_join(temp1, scenarios))
     temp1 <- suppressMessages(inner_join(temp1, deviance))
-    temp1$site <- g_mod_sel[i, ]$site
+    temp1$index <- g_mod_sel[i, ]$index
     temp1$age_class <- g_mod_sel[i, ]$age_class
     temp1$rank <- as.numeric(rownames(temp1))
 
     temp1 <- temp1 %>%
-      select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:10)
+      select(index, age_class, var, scenario, deviance, rank, model_num = num, 1:10)
 
     temp[[i]] <- temp1
 
@@ -216,13 +231,13 @@ for (j in levels(factor(g$index))) {
   g_best <- filter(g_surv_models, rank == 1)
 
   temp <- suppressMessages(inner_join(g_models_sel,
-                                      select(g_best, site, age_class, var, scenario)))
+                                      select(g_best, index, age_class, var, scenario)))
 
-  temp$index <- current_ind
+  temp$site <- current_site
 
-  res[[c]] <- temp
+  res[[counter]] <- temp
 
-  c <- c + 1
+  counter <- counter + 1
 }
 
 g <- bind_rows(res)
@@ -271,16 +286,62 @@ for (i in 1:nrow(temp)) {
 
 }
 
-g_best <- bind_rows(g_best)
-g_best <- filter(g_best, rank == 1)
+g_rank <- bind_rows(g_best)
+g_best <- filter(g_rank, rank == 1)
 
 # Obtain final set
 g <- rename(g, ind = index)
-g$ind <- factor(g$ind, levels = levels(g_best$ind))
+g$ind <- factor(g$ind, levels = levels(factor(g$ind)))
 g_best <- inner_join(g_best, g)
+g_rank <- inner_join(g_rank, g)
 
-rm(list = c("g_models", "g_models_sel", "g_mod_sel", "temp", "g_surv_models",
-        "m_table", "inds", "vars", "scenarios", "deviance", "temp1", "g"))
+
+# Plot
+temp <- bind_rows(g_rank, n_best)
+
+temp <- temp %>%
+  select(-rank, -model_num, -delta, -weight, -model) %>%
+  arrange(site, age_class, AICc)
+
+null_aic <- temp %>%
+  group_by(site, age_class) %>%
+  filter(var == "null") %>%
+  select(null_AICc = AICc)
+
+null_deviance <- temp %>%
+  group_by(site, age_class) %>%
+  filter(var == "null") %>%
+  select(null_deviance = deviance)
+
+temp <- temp %>%
+  inner_join(null_aic) %>%
+  inner_join(null_deviance) %>%
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
+         D = 1 - (deviance / null_deviance))
+
+lim <-  max(c(abs(min(temp$delta_AICc_vs_null, na.rm = TRUE)),
+              abs(max(temp$delta_AICc_vs_null, na.rm = TRUE))))
+
+ggplot(filter(temp, var != "null"),
+              aes(x = ind, y = age_class, fill = delta_AICc_vs_null)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+                       name = expression(paste(Delta, "AICc relative to Null Model")),
+                       limits = c(-lim, lim),
+                       trans = sqrt_sign_trans()) +
+  facet_wrap(~site, nrow = 1, drop = TRUE, scales = "free") +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nClimate Oscillation Index", y = "Age Class\n")
+
+# rm(list = c("g_models", "g_models_sel", "g_mod_sel", "temp", "g_surv_models",
+#             "m_table", "inds", "vars", "scenarios", "deviance", "temp1", "g"))
+
+
+
 
 
 # BEST LOCAL MODEL
@@ -293,9 +354,12 @@ l <- mod_df %>%
 l_models <- l %>%
   ungroup() %>%
   group_by(site, age_class, var) %>%
-  do(mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_2 = glmer(fate ~ lag2 + (1 | year_of), data = ., family = "binomial"))
+  do(mod_0 = glmer(cbind(successes, deaths) ~ lag0 + (1 | year_of),
+                   data = ., family = "binomial"),
+     mod_1 = glmer(cbind(successes, deaths) ~ lag1 + (1 | year_of),
+                   data = ., family = "binomial"),
+     mod_2 = glmer(cbind(successes, deaths) ~ lag2 + (1 | year_of),
+                   data = ., family = "binomial"))
 
 
 l_models_sel <- NULL
@@ -359,64 +423,50 @@ l_best <- filter(l_surv_models, rank == 1)
 l_models_sel$scenario <- factor(l_models_sel$scenario, levels = levels(l_best$scenario))
 l_best <- inner_join(l_best, l_models_sel)
 
-# Plot local variables
-temp <- l_surv_models %>%
-  select(-model_num, -delta, -weight) %>%
+temp <- bind_rows(l_surv_models, n_best)
+
+temp <- temp %>%
+  select(-rank, -model_num, -delta, -weight, -model) %>%
   arrange(site, age_class, AICc)
 
-null_mods <- n_best %>%
+null_aic <- temp %>%
   group_by(site, age_class) %>%
   filter(var == "null") %>%
-  select(null_AICc = AICc,
-         null_deviance = deviance)
+  select(null_AICc = AICc)
+
+null_deviance <- temp %>%
+  group_by(site, age_class) %>%
+  filter(var == "null") %>%
+  select(null_deviance = deviance)
 
 temp <- temp %>%
-  inner_join(null_mods)
-
-temp <- temp %>%
+  inner_join(null_aic) %>%
+  inner_join(null_deviance) %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
 
 temp1 <- filter(temp, site == "Muriqui")
 
-ggplot(temp1,
+lim <-  max(c(abs(min(temp1$delta_AICc_vs_null, na.rm = TRUE)),
+              abs(max(temp1$delta_AICc_vs_null, na.rm = TRUE))))
+
+ggplot(filter(temp1, var != "null"),
        aes(x = var, y = scenario, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
-                       trans = sqrt_sign_trans()) +
-  facet_wrap(age_class ~ site, nrow = 7, drop = TRUE, scales = "free") +
+                       limits = c(-lim, lim)) +
+  facet_wrap(age_class ~ site, nrow = 3, drop = TRUE, scales = "free") +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nScale", y = "Climate Variable\n")
-
-lim <-  max(c(abs(min(temp1$D, na.rm = TRUE)),
-              abs(max(temp1$D, na.rm = TRUE))))
-
-ggplot(temp1,
-       aes(x = var, y = scenario, fill = D)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdGy")),
-                       name = expression(paste(Delta, "Proportional Reduction in Deviance")),
-                       limits = c(-lim, lim),
-                       trans = sqrt_sign_trans()) +
-  facet_wrap(age_class ~ site, nrow = 7, drop = TRUE, scales = "free") +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nScale", y = "Climate Variable\n")
+  labs(x = "\nLocal Climate Variable", y = "Age Class\n")
 
 # rm(list = c("l_models", "l_models_sel", "l_mod_sel", "temp", "l_surv_models",
 #             "m_table", "vars", "scenarios", "deviance", "temp1", "l"))
+
 
 
 
@@ -431,9 +481,12 @@ d <- mod_df %>%
 d_models <- d %>%
   ungroup() %>%
   group_by(site, age_class, var) %>%
-  do(mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_2 = glmer(fate ~ lag2 + (1 | year_of), data = ., family = "binomial"))
+  do(mod_0 = glmer(cbind(successes, deaths) ~ lag0 + (1 | year_of),
+                   data = ., family = "binomial"),
+     mod_1 = glmer(cbind(successes, deaths) ~ lag1 + (1 | year_of),
+                   data = ., family = "binomial"),
+     mod_2 = glmer(cbind(successes, deaths) ~ lag2 + (1 | year_of),
+                   data = ., family = "binomial"))
 
 
 d_models_sel <- NULL
@@ -497,14 +550,66 @@ d_best <- filter(d_surv_models, rank == 1)
 d_models_sel$scenario <- factor(d_models_sel$scenario, levels = levels(d_best$scenario))
 d_best <- inner_join(d_best, d_models_sel)
 
-rm(list = c("d_models", "d_models_sel", "d_mod_sel", "temp", "d_surv_models",
-            "m_table", "vars", "scenarios", "deviance", "temp1", "d"))
+temp <- bind_rows(d_surv_models, n_best)
 
+temp <- temp %>%
+  select(-rank, -model_num, -delta, -weight, -model) %>%
+  arrange(site, age_class, AICc)
 
+null_aic <- temp %>%
+  group_by(site, age_class) %>%
+  filter(var == "null") %>%
+  select(null_AICc = AICc)
 
+null_deviance <- temp %>%
+  group_by(site, age_class) %>%
+  filter(var == "null") %>%
+  select(null_deviance = deviance)
 
+temp <- temp %>%
+  inner_join(null_aic) %>%
+  inner_join(null_deviance) %>%
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
+         D = 1 - (deviance / null_deviance))
 
+temp1 <- filter(temp, site == "Capuchin" & str_detect(var, "spei_01"))
 
+lim <-  max(c(abs(min(temp1$delta_AICc_vs_null, na.rm = TRUE)),
+              abs(max(temp1$delta_AICc_vs_null, na.rm = TRUE))))
+
+ggplot(filter(temp1, var != "null"),
+       aes(x = var, y = scenario, fill = delta_AICc_vs_null)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+                       name = expression(paste(Delta, "AICc relative to Null Model")),
+                       limits = c(-lim, lim)) +
+  facet_wrap(age_class ~ site, nrow = 3, drop = TRUE, scales = "free") +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nDrought Variable", y = "Age Class\n")
+
+lim <-  max(c(abs(min(temp1$D, na.rm = TRUE)),
+              abs(max(temp1$D, na.rm = TRUE))))
+
+ggplot(filter(temp1, var != "null"),
+       aes(x = var, y = scenario, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Reds")),
+                       name = "Proportional Reduction\n in Deviance",
+                       limits = c(0, lim)) +
+  facet_wrap(age_class ~ site, nrow = 3, drop = TRUE, scales = "free") +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(x = "\nDrought Variable", y = "Age Class\n")
+
+# rm(list = c("d_models", "d_models_sel", "d_mod_sel", "temp", "d_surv_models",
+#             "m_table", "vars", "scenarios", "deviance", "temp1", "d"))
 
 
 
@@ -557,11 +662,11 @@ null_deviance <- temp %>%
 
 temp <- temp %>%
   inner_join(null_aic) %>%
-  inner_join(null_deviance)
-
-temp <- temp %>%
+  inner_join(null_deviance) %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
+
+temp$site <- factor(temp$site, levels = levels(mod_df$site))
 
 ggplot(temp, aes(x = scale, y = var, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
@@ -577,39 +682,31 @@ ggplot(temp, aes(x = scale, y = var, fill = delta_AICc_vs_null)) +
         legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nScale", y = "Climate Variable\n")
+  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
 
 ggplot(temp, aes(x = scale, y = age_class, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
-                       name = expression(paste(Delta, "AICc relative to Null Model")),
-                       # limits = c(-lim, lim),
-                       trans = sqrt_sign_trans()) +
-  facet_wrap(~site, nrow = 7, drop = TRUE, scales = "free") +
+                       name = expression(paste(Delta, "AICc relative to Null Model"))) +
+  facet_wrap(~site, ncol = 7, drop = TRUE, scales = "free") +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nScale", y = "Age Class\n")
-
-lim <-  max(c(abs(min(temp$D, na.rm = TRUE)),
-                     abs(max(temp$D, na.rm = TRUE))))
+  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
 
 ggplot(temp, aes(x = scale, y = age_class, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdGy")),
-                       limits = c(-lim, lim),
-                       trans = sqrt_sign_trans(),
-                       name = "Proportional Reduction in Deviance") +
-  facet_wrap(~site, nrow = 7, drop = TRUE, scales = "free") +
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Reds")),
+                       name = expression(paste(Delta, "AICc relative to Null Model"))) +
+  facet_wrap(~site, ncol = 7, drop = TRUE, scales = "free") +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nScale", y = "Age Class\n")
+  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
+
+
+
