@@ -490,7 +490,7 @@ ggplot(filter(surv_l_models_plot, var != "null"),
                        name = expression(paste(Delta, "AICc relative to Null Model")),
                        trans = sqrt_sign_trans(),
                        limits = c(-lim, lim)) +
-  facet_wrap(age_class ~ site, nrow = 3, drop = TRUE) +
+  facet_grid(age_class ~ site, drop = TRUE) +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
@@ -1054,9 +1054,15 @@ fert_g$ind <- factor(fert_g$ind, levels = levels(factor(fert_g$ind)))
 fert_g_best <- inner_join(fert_g_best, fert_g)
 fert_g_rank <- inner_join(fert_g_rank, fert_g)
 
-
 # Plot
 fert_g_models_plot <- bind_rows(fert_g_rank, fert_n_best)
+
+fert_g_best$se <- ldply(fert_g_best$model, .fun = function(x) coef(summary(x))[2, "Std. Error"])$V1
+# temp <- ldply(fert_g_best$model,
+#               .fun = function(x) confint(x, method = "boot",
+#                                          nsim = 100, quiet = TRUE)[3, ])
+# fert_g_best$ci_lower <- temp[, 1]
+# fert_g_best$ci_upper <- temp[, 2]
 
 fert_g_models_plot <- fert_g_models_plot %>%
   select(-rank, -model_num, -delta, -weight, -model) %>%
@@ -1187,11 +1193,11 @@ fert_l_models_sel$scenario <- factor(fert_l_models_sel$scenario, levels = levels
 fert_l_best <- inner_join(fert_l_best, fert_l_models_sel)
 
 fert_l_best$se <- ldply(fert_l_best$model, .fun = function(x) coef(summary(x))[2, "Std. Error"])$V1
-temp <- ldply(fert_l_best$model,
-              .fun = function(x) confint(x, method = "boot",
-                                         nsim = 100, quiet = TRUE)[3, ])
-fert_l_best$ci_lower <- temp[, 1]
-fert_l_best$ci_upper <- temp[, 2]
+# temp <- ldply(fert_l_best$model,
+#               .fun = function(x) confint(x, method = "boot",
+#                                          nsim = 100, quiet = TRUE)[3, ])
+# fert_l_best$ci_lower <- temp[, 1]
+# fert_l_best$ci_upper <- temp[, 2]
 
 fert_l_models_plot <- bind_rows(fert_l_models, fert_n_best)
 
@@ -1319,6 +1325,13 @@ fert_d_best <- filter(fert_d_models, rank == 1)
 
 fert_d_models_sel$scenario <- factor(fert_d_models_sel$scenario, levels = levels(fert_d_best$scenario))
 fert_d_best <- inner_join(fert_d_best, fert_d_models_sel)
+
+fert_d_best$se <- ldply(fert_d_best$model, .fun = function(x) coef(summary(x))[2, "Std. Error"])$V1
+# temp <- ldply(fert_d_best$model,
+#               .fun = function(x) confint(x, method = "boot",
+#                                          nsim = 100, quiet = TRUE)[3, ])
+# fert_d_best$ci_lower <- temp[, 1]
+# fert_d_best$ci_upper <- temp[, 2]
 
 fert_d_models_plot <- bind_rows(fert_d_models, fert_n_best)
 
@@ -1489,11 +1502,16 @@ ggplot(fert_models_combined, aes(y = scale, x = site, fill = D)) +
 
 # ---- coefficient_plots --------------------------------------------------
 
-ggplot(fert_models_combined, aes(x = var, y = estimate, color = delta_AICc_vs_null)) +
+fert_models_combined$new_var <- paste(toupper(fert_models_combined$scale),
+                                      toupper(fert_models_combined$scenario),
+                                      fert_models_combined$var, sep = " - ")
+
+ggplot(filter(fert_models_combined, var != "null"),
+       aes(x = new_var, y = estimate, color = delta_AICc_vs_null)) +
   geom_point(size = 3) +
-#   geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
-#                  height = 0.3, size = 0.75) +
-  scale_color_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
+  geom_errorbar(aes(ymin = estimate - se, ymax = estimate + se),
+                 height = 0.3, size = 0.75) +
+  scale_color_gradientn(colours = rev(c(brewer.pal(5, "Reds"))),
                         name = expression(paste(Delta, "AICc relative to Null Model")),
                         trans = sqrt_sign_trans()) +
   geom_hline(yintercept = 0, lty = 2) +
@@ -1507,3 +1525,23 @@ ggplot(fert_models_combined, aes(x = var, y = estimate, color = delta_AICc_vs_nu
   labs(y = "Scaled Coefficient Estimate\n", x = "\nVariable",
        title = "Scaled Coefficient Estimates for Best Models of Adult Female Fertility\n")
 
+temp <- fert_models_combined
+temp[temp$D < 0, ]$D <- 0
+
+ggplot(filter(temp, var != "null"),
+       aes(x = new_var, y = estimate, color = D)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = estimate - se, ymax = estimate + se),
+                width = 0.25, size = 0.75) +
+  scale_color_gradientn(colours = brewer.pal(7, "Greens")[2:7],
+                        name = "Proportional Reduction in Deviance") +
+  geom_hline(yintercept = 0, lty = 2) +
+  theme_bw() +
+  facet_grid(. ~ site, scales = "free_x", drop = TRUE) +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "Scaled Coefficient Estimate\n", x = "\nVariable",
+       title = "Scaled Coefficient Estimates for Best Models of Adult Female Fertility\n")

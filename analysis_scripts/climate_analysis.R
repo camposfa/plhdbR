@@ -1,6 +1,7 @@
+# devtools::install_github("jjvanderwal/climates")
 
 Sys.setenv(TZ = 'UTC')
-list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4",
+list.of.packages <- list("climates", "Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
                          "stringr", "scales", "tidyr", "grid", "zoo",
                          "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom")
@@ -19,8 +20,7 @@ cubroot_trans <-  function(){
 }
 
 sqrt_sign_trans <-  function(){
-  trans_new('sqrt_sign', transform = function(x) sign(x) * sqrt(abs(x)),
-            inverse = function(x) sign(x) * x^2)
+  trans_new('sqrt_sign', transform = function(x) sign(x) * sqrt(abs(x)), inverse = function(x) sign(x) * x^2)
 }
 
 
