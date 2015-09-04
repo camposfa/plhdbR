@@ -210,7 +210,7 @@ stage_specific_survival <- function(b, adult_definition = "median"){
   ps_ages <- ps_ages %>%
     dplyr:: mutate(census_date = ymd(census_date),
                    census_end = census_date + lubridate::years(1)) %>%
-    dplyr::filter(census_end >= Entry.Date & census_date <= Depart.Date)
+    dplyr::filter(census_end > Entry.Date & census_date <= Depart.Date)
 
   animals <- ps_ages %>%
     distinct(Study.Id, Animal.Id) %>%
@@ -373,7 +373,7 @@ stage_specific_fertility <- function(b, f, adult_definition = "median", annual =
   ps_ages <- ps_ages %>%
     dplyr:: mutate(census_date = lubridate::ymd(census_date),
                    census_end = census_date + lubridate::years(1)) %>%
-    dplyr::filter(census_end >= Start.Date & census_date <= Stop.Date)
+    dplyr::filter(census_end > Start.Date & census_date <= Stop.Date)
 
   # Calculate weight as the proportion of the psuedocensus year for which
   # the female's fertility was observed
