@@ -579,7 +579,13 @@ for (i in 1:nrow(d_mod_sel)) {
 d_surv_models <- tbl_df(bind_rows(temp))
 
 # Get final set
-d_best <- filter(d_surv_models, rank == 1)
+# d_best <- filter(d_surv_models, rank == 1)
+
+# OR get best set of "annual mean" models
+d_best <- d_surv_models %>%
+  filter(str_detect(var, "annual_mean")) %>%
+  group_by(site, age_class) %>%
+  top_n(-rank, n = 1)
 
 d_models_sel$scenario <- factor(d_models_sel$scenario, levels = levels(d_best$scenario))
 d_best <- inner_join(d_best, d_models_sel)
@@ -724,6 +730,26 @@ ggplot(surv_models_combined, aes(y = scale, x = age_class, fill = delta_AICc_vs_
   scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
                        trans = sqrt_sign_trans(),
                        name = expression(paste(Delta, "AICc relative to Null Model"))) +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "\nScale of Climate Variable", x = "Age Class\n")
+
+temp <- surv_models_combined %>%
+  group_by(site, age_class) %>%
+  mutate(min_AICc = min(AICc),
+         delta = AICc - min_AICc)
+
+ggplot(temp, aes(y = scale, x = age_class, fill = delta)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = rev(viridis(256)[1:256]),
+                       trans = sqrt_trans(),
+                       name = expression(paste(Delta, "AICc"))) +
   facet_grid(. ~ site) +
   theme_bw() +
   theme(strip.background = element_blank(),

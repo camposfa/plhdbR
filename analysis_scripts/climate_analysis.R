@@ -3,7 +3,7 @@
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("climates", "Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
-                         "stringr", "scales", "tidyr", "grid", "zoo",
+                         "stringr", "scales", "tidyr", "grid", "zoo", "viridis",
                          "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if (length(new.packages)) install.packages(unlist(new.packages))
