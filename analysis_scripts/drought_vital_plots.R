@@ -1,0 +1,74 @@
+d_surv_models %>%
+  filter(str_detect(var, "annual_mean")) %>%
+  group_by(site, age_class) %>%
+  top_n(-rank, n = 1)
+
+d_best <- arrange(d_best, site, age_class)
+
+temp1 <- d_best[19, ]$model[[1]]
+newdata <- data.frame(seq(-5 , 5, 0.1))
+names(newdata)[1] <- names(fixef(temp1))[2]
+newdata$predicted <- predict(temp1, newdata, re.form = NA, type = "resp")
+
+names(newdata)[1] <- "climate_predictor"
+
+ggplot(newdata, aes(x = climate_predictor, y = predicted)) +
+  geom_line() +
+  theme_classic()
+
+
+# Plot vital rates per year
+
+# temp <- inner_join(m, select(climate_predictors2, site, year_of, contains("spei")),
+#                    by = c("Study.Id" = "site", "year_of"))
+
+temp <- m
+
+temp$site <- factor(temp$Study.Id,
+                    levels = c("rppn-fma", "amboseli", "kakamega",
+                               "gombe", "karisoke",
+                               "beza", "ssr"))
+
+temp$site <- mapvalues(temp$site,
+                         from = levels(temp$site),
+                         to = c("Muriqui", "Baboon", "Blue Monkey",
+                                "Chimpanzee", "Gorilla", "Sifaka",
+                                "Capuchin"))
+
+temp1 <- mod_df %>%
+  filter(scale == "spei" & str_detect(var, "v01")) %>%
+  distinct(site, year_of, age_class)
+
+temp <- inner_join(temp, temp1, by = c("site", "year_of", "age_class"))
+
+temp <- temp %>%
+  mutate(prop_surviving = successes/trials)
+
+stat_sum_single <- function(fun, geom="point", size = 2, ...) {
+  stat_summary(fun.y = fun, colour = "red", geom = geom, size = size, ...)
+}
+
+temp <- temp %>%
+  group_by(Study.Id, age_class) %>%
+  filter(!is.na(lag0)) %>%
+  mutate(q = ntile(lag0, 10))
+
+# temp1 <- temp %>%
+#   ungroup() %>%
+#   group_by(Study.Id, age_class, q) %>%
+#   summarise(prop = mean(prop_surviving, na.rm = TRUE))
+
+
+
+ggplot(temp, aes(x = q, y = prop_surviving)) +
+  stat_smooth(method = "lm", color = "red", fill = "red", se = TRUE) +
+  stat_sum_single(mean) +
+  # stat_sum_single(mean, geom = "line", size = 0.5) +
+  facet_grid(age_class ~ Study.Id) +
+  theme_bw()
+
+ggplot(temp, aes(x = year_of, y = prop_surviving, group = age_class, color = lag0)) +
+  geom_point(size = 3) +
+  facet_grid(Study.Id ~ age_class) +
+  scale_color_gradientn(colours = brewer.pal(10, "BrBG"), limits = c(-3, 3)) +
+  theme_bw()
