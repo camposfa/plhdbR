@@ -149,37 +149,42 @@ indclim_df$var <- mapvalues(indclim_df$var,
                                         "v06_mean_warmest_q", "v07_mean_coldest_q",
                                         "v08_mean_wettest_q", "v09_mean_driest_q"))
 
-
-# Get indices relevant to each site
-# Must show significant correlation with rain/temperature anomalies for > 1 month
-temp <- phase_cor %>%
-  select(site, month_of, index, new_rain_cor, new_tmin_d_cor, new_tmax_d_cor) %>%
-  gather(var, value, -site, -month_of, -index) %>%
-  filter(abs(value) > 0) %>%
-  arrange(site, index, month_of)
-
-temp1 <- temp %>%
-  ungroup() %>%
-  group_by(site, index, var) %>%
-  summarise(n = n()) %>%
-  filter(n > 1)
-
-temp2 <- temp1 %>%
-  ungroup() %>%
-  group_by(site) %>%
-  do(inds = levels(factor(.$index)))
-
 indclim_df$site <- factor(indclim_df$site,
                           levels = c("rppn-fma", "amboseli", "kakamega",
                                      "gombe", "karisoke",
                                      "beza", "ssr"))
 
-for (i in 1:length(levels(temp2$site))) {
-  current_site <- levels(temp2$site)[i]
-  ind_set <-  temp2[i, ]$inds[[1]]
-  all_inds <- levels(indclim_df$index)
-  indclim_df <- filter(indclim_df, !(site == current_site & index %ni% ind_set))
-}
+
+# Get indices relevant to each site
+# Must show significant correlation with rain/temperature anomalies for > 1 month
+# temp <- phase_cor %>%
+#   select(site, month_of, index, new_rain_cor, new_tmin_d_cor, new_tmax_d_cor) %>%
+#   gather(var, value, -site, -month_of, -index) %>%
+#   filter(abs(value) > 0) %>%
+#   arrange(site, index, month_of)
+#
+# temp1 <- temp %>%
+#   ungroup() %>%
+#   group_by(site, index, var) %>%
+#   summarise(n = n()) %>%
+#   filter(n > 1)
+#
+# temp2 <- temp1 %>%
+#   ungroup() %>%
+#   group_by(site) %>%
+#   do(inds = levels(factor(.$index)))
+#
+# indclim_df$site <- factor(indclim_df$site,
+#                           levels = c("rppn-fma", "amboseli", "kakamega",
+#                                      "gombe", "karisoke",
+#                                      "beza", "ssr"))
+#
+# for (i in 1:length(levels(temp2$site))) {
+#   current_site <- levels(temp2$site)[i]
+#   ind_set <-  temp2[i, ]$inds[[1]]
+#   all_inds <- levels(indclim_df$index)
+#   indclim_df <- filter(indclim_df, !(site == current_site & index %ni% ind_set))
+# }
 
 
 indclim_df <- unite(indclim_df, variable, index, var)

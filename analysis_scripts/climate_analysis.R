@@ -1,7 +1,7 @@
 # devtools::install_github("jjvanderwal/climates")
 
 Sys.setenv(TZ = 'UTC')
-list.of.packages <- list("climates", "Hmisc", "plyr", "reshape2", "ncdf4",
+list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
                          "stringr", "scales", "tidyr", "grid", "zoo", "viridis",
                          "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom")

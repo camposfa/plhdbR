@@ -15,7 +15,7 @@ surv_trials <- make_survivorship_trials(m)
 
 surv_trials <- surv_trials %>%
   ungroup() %>%
-  filter(year_of < 2015) %>%
+  filter(year_of < 2014) %>%
   select(site = Study.Id, year_of, age_class, fate)
 
 temp <- climate_predictors2 %>%
@@ -499,7 +499,7 @@ ggplot(filter(surv_l_models_plot, var != "null"),
   labs(y = "\nLocal Climate Variable", x = "Age Class\n")
 
 rm(list = c("l_models", "l_models_sel", "l_mod_sel", "surv_l_models_plot", "m_table",
-            "vars", "scenarios", "deviance", "surv_l_models_plot1", "l"))
+            "vars", "scenarios", "deviance", "l"))
 
 
 
@@ -579,13 +579,14 @@ for (i in 1:nrow(d_mod_sel)) {
 d_surv_models <- tbl_df(bind_rows(temp))
 
 # Get final set
-# d_best <- filter(d_surv_models, rank == 1)
+d_best <- filter(d_surv_models, rank == 1) %>%
+  arrange(site, age_class)
 
 # OR get best set of "annual mean" models
-d_best <- d_surv_models %>%
-  filter(str_detect(var, "annual_mean")) %>%
-  group_by(site, age_class) %>%
-  top_n(-rank, n = 1)
+# d_best <- d_surv_models %>%
+#   filter(str_detect(var, "annual_mean")) %>%
+#   group_by(site, age_class) %>%
+#   top_n(-rank, n = 1)
 
 d_models_sel$scenario <- factor(d_models_sel$scenario, levels = levels(d_best$scenario))
 d_best <- inner_join(d_best, d_models_sel)
@@ -684,6 +685,12 @@ d_best <- d_best %>%
 n_best <- n_best %>%
   mutate(scale = "null")
 
+g_best$site <- factor(g_best$site, levels = levels(factor(n_best$site)))
+
+g_best <- arrange(g_best, site, age_class)
+l_best <- arrange(l_best, site, age_class)
+d_best <- arrange(d_best, site, age_class)
+n_best <- arrange(n_best, site, age_class)
 
 surv_models_combined <- bind_rows(g_best, l_best, d_best, n_best)
 
@@ -799,7 +806,7 @@ fert_trials <- make_survivorship_trials(f)
 
 fert_trials <- fert_trials %>%
   ungroup() %>%
-  filter(year_of < 2015 & age_class == "adult") %>%
+  filter(year_of < 2014 & age_class == "adult") %>%
   select(site = Study.Id, year_of, age_class, fate)
 
 temp <- climate_predictors2 %>%
@@ -1456,6 +1463,13 @@ fert_n_best <- fert_n_best %>%
   mutate(scale = "null")
 
 
+fert_g_best$site <- factor(fert_g_best$site, levels = levels(factor(fert_n_best$site)))
+
+fert_g_best <- arrange(fert_g_best, site, age_class)
+fert_l_best <- arrange(fert_l_best, site, age_class)
+fert_d_best <- arrange(fert_d_best, site, age_class)
+fert_n_best <- arrange(fert_n_best, site, age_class)
+
 fert_models_combined <- bind_rows(fert_g_best, fert_l_best, fert_d_best, fert_n_best)
 
 fert_models_combined <- fert_models_combined %>%
@@ -1499,7 +1513,7 @@ ggplot(fert_models_combined, aes(x = scale, y = var, fill = delta_AICc_vs_null))
 ggplot(fert_models_combined, aes(x = age_class, y = scale, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = rev(c("#FFFFFF", brewer.pal(9, "Reds"))),
-                       trans = sqrt_sign_trans(),
+                       # trans = sqrt_sign_trans(),
                        name = expression(paste(Delta, "AICc relative to Null Model"))) +
   facet_grid(. ~ site) +
   theme_bw() +
@@ -1511,11 +1525,36 @@ ggplot(fert_models_combined, aes(x = age_class, y = scale, fill = delta_AICc_vs_
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(y = "\nScale of Climate Variable", x = "Lag Scenario\n")
 
-ggplot(fert_models_combined, aes(y = scale, x = site, fill = D)) +
+temp <- fert_models_combined %>%
+  group_by(site, age_class) %>%
+  mutate(min_AICc = min(AICc),
+         delta = AICc - min_AICc)
+
+ggplot(temp, aes(y = scale, x = age_class, fill = delta)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Reds")),
+  # scale_fill_gradientn(colours = rev(viridis(256)[1:256]),
+  scale_fill_gradientn(colours = c(rev(brewer.pal(9, "Reds")), "#FFFFFF"),
+                       trans = sqrt_trans(),
+                       name = expression(paste(Delta, "AICc"))) +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        panel.grid = element_blank(),
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "\nScale of Climate Variable", x = "Age Class\n")
+
+
+temp <- fert_models_combined
+temp[temp$D < 0, ]$D <- 0
+
+ggplot(temp, aes(y = scale, x = site, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
                        trans = sqrt_sign_trans(),
-                       name = expression(paste(Delta, "AICc relative to Null Model"))) +
+                       name = "Proportional Reduction in Deviance") +
   # facet_grid(~site) +
   theme_bw() +
   theme(strip.background = element_blank(),
