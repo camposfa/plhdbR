@@ -18,8 +18,19 @@ surv_trials <- surv_trials %>%
   filter(year_of < 2014) %>%
   select(site = Study.Id, year_of, age_class, fate)
 
+# temp <- climate_predictors2 %>%
+#   ungroup() %>%
+#   mutate_each(funs(scale), -site, -year_of) %>%
+#   group_by(site) %>%
+#   gather(var, lag0, -site, -year_of) %>%
+#   group_by(site, var) %>%
+#   arrange(year_of) %>%
+#   mutate(lag1 = lag(lag0),
+#          lag2 = lag(lag0, n = 2),
+#          lag3 = lag(lag0, n = 3))
+
 temp <- climate_predictors2 %>%
-  ungroup() %>%
+  group_by(site) %>%
   mutate_each(funs(scale), -site, -year_of) %>%
   group_by(site) %>%
   gather(var, lag0, -site, -year_of) %>%
@@ -754,7 +765,8 @@ temp <- surv_models_combined %>%
 
 ggplot(temp, aes(y = scale, x = age_class, fill = delta)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = rev(viridis(256)[1:256]),
+  scale_fill_gradientn(colours = rev(brewer.pal(9, "Reds")),
+                       # colours = rev(viridis(256)[1:256]),
                        trans = sqrt_trans(),
                        name = expression(paste(Delta, "AICc"))) +
   facet_grid(. ~ site) +
