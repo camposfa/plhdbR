@@ -36,7 +36,7 @@ temp$site <- mapvalues(temp$site,
                                 "Capuchin"))
 
 temp1 <- mod_df %>%
-  filter(scale == "spei" & str_detect(var, "v01")) %>%
+  filter(scale == "local" & str_detect(var, "v12_annual_precip")) %>%
   distinct(site, year_of, age_class)
 
 temp <- inner_join(temp, temp1, by = c("site", "year_of", "age_class"))
@@ -50,7 +50,7 @@ stat_sum_single <- function(fun, geom="point", size = 2, ...) {
 
 temp <- temp %>%
   group_by(Study.Id, age_class) %>%
-  filter(!is.na(lag0)) %>%
+  filter(!is.na(lag1)) %>%
   mutate(q = ntile(lag0, 10))
 
 # temp1 <- temp %>%
@@ -67,7 +67,7 @@ ggplot(temp, aes(x = q, y = prop_surviving)) +
   facet_grid(age_class ~ Study.Id) +
   theme_bw()
 
-ggplot(temp, aes(x = year_of, y = prop_surviving, group = age_class, color = lag0)) +
+ggplot(temp, aes(x = lag0, y = prop_surviving, group = age_class, color = lag0)) +
   geom_point(size = 3) +
   facet_grid(Study.Id ~ age_class) +
   scale_color_gradientn(colours = brewer.pal(10, "BrBG"), limits = c(-3, 3)) +
