@@ -8,7 +8,7 @@ summary(m)
 # Make trials
 surv_trials <- m %>%
   ungroup() %>%
-  filter(year_of < 2015) %>%
+  filter(year_of < 2014) %>%
   mutate(successes = round(successes, 0),
          deaths = round(deaths, 0)) %>%
   select(site = Study.Id, year_of, age_class, successes, deaths)
@@ -40,10 +40,10 @@ mod_df1$site <- mapvalues(mod_df1$site,
 mod3 <- mod_df1 %>%
   ungroup() %>%
   group_by(site, age_class, var) %>%
-  do(mod_null = glmer(cbind(successes, deaths) ~ 1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0 = glmer(cbind(successes, deaths) ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(cbind(successes, deaths) ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_2 = glmer(cbind(successes, deaths) ~ lag2 + (1 | year_of), data = ., family = "binomial"))
+  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
+     mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
+     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
+     mod_2 = glmer(fate ~ lag2 + (1 | year_of), data = ., family = "binomial"))
 
 mod4 <- NULL
 k <- 1
