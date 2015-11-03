@@ -100,7 +100,7 @@ get_speiclim <- function(df, clim_extremes = NULL){
 }
 
 # The function below was written by Jeremy VanDerWal jjvanderwal@gmail.com
-# In defunct "climates" package
+# In "climates" package
 # I just replaced annoying "print" command with "message", which can be suppressed
 bioclim <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL,
           vois = 1:19, cov = FALSE, t.as.int = TRUE, period = "month",
@@ -282,7 +282,7 @@ bioclim <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL,
 
 # The functions below were modified from code written by Jeremy VanDerWal
 # jjvanderwal@gmail.com
-# In defunct "climates" package
+# In "climates" package
 #
 # The original function takes a series of climate measurements
 # and calculates the 19 Bioclimatic variables based for each location
@@ -672,3 +672,73 @@ indclim_annual <- function(osc = NULL, vois = 1:9, t.as.int = TRUE, clim = NULL)
 #   colnames(out) = paste("indclim", 1:9, sep = "_")
 #   return(out[, vois])
 # }
+
+extremes=function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL, period = "month",tiebreak="first")
+{
+  # 	This function finds the warmest, wettest, coldest, driest periods for each location
+
+  tsize = NULL
+  m.per.indx=function(x){c(x,(x:(x+1))%%12+1)} # index for 3 month quarter
+  w.per.indx=function(x){c(x,(x:(x+11))%%52+1)} # index for 13 week quarter
+
+  # Function to check for various input errors, stop program and print an error message
+  error.check=function(datum,datum.name,dsize=tsize){
+    if (is.null(datum))
+      stop(paste(datum.name,"is needed for the variables selected"))
+    else if (is.data.frame(datum) | is.matrix(tmin)) {
+      if (!(dim(datum)[2] %in% c(12, 52))) # check for correct number of columns
+        stop(paste(datum.name,"must have 12 or 52 columns -- one for each month or week"))
+      dsize = c(dsize, dim(datum)[1])
+    }
+    else
+      stop(paste(datum.name,"must be a data.frame or matrix"))
+    return(dsize)
+  }
+
+  # Check for valid input data; tmin, tmax, prec are always needed
+  tsize=error.check(tmin,"tmin")
+  tsize=error.check(tmax,"tmax")
+  tsize=error.check(prec,"prec")
+
+  if (is.null(tmean)) {
+    tmean=(tmax+tmin)/2
+    print("Calculated tmean as (tmax+tmin)/2")
+  }
+  else
+    tsize=error.check(tmean,"tmean")
+
+  if (!all(tsize == mean(tsize))) # Check all input vars are the same length
+    stop("all input data must be of the same length") # redundant?
+
+  tsize=mean(tsize)
+  out = matrix(NA, nrow = tsize, ncol = 4)  # Set up output matrix
+
+  if (period == "month") { # Warmest/coldest and wettest/driest quarter sums and means
+    tt1 = matrix(NA, nrow = tsize, ncol = 12)
+    tt2 = matrix(NA, nrow = tsize, ncol = 12)
+    for (ii in 1:12) {  # Find temperature means for 3 month quarters
+      tt1[, ii] = rowMeans(tmean[, m.per.indx(ii)], na.rm = T)
+      tt2[, ii] = rowSums(prec[, m.per.indx(ii)], na.rm = T)
+    }
+  }
+  else {
+    tt1 = matrix(NA, nrow = tsize, ncol = 52)
+    tt2 = matrix(NA, nrow = tsize, ncol = 52)
+    for (ii in 1:52) {  # Find temperature means for 13 week quarters
+      tt1[, ii] = rowMeans(tmean[, w.per.indx(ii)], na.rm = T)
+      tt2[, ii] = rowSums(prec[, w.per.indx(ii)], na.rm = T)
+    }
+  }
+  # 1 Warmest quarter
+  out[, 1] = max.col(tt1,tiebreak)
+  # 2 Coldest quarter; there is no min.col!; this can only find first match
+  out[, 2] = unname(apply(tt1, 1, which.min))
+  # 3 Wettest quarter
+  out[, 3] = max.col(tt2,tiebreak)
+  # 4 Driest quarter; this can only find first match
+  out[, 4] = unname(apply(tt2, 1, which.min))
+
+  out=data.frame(out)
+  colnames(out) = c("Warmest","Coldest","Wettest","Driest")
+  return(out)
+}
