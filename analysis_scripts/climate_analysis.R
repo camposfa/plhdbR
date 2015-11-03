@@ -1,15 +1,18 @@
-# devtools::install_github("jjvanderwal/climates")
-
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
                          "stringr", "scales", "tidyr", "grid", "zoo", "viridis",
-                         "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom")
+                         "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom",
+                         "purrr")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if (length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
 
-load(".RData")
+if (!("ClimGrid" %in% installed.packages()[,"Package"]))
+  devtools::install_github("camposfa/ClimGrid")
+
+require(ClimGrid)
+
 `%ni%` = Negate(`%in%`)
 
 
@@ -553,8 +556,8 @@ ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
 # 0.5 degree latitude x 0.5 degree longitude global grid
 # http://sac.csic.es/spei/database.html
 
-# Use 1, 3, and 6 month drought condition data
-f <- c("01", "03", "06")
+# Use 1, 3, 6, and 12 month drought condition data
+f <- c("01", "03", "06", "12")
 
 spei <- NULL
 
@@ -615,7 +618,7 @@ names(spei)[5:(5+length(f) - 1)] <- paste("spei", f, sep = "_")
 
 
 # Plot data
-ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei_01)) +
+ggplot(spei, aes(x = factor(month_of), y = year_of, fill = spei_12)) +
   geom_tile() +
   facet_grid(. ~ site) +
   scale_fill_gradientn(colours = brewer.pal(11, "PuOr"), name = "SPEI") +
@@ -1198,15 +1201,16 @@ write.csv(rain_selected, "data/rain_csv/rain_selected.csv", row.names = FALSE)
 
 # ---- load_indices -------------------------------------------------------
 
-ind <- load_climate_index(c("pdo", "dmi", "oni", "soi", "amo",
-                            "nao", "sam", "ao"))
+ind <- ClimGrid::load_climate_index(c("pdo", "dmi", "mei", "soi", "nino3.4", "amo",
+                                      "nao", "sam", "ao"))
 
 ind_df <- bind_rows(ind)
 
 ind_df <- filter(ind_df, date_of > ymd("1945-01-01"))
 
-ind_df$index <- factor(ind_df$index, levels = c("amo", "nao", "oni", "soi",
-                                                "pdo", "dmi", "sam", "ao"))
+ind_df$index <- factor(ind_df$index,
+                       levels = c("pdo", "dmi", "mei", "soi", "nino3.4", "amo",
+                                  "nao", "sam", "ao"))
 
 ind_neg <- ind_df
 ind_neg[ind_neg$value > 0, ]$value <- 0
@@ -1892,7 +1896,7 @@ ann_div <- climates %>%
             simpson_rain = diversity(rain_adj, index = "simpson"),
             invsimpson_rain = diversity(rain_adj, index = "invsimpson"),
             cov_rain = sd(rain_monthly_mm, na.rm = TRUE) /
-              mean(rain_monthly_mm, na.rm = TRUE))%>%
+              mean(rain_monthly_mm, na.rm = TRUE)) %>%
   ungroup() %>%
   filter(n_months == 12)
 
@@ -1918,3 +1922,8 @@ climate_predictors <- ann_mean %>%
   left_join(select(ann_extremes, -n_months)) %>%
   left_join(select(ann_div, site, year_of, shannon_rain))
 
+
+# ---- save_r_data --------------------------------------------------------
+
+save.image("~/GitHub/plhdbR/ClimatePrep.RData")
+save(lh, fert, climate_predictors, sqrt_sign_trans, file = "~/GitHub/plhdbR/ClimatePred1.RData")
