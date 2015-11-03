@@ -1,3 +1,7 @@
+load("ClimatePrep.RData")
+
+source("analysis_scripts/bioclim.R")
+
 # Calculate hottest/coldest/wettest/driest months for each site
 monthly_clim_means <- climates %>%
   ungroup() %>%
@@ -70,10 +74,6 @@ clim_extremes <- inner_join(monthly_extremes, quarterly_extremes) %>%
 row.names(clim_extremes) <- clim_extremes$site
 clim_extremes <- clim_extremes[, -1]
 
-
-
-source('analysis_scripts/bioclim.R')
-
 # Bioclim
 
 bioclim_df <- climates %>%
@@ -105,6 +105,7 @@ bioclim_df$variable <- mapvalues(bioclim_df$variable,
                                   "v19_precip_coldest_q"))
 
 bioclim_df <- spread(bioclim_df, variable, value)
+temp <- bioclim_df
 
 ggplot() +
   geom_tile(data = temp,
@@ -131,6 +132,7 @@ ggplot() +
 # ---- ind_clim -----------------------------------------------------------
 
 indclim_df <- ind_df %>%
+  filter(index %in% c("nino3.4", "pdo", "dmi", "amo", "nao")) %>%
   mutate(year_of = year(date_of),
          month_of = factor(month.abb[month(date_of)], levels = month.abb)) %>%
   group_by(index) %>%
@@ -218,3 +220,37 @@ speiclim_df <- unite(speiclim_df, variable, period, var)
 speiclim_df <- spread(speiclim_df, variable, value)
 
 
+
+# ---- final_set ----------------------------------------------------------
+
+temp1 <- select(bioclim_df, site, year_of,
+                precip_annual = v12_annual_precip,
+                precip_wettest_q = v16_precip_wettest_q,
+                precip_driest_q = v17_precip_driest_q,
+                precip_seasonality = v15_precip_seasonality,
+                temp_mean_annual = v01_annual_mean_temp,
+                tmax_warmest = v05_max_temp_warmest_m,
+                tmin_coldest = v06_min_temp_coldest_m,
+                temp_range_annual = v07_temp_annual_range)
+
+temp2 <- indclim_df %>%
+  select(site, year_of, contains("v01")) %>%
+  rename(amo_mean = amo_v01_annual_mean,
+         dmi_mean = dmi_v01_annual_mean,
+         n34_mean = nino3.4_v01_annual_mean,
+         pdo_mean = pdo_v01_annual_mean,
+         nao_mean = nao_v01_annual_mean)
+
+temp3 <- speiclim_df %>%
+  select(site, year_of, contains("v01")) %>%
+  rename(spei01_mean = spei_01_v01_annual_mean,
+         spei03_mean = spei_03_v01_annual_mean,
+         spei06_mean = spei_06_v01_annual_mean,
+         spei12_mean = spei_12_v01_annual_mean)
+
+climate_predictors <- temp1 %>%
+  left_join(temp1) %>%
+  left_join(temp2) %>%
+  left_join(temp3)
+
+save(lh, fert, climate_predictors, sqrt_sign_trans, file = "~/GitHub/plhdbR/ClimatePred2.RData")
