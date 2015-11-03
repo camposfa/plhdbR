@@ -32,7 +32,6 @@ surv_trials <- surv_trials %>%
 temp <- climate_predictors2 %>%
   group_by(site) %>%
   mutate_each(funs(scale), -site, -year_of) %>%
-  group_by(site) %>%
   gather(var, lag0, -site, -year_of) %>%
   group_by(site, var) %>%
   arrange(year_of) %>%
@@ -167,6 +166,7 @@ g <- separate(g, var, c("index", "var"), fixed("_v"))
 
 res <- list()
 res_avg <- list()
+res_enso <- list()
 counter <- 1
 
 for (j in levels(factor(g$site))) {
@@ -241,25 +241,28 @@ for (j in levels(factor(g$site))) {
   g_surv_models <- tbl_df(bind_rows(temp))
 
   g_best <- filter(g_surv_models, rank == 1)
+  temp <- suppressMessages(inner_join(g_models_sel,
+                                      select(g_best, index, age_class, var, scenario)))
+  temp$site <- current_site
+  res[[counter]] <- temp
 
   g_avg <- g_surv_models %>%
     filter(str_detect(var, "annual_mean")) %>%
     group_by(index, age_class) %>%
     top_n(n = 1, wt = -rank)
-
-  temp <- suppressMessages(inner_join(g_models_sel,
-                                      select(g_best, index, age_class, var, scenario)))
-
-  temp$site <- current_site
-
-  res[[counter]] <- temp
-
   temp <- suppressMessages(inner_join(g_models_sel,
                                       select(g_avg, index, age_class, var, scenario)))
-
   temp$site <- current_site
-
   res_avg[[counter]] <- temp
+
+  g_enso <- g_surv_models %>%
+    filter(index == "oni") %>%
+    group_by(index, age_class) %>%
+    top_n(n = 1, wt = -rank)
+  temp <- suppressMessages(inner_join(g_models_sel,
+                                      select(g_enso, index, age_class, var, scenario)))
+  temp$site <- current_site
+  res_enso[[counter]] <- temp
 
   counter <- counter + 1
 }
@@ -269,6 +272,9 @@ g <- bind_rows(res)
 
 # Best among annual average models only
 g_avg <- bind_rows(res_avg)
+
+# Best among ENSO models only
+g_enso <- bind_rows(res_enso)
 
 # Given this set of "best global models" (one for each site/age class/index),
 # find the one that is best for each site and age class
@@ -767,7 +773,7 @@ ggplot(temp, aes(y = scale, x = age_class, fill = delta)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = rev(brewer.pal(9, "Reds")),
                        # colours = rev(viridis(256)[1:256]),
-                       trans = sqrt_trans(),
+                       # trans = sqrt_trans(),
                        name = expression(paste(Delta, "AICc"))) +
   facet_grid(. ~ site) +
   theme_bw() +
