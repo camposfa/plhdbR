@@ -1,3 +1,6 @@
+if (!("plhdbR" %in% installed.packages()[,"Package"]))
+  devtools::install_github("camposfa/plhdbR")
+
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
