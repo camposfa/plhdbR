@@ -3,10 +3,10 @@ rm(list = ls())
 
 # If running the script from scratch
 # load("ClimatePred1.RData")
-load("ClimatePred2.RData")
+# load("ClimatePred2.RData")
 
 # If script already run and resuming workspace
-# load(".RData")
+load(".RData")
 
 # ---- survival -----------------------------------------------------------
 
@@ -190,54 +190,8 @@ ggplot(temp, aes(x = age_class, y = var, fill = (AICc - null_AICc))) +
   labs(x = "\nAge Class", y = "Cliamte Variable\n") +
   coord_equal()
 
-temp1 <- temp %>%
-  group_by(site, age_class) %>%
-  mutate(min_AICc = min(AICc),
-         delta = AICc - min_AICc) %>%
-  ungroup() %>%
-  group_by(site, age_class, var) %>%
-  top_n(n = 1, wt = -rank)
-
-colvec <- c(rep("#53777A", 4), rep("#542437", 4), rep("#C02942", 5), rep("#D95B43", 4))
-
-ggplot(temp1, aes(y = var, x = age_class, fill = delta)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c(rev(brewer.pal(9, "Reds")), "#FFFFFF"),
-                       trans = log1p_trans(),
-                       name = expression(paste(Delta, "AICc"))) +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        panel.grid = element_blank(),
-        legend.key.width = unit(2, "cm"),
-        # axis.text.y = element_text(color = colvec),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-        legend.key.height = unit(0.2, "cm")) +
-  labs(y = "Scale of Climate Variable\n", x = "\nAge Class") +
-  coord_equal()
-
 ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
-       width = 11, height = 8.5, units = "in")
-
-# Pick best lag scenario
-ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = "AICc relative to Null Model",
-                       # trans = sqrt_sign_trans(),
-                       limits = c(-lim, lim)) +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(y = "Climate Variable\n", y = "\nAge Class") +
-  coord_equal()
-
+       width = 9, height = 16, units = "in")
 
 # Plot Deviance
 ggplot(temp, aes(x = age_class, y = var, fill = D)) +
@@ -259,124 +213,132 @@ ggplot(temp, aes(x = age_class, y = var, fill = D)) +
 ggsave("plots/models/Survival_AllLagScenarios_Deviance.pdf",
        width = 9, height = 16, units = "in")
 
+# temp1 <- temp %>%
+#   group_by(site, age_class) %>%
+#   mutate(min_AICc = min(AICc),
+#          delta = AICc - min_AICc) %>%
+#   ungroup() %>%
+#   group_by(site, age_class, var) %>%
+#   top_n(n = 1, wt = -rank)
+#
+# ggplot(temp1, aes(y = var, x = age_class, fill = delta)) +
+#   geom_tile(size = 0.1, color = "black") +
+#   scale_fill_gradientn(colours = c(rev(brewer.pal(9, "Reds")), "#FFFFFF"),
+#                        trans = log1p_trans(),
+#                        name = expression(paste(Delta, "AICc"))) +
+#   facet_grid(. ~ site) +
+#   theme_bw() +
+#   theme(strip.background = element_blank(),
+#         legend.position = "bottom",
+#         panel.grid = element_blank(),
+#         legend.key.width = unit(2, "cm"),
+#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+#         legend.key.height = unit(0.2, "cm")) +
+#   labs(y = "Scale of Climate Variable\n", x = "\nAge Class") +
+#   coord_equal()
+
+# Pick best lag scenario
+ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+                       name = "AICc relative to Null Model",
+                       # trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "Climate Variable\n", x = "\nAge Class") +
+  coord_equal()
+
+ggsave("plots/models/Survival_BestLagScenarios_AIC.pdf",
+       width = 11, height = 8.5, units = "in")
+
+
 
 # All CIs / SEs
 
-temp <- mod4 %>%
+sc_0 <- mod4 %>%
   filter(scenario == "mod_0" & var %ni% c("null"))
 
-temp1 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) coef(summary(x))["lag0", "Std. Error"]))
-temp2 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) confint(x, method = "Wald")["lag0", ]))
+sc_01 <- cbind(sc_0[, 1:3], ldply(sc_0$model, .fun = function(x) coef(summary(x))["lag0", "Std. Error"]))
+sc_02 <- cbind(sc_0[, 1:3], ldply(sc_0$model, .fun = function(x) confint(x, method = "Wald")["lag0", ]))
 
-temp <- surv_models %>%
+sc_0 <- surv_models %>%
   filter(scenario == "Lag 0" & var %ni% c("null"))
 
-temp$var <- factor(temp$var)
-temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
-temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
+sc_0$var <- factor(sc_0$var)
+sc_02$var <- factor(sc_02$var, levels = levels(factor(sc_0$var)))
+sc_01$var <- factor(sc_01$var, levels = levels(factor(sc_0$var)))
 
-temp_lag0 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag0)[(ncol(temp_lag0) - 2):ncol(temp_lag0)] <- c("se", "lower_ci", "upper_ci")
+sc_0_lag0 <- sc_0 %>% inner_join(sc_01) %>% inner_join(sc_02)
+names(sc_0_lag0)[(ncol(sc_0_lag0) - 2):ncol(sc_0_lag0)] <- c("se", "lower_ci", "upper_ci")
 
-temp <- mod4 %>%
+sc_1 <- mod4 %>%
   filter(scenario == "mod_1" & var %ni% c("null"))
 
-temp1 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) coef(summary(x))["lag1", "Std. Error"]))
-temp2 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
+sc_11 <- cbind(sc_1[, 1:3], ldply(sc_1$model, .fun = function(x) coef(summary(x))["lag1", "Std. Error"]))
+sc_12 <- cbind(sc_1[, 1:3], ldply(sc_1$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
 
-temp <- surv_models %>%
+sc_1 <- surv_models %>%
   filter(scenario == "Lag 1" & var %ni% c("null"))
 
-temp$var <- factor(temp$var)
-temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
-temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
+sc_1$var <- factor(sc_1$var)
+sc_12$var <- factor(sc_12$var, levels = levels(factor(sc_1$var)))
+sc_11$var <- factor(sc_11$var, levels = levels(factor(sc_1$var)))
 
-temp_lag1 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag1)[(ncol(temp_lag1) - 2):ncol(temp_lag1)] <- c("se", "lower_ci", "upper_ci")
+sc_1_lag1 <- sc_1 %>% inner_join(sc_11) %>% inner_join(sc_12)
+names(sc_1_lag1)[(ncol(sc_1_lag1) - 2):ncol(sc_1_lag1)] <- c("se", "lower_ci", "upper_ci")
 
-temp <- mod4 %>%
+sc_2 <- mod4 %>%
   filter(scenario == "mod_2" & var %ni% c("null"))
 
-temp1 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) coef(summary(x))["lag2", "Std. Error"]))
-temp2 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) confint(x, method = "Wald")["lag2", ]))
+sc_21 <- cbind(sc_2[, 1:3], ldply(sc_2$model, .fun = function(x) coef(summary(x))["lag2", "Std. Error"]))
+sc_22 <- cbind(sc_2[, 1:3], ldply(sc_2$model, .fun = function(x) confint(x, method = "Wald")["lag2", ]))
 
-temp <- surv_models %>%
+sc_2 <- surv_models %>%
   filter(scenario == "Lag 2" & var %ni% c("null"))
 
-temp$var <- factor(temp$var)
-temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
-temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
+sc_2$var <- factor(sc_2$var)
+sc_22$var <- factor(sc_22$var, levels = levels(factor(sc_2$var)))
+sc_21$var <- factor(sc_21$var, levels = levels(factor(sc_2$var)))
 
-temp_lag2 <- temp %>% inner_join(temp1) %>% inner_join(temp2)
-names(temp_lag2)[(ncol(temp_lag2) - 2):ncol(temp_lag2)] <- c("se", "lower_ci", "upper_ci")
+sc_2_lag2 <- sc_2 %>% inner_join(sc_21) %>% inner_join(sc_22)
+names(sc_2_lag2)[(ncol(sc_2_lag2) - 2):ncol(sc_2_lag2)] <- c("se", "lower_ci", "upper_ci")
 
-temp <- bind_rows(temp_lag0, temp_lag1, temp_lag2)
+sc <- bind_rows(sc_0_lag0, sc_1_lag1, sc_2_lag2)
 
-t <- temp %>%
+st <- sc %>%
   select(-scenario) %>%
   gather(lag, estimate, lag0, lag1, lag2) %>%
   filter(!is.na(estimate))
 
-t$lag <- mapvalues(t$lag,
-                   from = c("lag0", "lag1", "lag2"),
-                   to = c("Lag 0", "Lag 1", "Lag 2"))
+st$lag <- mapvalues(st$lag,
+                    from = c("lag0", "lag1", "lag2"),
+                    to = c("Lag 0", "Lag 1", "Lag 2"))
 
-lim <-  max(c(abs(min(t$null_AICc - t$AICc, na.rm = TRUE)),
-              abs(max(t$null_AICc - t$AICc, na.rm = TRUE))))
+lim <-  max(c(abs(min(st$null_AICc - st$AICc, na.rm = TRUE)),
+              abs(max(st$null_AICc - st$AICc, na.rm = TRUE))))
 
-
-# Plot coefficients separately for each population
-
-# for(i in 1:length(levels(temp$site))){
-#
-#   current_site = levels(temp$site)[i]
-#
-#   temp4 <- filter(temp, site == current_site)
-#
-#   lim <-  max(c(abs(min(temp4$null_AICc - temp4$AICc, na.rm = TRUE)),
-#                 abs(max(temp4$null_AICc - temp4$AICc, na.rm = TRUE))))
-#
-#   ggplot(temp4, aes(x = lag1, y = var, color = (AICc - null_AICc))) +
-#     geom_point(size = 3) +
-#     geom_errorbarh(aes(xmin = lag1 - se, xmax = lag1 + se),
-#                    height = 0.3, size = 0.75) +
-#     scale_color_gradientn(colours = brewer.pal(9, "RdGy"),
-#                           name = expression(paste(Delta, "AICc relative to Null Model")),
-#                           limits = c(-lim, lim),
-#                           trans = sqrt_sign_trans()) +
-#     geom_vline(xintercept = 0, lty = 2) +
-#     facet_grid(age_class ~ .) +
-#     theme_bw() +
-#     theme(strip.background = element_blank(),
-#           legend.position = "bottom",
-#           legend.key.width = unit(2, "cm"),
-#           legend.key.height = unit(0.2, "cm"),
-#           axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-#     labs(x = "Scaled Coefficient Estimate\n", y = "\nPopulation",
-#          title = paste(current_site, ":\n",
-#                        "Scaled Coefficient Estimates for Lag-1 Models of Stage-specific Survival\n",
-#                        sep = "")) +
-#     coord_flip()
-#
-# #   ggsave(paste("plots/models/Survival_Lag1_Coefficients_",
-# #                i, "_", current_site, ".pdf", sep = ""),
-# #          width = 8, height = 11, units = "in")
-# }
 
 # Plot both lag scenarios for each site separately
 
-t <- t %>%
+st <- st %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
 
-lim <-  max(c(abs(min(t$D, na.rm = TRUE)),
-              abs(max(t$D, na.rm = TRUE))))
+lim <-  max(c(abs(min(st$D, na.rm = TRUE)),
+              abs(max(st$D, na.rm = TRUE))))
 
-for (i in 1:length(levels(t$site))) {
+for (i in 1:length(levels(st$site))) {
 
-  current_site = levels(t$site)[i]
+  current_site = levels(st$site)[i]
 
-  temp4 <- filter(t, site == current_site)
+  temp4 <- filter(st, site == current_site)
 
   ggplot(temp4, aes(x = estimate, y = var, color = D)) +
     geom_point(size = 3) +
@@ -397,12 +359,11 @@ for (i in 1:length(levels(t$site))) {
     labs(x = "Scaled Coefficient Estimate\n", y = "\nVariable",
          title = paste(current_site, ":\n",
                        "Scaled Coefficient Estimates for Models of Survival\n",
-                       sep = "")) +
-    coord_flip()
+                       sep = ""))
 
   ggsave(paste("plots/models/Survival_Lags_Coefficients_",
                i, "_", current_site, ".pdf", sep = ""),
-         width = 14, height = 11, units = "in")
+         width = 8.5, height = 11, units = "in")
 }
 
 
@@ -553,6 +514,14 @@ fert_models %>%
   select(-null_AICc, -null_delta, -null_deviance) %>%
   View()
 
+best_fert_scenarios2 <- fert_models %>%
+  group_by(site, var) %>%
+  top_n(1, -rank) %>%
+  ungroup() %>%
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
+         D = 1 - (deviance / null_deviance)) %>%
+  select(-null_AICc, -null_delta, -null_deviance)
+
 
 # Plot
 
@@ -563,13 +532,13 @@ temp <- fert_models %>%
 lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
               abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
 
-ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
+ggplot(temp, aes(y = var, x = scenario, fill = (AICc - null_AICc))) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = expression(paste(Delta, "AICc relative to Null Model")),
+                       name = "AICc relative to Null Model",
                        # trans = sqrt_sign_trans(),
                        limits = c(-lim, lim)) +
-  facet_wrap(~site, nrow = 7) +
+  facet_grid(. ~ site) +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
@@ -577,14 +546,16 @@ ggplot(temp, aes(x = var, y = scenario, fill = (AICc - null_AICc))) +
         legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  labs(x = "\nClimate Variable", y = "Lag Scenario\n")
+  labs(x = "\nClimate Variable", y = "Lag Scenario\n") +
+  coord_equal()
 
 ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
-       width = 8, height = 12, units = "in")
+       width = 11, height = 8.5, units = "in")
 
-lim <- max(temp$D)
 
 # Deviance
+lim <- max(temp$D)
+
 ggplot(temp, aes(y = var, x = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
@@ -595,82 +566,128 @@ ggplot(temp, aes(y = var, x = scenario, fill = D)) +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
         legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.5, "cm"),
+        legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5)) +
   labs(x = "\nClimate Variable", y = "Lag Scenario\n") +
   coord_equal()
 
 ggsave("plots/models/Fertility_AllLagScenarios_Deviance.pdf",
-       width = 8, height = 12, units = "in")
+       width = 8.5, height = 11, units = "in")
+
+# temp1 <- temp %>%
+#   group_by(site) %>%
+#   mutate(min_AICc = min(AICc),
+#          delta = AICc - min_AICc) %>%
+#   ungroup() %>%
+#   group_by(site, var) %>%
+#   top_n(n = 1, wt = -rank)
+#
+# ggplot(temp1, aes(y = var, x = site, fill = delta)) +
+#   geom_tile(size = 0.1, color = "black") +
+#   scale_fill_gradientn(colours = c(rev(brewer.pal(9, "Reds")), "#FFFFFF"),
+#                        trans = log1p_trans(),
+#                        name = expression(paste(Delta, "AICc"))) +
+#   # facet_grid(. ~ site) +
+#   theme_bw() +
+#   theme(strip.background = element_blank(),
+#         legend.position = "bottom",
+#         panel.grid = element_blank(),
+#         legend.key.width = unit(2, "cm"),
+#         # axis.text.y = element_text(color = colvec),
+#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
+#         legend.key.height = unit(0.2, "cm")) +
+#   labs(y = "Scale of Climate Variable\n", x = "\nPopulation") +
+#   coord_equal()
+#
+# ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
+#        width = 8, height = 12, units = "in")
+
+ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = delta_AICc_vs_null)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+                       name = "AICc relative to Null Model",
+                       limits = c(-lim, lim)) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "Climate Variable\n", x = "\nPopulation") +
+  coord_equal()
+
+ggsave("plots/models/Fertility_BestLagScenarios_AIC.pdf",
+       width = 11, height = 8.5, units = "in")
 
 
 # Coefficients
-temp <- mod5 %>%
+fc_0 <- mod5 %>%
   filter(scenario == "mod_0" & var %ni% c("null"))
 
-temp1 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) coef(summary(x))["lag0", "Std. Error"]))
-temp2 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) confint(x, method = "Wald")["lag0", ]))
+fc_01 <- cbind(fc_0[, 1:3], ldply(fc_0$model, .fun = function(x) coef(summary(x))["lag0", "Std. Error"]))
+fc_02 <- cbind(fc_0[, 1:3], ldply(fc_0$model, .fun = function(x) confint(x, method = "Wald")["lag0", ]))
 
-temp1 <- select(temp1, -model)
-temp2 <- select(temp2, -model)
+fc_01 <- select(fc_01, -model)
+fc_02 <- select(fc_02, -model)
 
-temp <- fert_models %>%
+fc_0 <- fert_models %>%
   filter(scenario == "Lag 0" & var %ni% c("null"))
 
-temp$var <- factor(temp$var)
-temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
-temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
+fc_0$var <- factor(fc_0$var)
+fc_02$var <- factor(fc_02$var, levels = levels(factor(fc_0$var)))
+fc_01$var <- factor(fc_01$var, levels = levels(factor(fc_0$var)))
 
-temp_lag0 <- temp %>%
-  inner_join(temp1, by = c("site", "var")) %>%
-  inner_join(temp2, by = c("site", "var"))
+fc_0_lag0 <- fc_0 %>%
+  inner_join(fc_01, by = c("site", "var")) %>%
+  inner_join(fc_02, by = c("site", "var"))
 
-names(temp_lag0)[(ncol(temp_lag0) - 2):ncol(temp_lag0)] <- c("se", "lower_ci", "upper_ci")
+names(fc_0_lag0)[(ncol(fc_0_lag0) - 2):ncol(fc_0_lag0)] <- c("se", "lower_ci", "upper_ci")
 
-temp <- mod5 %>%
+fc_1 <- mod5 %>%
   filter(scenario == "mod_1" & var %ni% c("null"))
 
-temp1 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) coef(summary(x))["lag1", "Std. Error"]))
-temp2 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
+fc_11 <- cbind(fc_1[, 1:3], ldply(fc_1$model, .fun = function(x) coef(summary(x))["lag1", "Std. Error"]))
+fc_12 <- cbind(fc_1[, 1:3], ldply(fc_1$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
 
-temp1 <- select(temp1, -model)
-temp2 <- select(temp2, -model)
+fc_11 <- select(fc_11, -model)
+fc_12 <- select(fc_12, -model)
 
-temp <- fert_models %>%
+fc_1 <- fert_models %>%
   filter(scenario == "Lag 1" & var %ni% c("null"))
 
-temp$var <- factor(temp$var)
-temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
-temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
+fc_1$var <- factor(fc_1$var)
+fc_12$var <- factor(fc_12$var, levels = levels(factor(fc_1$var)))
+fc_11$var <- factor(fc_11$var, levels = levels(factor(fc_1$var)))
 
-temp_lag1 <- temp %>%
-  inner_join(temp1) %>%
-  inner_join(temp2)
+fc_1_lag1 <- fc_1 %>%
+  inner_join(fc_11) %>%
+  inner_join(fc_12)
 
-names(temp_lag1)[(ncol(temp_lag1) - 2):ncol(temp_lag1)] <- c("se", "lower_ci", "upper_ci")
+names(fc_1_lag1)[(ncol(fc_1_lag1) - 2):ncol(fc_1_lag1)] <- c("se", "lower_ci", "upper_ci")
 
-temp <- mod5 %>%
+fc_2 <- mod5 %>%
   filter(scenario == "mod_2" & var %ni% c("null"))
 
-temp1 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) coef(summary(x))["lag2", "Std. Error"]))
-temp2 <- cbind(temp[, 1:3], ldply(temp$model, .fun = function(x) confint(x, method = "Wald")["lag2", ]))
+fc_21 <- cbind(fc_2[, 1:3], ldply(fc_2$model, .fun = function(x) coef(summary(x))["lag2", "Std. Error"]))
+fc_22 <- cbind(fc_2[, 1:3], ldply(fc_2$model, .fun = function(x) confint(x, method = "Wald")["lag2", ]))
 
-temp1 <- select(temp1, -model)
-temp2 <- select(temp2, -model)
+fc_21 <- select(fc_21, -model)
+fc_22 <- select(fc_22, -model)
 
-temp <- fert_models %>%
+fc_2 <- fert_models %>%
   filter(scenario == "Lag 2" & var %ni% c("null"))
 
-temp$var <- factor(temp$var)
-temp2$var <- factor(temp2$var, levels = levels(factor(temp$var)))
-temp1$var <- factor(temp1$var, levels = levels(factor(temp$var)))
+fc_2$var <- factor(fc_2$var)
+fc_22$var <- factor(fc_22$var, levels = levels(factor(fc_2$var)))
+fc_21$var <- factor(fc_21$var, levels = levels(factor(fc_2$var)))
 
-temp_lag2 <- temp %>%
-  inner_join(temp1) %>%
-  inner_join(temp2)
+fc_2_lag2 <- fc_2 %>%
+  inner_join(fc_21) %>%
+  inner_join(fc_22)
 
-names(temp_lag2)[(ncol(temp_lag2) - 2):ncol(temp_lag2)] <- c("se", "lower_ci", "upper_ci")
+names(fc_2_lag2)[(ncol(fc_2_lag2) - 2):ncol(fc_2_lag2)] <- c("se", "lower_ci", "upper_ci")
 
 temp <- bind_rows(temp_lag0, temp_lag1, temp_lag2)
 
@@ -684,10 +701,6 @@ t$lag <- mapvalues(t$lag,
                    to = c("Lag 0", "Lag 1", "Lag 2"))
 
 lim <- max(t$delta)
-
-# colvec <- c(rep("#53777A", 5), rep("#542437", 4), rep("#C02942", 6), rep("#D95B43", 8))
-#
-# heat.pal <- heat_hcl(9, c = c(80, 30), l = c(30, 90), power = c(1/5, 2))
 
 for (i in 1:length(levels(t$site))) {
 
@@ -716,103 +729,7 @@ for (i in 1:length(levels(t$site))) {
                        "Scaled Coefficient Estimates for\nModels of Adult Female Fertility\n",
                        sep = ""))
 
-  ggsave(paste("plots/models/Fertility_Lag0_Lag1_Coefficients_",
+  ggsave(paste("plots/models/Fertility_Lags_Coefficients_",
                i, "_", current_site, ".pdf", sep = ""),
          width = 7, height = 8, units = "in")
 }
-
-
-
-
-
-
-# ---- following_Adler_2012 -----------------------------------------------
-
-mod3 <- mod_df %>%
-  ungroup() %>%
-  filter(!str_detect(var, "monthly") & !str_detect(var, "tavg")) %>%
-  group_by(site, age_class, var) %>%
-  do(mod_constant = glm(fate ~ 1, data = ., family = "binomial"),
-     mod_climate_0 = glm(fate ~ lag0, data = ., family = "binomial"),
-     mod_full_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_climate_1 = glm(fate ~ lag1, data = ., family = "binomial"),
-     mod_full_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"))
-
-mod4 <- NULL
-k <- 1
-for (i in 1:nrow(mod3)) {
-  for (j in 4:ncol(mod3)) {
-    temp <- select(mod3[i, ], 1:3, j)
-    temp$scenario <- names(temp)[4]
-    names(temp)[4] <- "model"
-    mod4[[k]] <- temp
-    k <- k + 1
-  }
-}
-
-mod4 <- bind_rows(mod4)
-
-mod4 <- filter(mod4, scenario != "mod_constant" | (scenario == "mod_constant" & var == "rain_anomaly_mean"))
-var_levels <- c(levels(factor(mod4$var)), "constant")
-mod4$var <- factor(mod4$var, levels = var_levels)
-mod4[mod4$scenario == "mod_constant", ]$var <- "constant"
-
-mod_sel <- mod4 %>%
-  group_by(site, age_class) %>%
-  do(m_table = model.sel(.$model),
-     vars = data.frame(var = .$var),
-     scenarios = data.frame(scenario = .$scenario),
-     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
-
-temp <- NULL
-
-for (i in 1:nrow(mod_sel)) {
-  m_table <- data.frame(mod_sel[i, ]$m_table[[1]])
-  m_table$num <- rownames(m_table)
-
-  vars <- mod_sel[i, ]$vars[[1]]
-  vars$num <- rownames(vars)
-
-  scenarios <- mod_sel[i, ]$scenarios[[1]]
-  scenarios$num <- rownames(scenarios)
-
-  deviance <- mod_sel[i, ]$deviance[[1]]
-  deviance$num <- rownames(deviance)
-
-  temp1 <- suppressMessages(inner_join(m_table, vars))
-  temp1 <- suppressMessages(inner_join(temp1, scenarios))
-  temp1 <- suppressMessages(inner_join(temp1, deviance))
-  temp1$site <- mod_sel[i, ]$site
-  temp1$age_class <- mod_sel[i, ]$age_class
-  temp1$rank <- as.numeric(rownames(temp1))
-
-  temp1 <- temp1 %>%
-    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:9)
-
-  temp[[i]] <- temp1
-
-}
-
-surv_models <- tbl_df(bind_rows(temp))
-
-null_aic <- surv_models %>%
-  filter(var == "constant") %>%
-  select(site, age_class, null_AICc = AICc, null_delta = delta,
-         null_weight = weight, null_deviance = deviance)
-
-full_aic <- surv_models %>%
-  filter(str_detect(scenario, "full_1")) %>%
-  select(site, age_class, var, full_AICc = AICc, full_delta = delta,
-         full_weight = weight, full_deviance = deviance)
-
-climate_aic <- surv_models %>%
-  filter(str_detect(scenario, "climate_1")) %>%
-  select(site, age_class, var, climate_AICc = AICc, climate_delta = delta,
-         climate_weight = weight, climate_deviance = deviance)
-
-temp <- full_aic %>%
-  inner_join(climate_aic) %>%
-  inner_join(null_aic)
-
-temp <- temp %>%
-  mutate(D = (climate_deviance - null_deviance) / (full_deviance - null_deviance))
