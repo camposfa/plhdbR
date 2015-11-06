@@ -234,22 +234,24 @@ temp1 <- select(bioclim_df, site, year_of,
                 temp_range_annual = v07_temp_annual_range)
 
 temp2 <- indclim_df %>%
-  select(site, year_of, contains("v01")) %>%
-  rename(amo_mean = amo_v01_annual_mean,
-         dmi_mean = dmi_v01_annual_mean,
-         n34_mean = nino3.4_v01_annual_mean,
-         pdo_mean = pdo_v01_annual_mean,
-         nao_mean = nao_v01_annual_mean)
+  select(site, year_of, matches("v0[1345]"))
+
+names(temp2) <- str_replace(names(temp2), pattern = "v0[12345]_", "")
+
+# temp2 <- indclim_df %>%
+#   select(site, year_of, contains("v01")) %>%
+#   rename(amo_mean = amo_v01_annual_mean,
+#          dmi_mean = dmi_v01_annual_mean,
+#          n34_mean = nino3.4_v01_annual_mean,
+#          pdo_mean = pdo_v01_annual_mean,
+#          nao_mean = nao_v01_annual_mean)
 
 temp3 <- speiclim_df %>%
-  select(site, year_of, contains("v01")) %>%
-  rename(spei01_mean = spei_01_v01_annual_mean,
-         spei03_mean = spei_03_v01_annual_mean,
-         spei06_mean = spei_06_v01_annual_mean,
-         spei12_mean = spei_12_v01_annual_mean)
+  select(site, year_of, matches("03_v0[1345]"))
+
+names(temp3) <- str_replace(names(temp3), pattern = "v0[12345]_", "")
 
 climate_predictors <- temp1 %>%
-  left_join(temp1) %>%
   left_join(temp2) %>%
   left_join(temp3)
 

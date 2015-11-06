@@ -3,10 +3,10 @@ rm(list = ls())
 
 # If running the script from scratch
 # load("ClimatePred1.RData")
-# load("ClimatePred2.RData")
+load("ClimatePred2.RData")
 
 # If script already run and resuming workspace
-load(".RData")
+# load(".RData")
 
 # ---- survival -----------------------------------------------------------
 
@@ -163,6 +163,9 @@ best_surv_scenarios2 <- surv_models %>%
   select(-null_AICc, -null_delta, -null_deviance)
 
 
+
+# ---- Survival_tile_plots ------------------------------------------------
+
 # All lag scenarios
 
 surv_plots <- surv_models %>%
@@ -173,7 +176,7 @@ surv_plots <- surv_models %>%
 lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
               abs(max(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE))))
 
-ggplot(surv_plots, aes(x = age_class, y = var, fill = (AICc - null_AICc))) +
+ggplot(surv_plots, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = "AICc relative to Null Model",
@@ -191,58 +194,38 @@ ggplot(surv_plots, aes(x = age_class, y = var, fill = (AICc - null_AICc))) +
   coord_equal()
 
 ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
-       width = 9, height = 16, units = "in")
+       width = 9, height = 20, units = "in")
 
+
+lim <- max(surv_plots$D)
 # Plot Deviance
 ggplot(surv_plots, aes(x = age_class, y = var, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
-                       # trans = sqrt_sign_trans(),
-                       name = "Proportional Reduction in Deviance") +
+  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
+                       limits = c(0, lim),
+                       name = "Proportional Reduction\nin Deviance") +
   facet_grid(scenario ~ site) +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
         legend.key.width = unit(2, "cm"),
         legend.key.height = unit(0.2, "cm"),
-        # axis.text.y = element_text(color = colvec),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
   labs(y = "Climate Variable\n", x = "\nAge Class") +
   coord_equal()
 
 ggsave("plots/models/Survival_AllLagScenarios_Deviance.pdf",
-       width = 9, height = 16, units = "in")
+       width = 9, height = 20, units = "in")
 
-# temp1 <- temp %>%
-#   group_by(site, age_class) %>%
-#   mutate(min_AICc = min(AICc),
-#          delta = AICc - min_AICc) %>%
-#   ungroup() %>%
-#   group_by(site, age_class, var) %>%
-#   top_n(n = 1, wt = -rank)
-#
-# ggplot(temp1, aes(y = var, x = age_class, fill = delta)) +
-#   geom_tile(size = 0.1, color = "black") +
-#   scale_fill_gradientn(colours = c(rev(brewer.pal(9, "Reds")), "#FFFFFF"),
-#                        trans = log1p_trans(),
-#                        name = expression(paste(Delta, "AICc"))) +
-#   facet_grid(. ~ site) +
-#   theme_bw() +
-#   theme(strip.background = element_blank(),
-#         legend.position = "bottom",
-#         panel.grid = element_blank(),
-#         legend.key.width = unit(2, "cm"),
-#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-#         legend.key.height = unit(0.2, "cm")) +
-#   labs(y = "Scale of Climate Variable\n", x = "\nAge Class") +
-#   coord_equal()
+
+lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
+              abs(max(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE))))
 
 # Pick best lag scenario
 ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = "AICc relative to Null Model",
-                       # trans = sqrt_sign_trans(),
                        limits = c(-lim, lim)) +
   facet_grid(. ~ site) +
   theme_bw() +
@@ -256,8 +239,32 @@ ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_nu
   coord_equal()
 
 ggsave("plots/models/Survival_BestLagScenarios_AIC.pdf",
-       width = 11, height = 8.5, units = "in")
+       width = 8.5, height = 11, units = "in")
 
+lim <- max(best_surv_scenarios2$D)
+
+ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
+                       name = "Proportional Reduction\nin Deviance",
+                       limits = c(0, lim)) +
+  facet_grid(. ~ site) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "Climate Variable\n", x = "\nAge Class") +
+  coord_equal()
+
+ggsave("plots/models/Survival_BestLagScenarios_Deviance.pdf",
+       width = 8.5, height = 11, units = "in")
+
+
+
+# ---- Survival_coefficients ----------------------------------------------
 
 
 # All CIs / SEs
@@ -321,45 +328,59 @@ st$lag <- mapvalues(st$lag,
                     from = c("lag0", "lag1", "lag2"),
                     to = c("Lag 0", "Lag 1", "Lag 2"))
 
+st$var <- factor(st$var)
+
 
 # Plot both lag scenarios for each site separately
 st <- st %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
 
-lim <-  max(c(abs(min(st$D, na.rm = TRUE)),
-              abs(max(st$D, na.rm = TRUE))))
-
 for (i in 1:length(levels(st$site))) {
 
-  current_site = levels(st$site)[i]
+  for (j in 1:length(levels(st$age_class))) {
 
-  temp4 <- filter(st, site == current_site)
+    current_site = levels(st$site)[i]
+    current_ac <- levels(st$age_class)[j]
 
-  ggplot(temp4, aes(x = estimate, y = var, color = D)) +
-    geom_point(size = 3) +
-    geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
-                   height = 0.3, size = 0.75) +
-    scale_color_gradientn(colours = brewer.pal(9, "Greens")[2:9],
-                          name = "Proportional Reduction\nin Deviance",
-                          trans = sqrt_sign_trans(),
-                          limits = c(0, lim)) +
-    geom_vline(xintercept = 0, lty = 2) +
-    theme_bw() +
-    facet_grid(lag ~ age_class) +
-    theme(strip.background = element_blank(),
-          legend.position = "bottom",
-          legend.key.width = unit(2, "cm"),
-          legend.key.height = unit(0.5, "cm"),
-          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-    labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
-         title = paste(current_site, ":\n",
-                       "Scaled Coefficient Estimates for Models of Survival\n",
-                       sep = ""))
+    temp4 <- filter(st, site == current_site & age_class == current_ac)
 
-  ggsave(paste("plots/models/Survival_Lags_Coefficients_",
-               i, "_", current_site, ".pdf", sep = ""),
-         width = 8.5, height = 11, units = "in")
+    temp4 <- temp4 %>%
+      unite(newvar, var, lag, sep = ", ", remove = FALSE)
+
+    temp4 <- temp4 %>%
+      group_by(site, var) %>%
+      top_n(1, -AICc)
+
+    lim <-  max(c(abs(min(temp4$D, na.rm = TRUE)),
+                  abs(max(temp4$D, na.rm = TRUE))))
+
+    ggplot(temp4, aes(x = estimate, y = newvar, color = D)) +
+      geom_point(size = 3) +
+      geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
+                     height = 0.3, size = 0.75) +
+      scale_color_gradientn(colours = c("gray90", rev(viridis(6))[2:6]),
+                            # colours = brewer.pal(9, "Greens")[2:9],
+                            name = "Proportional Reduction\nin Deviance",
+                            # trans = sqrt_sign_trans(),
+                            limits = c(0, lim)) +
+      geom_vline(xintercept = 0, lty = 2) +
+      theme_bw() +
+      # facet_wrap(~ age_class, drop = TRUE, scales = "free_y") +
+      theme(strip.background = element_blank(),
+            legend.position = "bottom",
+            legend.key.width = unit(2, "cm"),
+            legend.key.height = unit(0.5, "cm"),
+            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+      labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
+           title = paste(current_site, ", ", current_ac, ":\n",
+                         "Scaled Coefficient Estimates for Models of Survival\n",
+                         sep = ""))
+
+    ggsave(paste("plots/models/Survival_Coefficients_",
+                 i, "_", current_site, "_", current_ac, ".pdf", sep = ""),
+           width = 8, height = 10, units = "in")
+  }
 }
 
 rm(sc_0, sc_0_lag0, sc_01, sc_02, sc_1, sc_1_lag1, sc_11, sc_12, sc_2,
@@ -520,6 +541,9 @@ best_fert_scenarios2 <- fert_models %>%
   select(-null_AICc, -null_delta, -null_deviance)
 
 
+
+# ---- Fertility_tile_plots -----------------------------------------------
+
 # Plot
 
 fert_plots <- fert_models %>%
@@ -547,7 +571,7 @@ ggplot(fert_plots, aes(y = var, x = scenario, fill = (AICc - null_AICc))) +
   coord_equal()
 
 ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
-       width = 11, height = 8.5, units = "in")
+       width = 8.5, height = 11, units = "in")
 
 
 # Deviance
@@ -555,8 +579,8 @@ lim <- max(fert_plots$D)
 
 ggplot(fert_plots, aes(y = var, x = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
-                       name = "Proportional Reduction in Deviance",
+  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
+                       name = "Proportional Reduction\nin Deviance",
                        limits = c(0, lim)) +
   facet_grid(. ~ site) +
   theme_bw() +
@@ -572,33 +596,9 @@ ggplot(fert_plots, aes(y = var, x = scenario, fill = D)) +
 ggsave("plots/models/Fertility_AllLagScenarios_Deviance.pdf",
        width = 8.5, height = 11, units = "in")
 
-# temp1 <- temp %>%
-#   group_by(site) %>%
-#   mutate(min_AICc = min(AICc),
-#          delta = AICc - min_AICc) %>%
-#   ungroup() %>%
-#   group_by(site, var) %>%
-#   top_n(n = 1, wt = -rank)
-#
-# ggplot(temp1, aes(y = var, x = site, fill = delta)) +
-#   geom_tile(size = 0.1, color = "black") +
-#   scale_fill_gradientn(colours = c(rev(brewer.pal(9, "Reds")), "#FFFFFF"),
-#                        trans = log1p_trans(),
-#                        name = expression(paste(Delta, "AICc"))) +
-#   # facet_grid(. ~ site) +
-#   theme_bw() +
-#   theme(strip.background = element_blank(),
-#         legend.position = "bottom",
-#         panel.grid = element_blank(),
-#         legend.key.width = unit(2, "cm"),
-#         # axis.text.y = element_text(color = colvec),
-#         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1),
-#         legend.key.height = unit(0.2, "cm")) +
-#   labs(y = "Scale of Climate Variable\n", x = "\nPopulation") +
-#   coord_equal()
-#
-# ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
-#        width = 8, height = 12, units = "in")
+
+lim <-  max(c(abs(min(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE)),
+              abs(max(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE))))
 
 ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
@@ -616,7 +616,31 @@ ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = delta_AICc_vs_null)) 
   coord_equal()
 
 ggsave("plots/models/Fertility_BestLagScenarios_AIC.pdf",
-       width = 11, height = 8.5, units = "in")
+       width = 8.5, height = 11, units = "in")
+
+lim <- max(fert_plots$D)
+
+ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = D)) +
+  geom_tile(size = 0.1, color = "black") +
+  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
+                       name = "Proportional Reduction\nin Deviance",
+                       limits = c(0, lim)) +
+  theme_bw() +
+  theme(strip.background = element_blank(),
+        legend.position = "bottom",
+        legend.key.width = unit(2, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        panel.grid = element_blank(),
+        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(y = "Climate Variable\n", x = "\nPopulation") +
+  coord_equal()
+
+ggsave("plots/models/Fertility_BestLagScenarios_Deviance.pdf",
+       width = 8.5, height = 11, units = "in")
+
+
+
+# ---- Fertility_coefficients ---------------------------------------------
 
 
 # Coefficients
@@ -702,29 +726,35 @@ ft <- ft %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
 
-lim <-  max(c(abs(min(ft$D, na.rm = TRUE)),
-              abs(max(ft$D, na.rm = TRUE))))
 
 for (i in 1:length(levels(ft$site))) {
 
   current_site = levels(ft$site)[i]
 
-  temp4 <- filter(ft, site == current_site)
+  temp4 <- filter(st, site == current_site)
 
-  ggplot(temp4, aes(x = estimate, y = var, color = D)) +
+  temp4 <- temp4 %>%
+    unite(newvar, var, lag, sep = ", ", remove = FALSE)
+
+  temp4 <- temp4 %>%
+    group_by(site, var) %>%
+    top_n(1, -AICc)
+
+  lim <-  max(c(abs(min(temp4$D, na.rm = TRUE)),
+                abs(max(temp4$D, na.rm = TRUE))))
+
+  ggplot(temp4, aes(x = estimate, y = newvar, color = D)) +
     geom_point(size = 3) +
     geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
                    height = 0.3, size = 0.75) +
-    scale_color_gradientn(colours = brewer.pal(9, "Greens")[2:9],
+    scale_color_gradientn(colours = c("gray90", rev(viridis(6))[2:6]),
                           name = "Proportional Reduction\nin Deviance",
-                          # trans = sqrt_sign_trans(),
                           limits = c(0, lim)) +
     geom_vline(xintercept = 0, lty = 2) +
     theme_bw() +
-    facet_grid(lag ~ .) +
     theme(strip.background = element_blank(),
           legend.position = "bottom",
-          legend.key.width = unit(1.5, "cm"),
+          legend.key.width = unit(2, "cm"),
           legend.key.height = unit(0.5, "cm"),
           axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
     labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
@@ -732,9 +762,9 @@ for (i in 1:length(levels(ft$site))) {
                        "Scaled Coefficient Estimates for Models of Fertility\n",
                        sep = ""))
 
-  ggsave(paste("plots/models/Fertility_Lags_Coefficients_",
+  ggsave(paste("plots/models/Fertility_Coefficients_",
                i, "_", current_site, ".pdf", sep = ""),
-         width = 6.5, height = 11, units = "in")
+         width = 8, height = 10, units = "in")
 }
 
 rm(fc_0, fc_0_lag0, fc_01, fc_02, fc_1, fc_1_lag1, fc_11, fc_12, fc_2,
