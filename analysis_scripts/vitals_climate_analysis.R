@@ -165,15 +165,15 @@ best_surv_scenarios2 <- surv_models %>%
 
 # All lag scenarios
 
-temp <- surv_models %>%
+surv_plots <- surv_models %>%
   filter(var != "null") %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
 
-lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
-              abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
+lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
+              abs(max(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE))))
 
-ggplot(temp, aes(x = age_class, y = var, fill = (AICc - null_AICc))) +
+ggplot(surv_plots, aes(x = age_class, y = var, fill = (AICc - null_AICc))) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = "AICc relative to Null Model",
@@ -194,7 +194,7 @@ ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
        width = 9, height = 16, units = "in")
 
 # Plot Deviance
-ggplot(temp, aes(x = age_class, y = var, fill = D)) +
+ggplot(surv_plots, aes(x = age_class, y = var, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
                        # trans = sqrt_sign_trans(),
@@ -321,12 +321,8 @@ st$lag <- mapvalues(st$lag,
                     from = c("lag0", "lag1", "lag2"),
                     to = c("Lag 0", "Lag 1", "Lag 2"))
 
-lim <-  max(c(abs(min(st$null_AICc - st$AICc, na.rm = TRUE)),
-              abs(max(st$null_AICc - st$AICc, na.rm = TRUE))))
-
 
 # Plot both lag scenarios for each site separately
-
 st <- st %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance))
@@ -356,7 +352,7 @@ for (i in 1:length(levels(st$site))) {
           legend.key.width = unit(2, "cm"),
           legend.key.height = unit(0.5, "cm"),
           axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-    labs(x = "Scaled Coefficient Estimate\n", y = "\nVariable",
+    labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
          title = paste(current_site, ":\n",
                        "Scaled Coefficient Estimates for Models of Survival\n",
                        sep = ""))
@@ -366,7 +362,8 @@ for (i in 1:length(levels(st$site))) {
          width = 8.5, height = 11, units = "in")
 }
 
-
+rm(sc_0, sc_0_lag0, sc_01, sc_02, sc_1, sc_1_lag1, sc_11, sc_12, sc_2,
+   sc_2_lag2, sc_21, sc_22)
 
 
 # ---- fertility ----------------------------------------------------------
@@ -525,14 +522,14 @@ best_fert_scenarios2 <- fert_models %>%
 
 # Plot
 
-temp <- fert_models %>%
+fert_plots <- fert_models %>%
   filter(var != "null") %>%
   mutate(D = 1 - (deviance / null_deviance))
 
-lim <-  max(c(abs(min(temp$null_AICc - temp$AICc, na.rm = TRUE)),
-              abs(max(temp$null_AICc - temp$AICc, na.rm = TRUE))))
+lim <-  max(c(abs(min(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE)),
+              abs(max(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE))))
 
-ggplot(temp, aes(y = var, x = scenario, fill = (AICc - null_AICc))) +
+ggplot(fert_plots, aes(y = var, x = scenario, fill = (AICc - null_AICc))) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = "AICc relative to Null Model",
@@ -554,9 +551,9 @@ ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
 
 
 # Deviance
-lim <- max(temp$D)
+lim <- max(fert_plots$D)
 
-ggplot(temp, aes(y = var, x = scenario, fill = D)) +
+ggplot(fert_plots, aes(y = var, x = scenario, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
                        name = "Proportional Reduction in Deviance",
@@ -689,47 +686,56 @@ fc_2_lag2 <- fc_2 %>%
 
 names(fc_2_lag2)[(ncol(fc_2_lag2) - 2):ncol(fc_2_lag2)] <- c("se", "lower_ci", "upper_ci")
 
-temp <- bind_rows(temp_lag0, temp_lag1, temp_lag2)
+fc <- bind_rows(fc_0_lag0, fc_1_lag1, fc_2_lag2)
 
-t <- temp %>%
+ft <- fc %>%
   select(-scenario) %>%
   gather(lag, estimate, lag0, lag1, lag2) %>%
   filter(!is.na(estimate))
 
-t$lag <- mapvalues(t$lag,
+ft$lag <- mapvalues(ft$lag,
                    from = c("lag0", "lag1", "lag2"),
                    to = c("Lag 0", "Lag 1", "Lag 2"))
 
-lim <- max(t$delta)
+# Plot both lag scenarios for each site separately
+ft <- ft %>%
+  mutate(delta_AICc_vs_null = AICc - null_AICc,
+         D = 1 - (deviance / null_deviance))
 
-for (i in 1:length(levels(t$site))) {
+lim <-  max(c(abs(min(ft$D, na.rm = TRUE)),
+              abs(max(ft$D, na.rm = TRUE))))
 
-  current_site = levels(t$site)[i]
+for (i in 1:length(levels(ft$site))) {
 
-  temp4 <- filter(t, site == current_site)
+  current_site = levels(ft$site)[i]
 
-  ggplot(temp4, aes(x = estimate, y = var, color = delta)) +
+  temp4 <- filter(ft, site == current_site)
+
+  ggplot(temp4, aes(x = estimate, y = var, color = D)) +
     geom_point(size = 3) +
-    geom_errorbarh(aes(xmin = lower_ci, xmax = upper_ci),
+    geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
                    height = 0.3, size = 0.75) +
     scale_color_gradientn(colours = brewer.pal(9, "Greens")[2:9],
-                          name = expression(paste(Delta, "AICc")),
-                          # trans = sqrt_trans(),
+                          name = "Proportional Reduction\nin Deviance",
+                          # trans = sqrt_sign_trans(),
                           limits = c(0, lim)) +
     geom_vline(xintercept = 0, lty = 2) +
     theme_bw() +
-    facet_grid(. ~ lag) +
+    facet_grid(lag ~ .) +
     theme(strip.background = element_blank(),
           legend.position = "bottom",
-          legend.key.width = unit(2, "cm"),
-          legend.key.height = unit(0.2, "cm"),
-          axis.text.y = element_text(colour = colvec)) +
+          legend.key.width = unit(1.5, "cm"),
+          legend.key.height = unit(0.5, "cm"),
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
     labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
          title = paste(current_site, ":\n",
-                       "Scaled Coefficient Estimates for\nModels of Adult Female Fertility\n",
+                       "Scaled Coefficient Estimates for Models of Fertility\n",
                        sep = ""))
 
   ggsave(paste("plots/models/Fertility_Lags_Coefficients_",
                i, "_", current_site, ".pdf", sep = ""),
-         width = 7, height = 8, units = "in")
+         width = 6.5, height = 11, units = "in")
 }
+
+rm(fc_0, fc_0_lag0, fc_01, fc_02, fc_1, fc_1_lag1, fc_11, fc_12, fc_2,
+   fc_2_lag2, fc_21, fc_22)
