@@ -3,10 +3,10 @@ rm(list = ls())
 
 # If running the script from scratch
 # load("ClimatePred1.RData")
-load("ClimatePred2.RData")
+# load("ClimatePred2.RData")
 
 # If script already run and resuming workspace
-# load(".RData")
+load(".RData")
 
 # ---- survival -----------------------------------------------------------
 
@@ -33,6 +33,11 @@ temp <- climate_predictors %>%
   mutate(lag1 = lag(lag0),
          lag2 = lag(lag0, n = 2),
          lag3 = lag(lag0, n = 3))
+
+l <- levels(factor(temp$var))
+keep <- l[str_detect(l, "nino") | str_detect(l, "precip") | str_detect(l, "temp") | str_detect(l, "tmax") | str_detect(l, "tmin") | str_detect(l, "spei")]
+
+temp <- temp %>% filter(var %in% keep)
 
 # Models
 mod_df1 <- surv_trials %>%
@@ -137,7 +142,7 @@ surv_models$scenario <- factor(surv_models$scenario,
                                levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
 
 surv_models %>%
-  group_by(site, age_class) %>%
+  group_by(site, age_class, var) %>%
   top_n(1, -rank) %>%
   mutate(delta_AICc_vs_null = AICc - null_AICc,
          D = 1 - (deviance / null_deviance)) %>%
@@ -194,7 +199,7 @@ ggplot(surv_plots, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
   coord_equal()
 
 ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
-       width = 9, height = 20, units = "in")
+       width = 9, height = 15, units = "in")
 
 
 lim <- max(surv_plots$D)
@@ -215,7 +220,7 @@ ggplot(surv_plots, aes(x = age_class, y = var, fill = D)) +
   coord_equal()
 
 ggsave("plots/models/Survival_AllLagScenarios_Deviance.pdf",
-       width = 9, height = 20, units = "in")
+       width = 9, height = 15, units = "in")
 
 
 lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
@@ -239,7 +244,7 @@ ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_nu
   coord_equal()
 
 ggsave("plots/models/Survival_BestLagScenarios_AIC.pdf",
-       width = 8.5, height = 11, units = "in")
+       width = 11, height = 8.5, units = "in")
 
 lim <- max(best_surv_scenarios2$D)
 
@@ -260,7 +265,7 @@ ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = D)) +
   coord_equal()
 
 ggsave("plots/models/Survival_BestLagScenarios_Deviance.pdf",
-       width = 8.5, height = 11, units = "in")
+       width = 11, height = 8.5, units = "in")
 
 
 
@@ -409,6 +414,8 @@ temp <- climate_predictors %>%
   arrange(year_of) %>%
   mutate(lag1 = lag(lag0),
          lag2 = lag(lag0, n = 2))
+
+temp <- temp %>% filter(var %in% keep)
 
 # Models
 fert_mod_df <- fert_trials %>%
@@ -571,7 +578,7 @@ ggplot(fert_plots, aes(y = var, x = scenario, fill = (AICc - null_AICc))) +
   coord_equal()
 
 ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
-       width = 8.5, height = 11, units = "in")
+       width = 11, height = 8.5, units = "in")
 
 
 # Deviance
@@ -594,7 +601,7 @@ ggplot(fert_plots, aes(y = var, x = scenario, fill = D)) +
   coord_equal()
 
 ggsave("plots/models/Fertility_AllLagScenarios_Deviance.pdf",
-       width = 8.5, height = 11, units = "in")
+       width = 11, height = 8.5, units = "in")
 
 
 lim <-  max(c(abs(min(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE)),
@@ -608,7 +615,7 @@ ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = delta_AICc_vs_null)) 
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(1.5, "cm"),
         legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -616,7 +623,7 @@ ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = delta_AICc_vs_null)) 
   coord_equal()
 
 ggsave("plots/models/Fertility_BestLagScenarios_AIC.pdf",
-       width = 8.5, height = 11, units = "in")
+       width = 7, height = 8, units = "in")
 
 lim <- max(fert_plots$D)
 
@@ -628,7 +635,7 @@ ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = D)) +
   theme_bw() +
   theme(strip.background = element_blank(),
         legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
+        legend.key.width = unit(1.5, "cm"),
         legend.key.height = unit(0.2, "cm"),
         panel.grid = element_blank(),
         axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
@@ -636,7 +643,7 @@ ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = D)) +
   coord_equal()
 
 ggsave("plots/models/Fertility_BestLagScenarios_Deviance.pdf",
-       width = 8.5, height = 11, units = "in")
+       width = 7, height = 8, units = "in")
 
 
 
