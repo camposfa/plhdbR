@@ -250,8 +250,9 @@ lim <- max(best_surv_scenarios2$D)
 
 ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
                        name = "Proportional Reduction\nin Deviance",
+                       trans = sqrt_trans(),
                        limits = c(0, lim)) +
   facet_grid(. ~ site) +
   theme_bw() +
@@ -357,6 +358,8 @@ for (i in 1:length(levels(st$site))) {
       group_by(site, var) %>%
       top_n(1, -AICc)
 
+    temp4$newvar <- factor(temp4$newvar, levels = temp4$newvar[order(temp4$var)])
+
     lim <-  max(c(abs(min(temp4$D, na.rm = TRUE)),
                   abs(max(temp4$D, na.rm = TRUE))))
 
@@ -364,14 +367,11 @@ for (i in 1:length(levels(st$site))) {
       geom_point(size = 3) +
       geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
                      height = 0.3, size = 0.75) +
-      scale_color_gradientn(colours = c("gray90", rev(viridis(6))[2:6]),
-                            # colours = brewer.pal(9, "Greens")[2:9],
+      scale_color_gradientn(colours = brewer.pal(9, "Greens"),
                             name = "Proportional Reduction\nin Deviance",
-                            # trans = sqrt_sign_trans(),
                             limits = c(0, lim)) +
       geom_vline(xintercept = 0, lty = 2) +
       theme_bw() +
-      # facet_wrap(~ age_class, drop = TRUE, scales = "free_y") +
       theme(strip.background = element_blank(),
             legend.position = "bottom",
             legend.key.width = unit(2, "cm"),
@@ -629,8 +629,9 @@ lim <- max(fert_plots$D)
 
 ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = D)) +
   geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
+  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
                        name = "Proportional Reduction\nin Deviance",
+                       trans = sqrt_trans(),
                        limits = c(0, lim)) +
   theme_bw() +
   theme(strip.background = element_blank(),
@@ -738,7 +739,7 @@ for (i in 1:length(levels(ft$site))) {
 
   current_site = levels(ft$site)[i]
 
-  temp4 <- filter(st, site == current_site)
+  temp4 <- filter(ft, site == current_site)
 
   temp4 <- temp4 %>%
     unite(newvar, var, lag, sep = ", ", remove = FALSE)
@@ -747,6 +748,8 @@ for (i in 1:length(levels(ft$site))) {
     group_by(site, var) %>%
     top_n(1, -AICc)
 
+  temp4$newvar <- factor(temp4$newvar, levels = temp4$newvar[order(temp4$var)])
+
   lim <-  max(c(abs(min(temp4$D, na.rm = TRUE)),
                 abs(max(temp4$D, na.rm = TRUE))))
 
@@ -754,7 +757,7 @@ for (i in 1:length(levels(ft$site))) {
     geom_point(size = 3) +
     geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
                    height = 0.3, size = 0.75) +
-    scale_color_gradientn(colours = c("gray90", rev(viridis(6))[2:6]),
+    scale_color_gradientn(colours = brewer.pal(9, "Greens"),
                           name = "Proportional Reduction\nin Deviance",
                           limits = c(0, lim)) +
     geom_vline(xintercept = 0, lty = 2) +
@@ -776,3 +779,8 @@ for (i in 1:length(levels(ft$site))) {
 
 rm(fc_0, fc_0_lag0, fc_01, fc_02, fc_1, fc_1_lag1, fc_11, fc_12, fc_2,
    fc_2_lag2, fc_21, fc_22)
+
+
+# Save RData file for summary
+save(fert_trials, keep, best_surv_scenarios2, surv_plots, best_fert_scenarios2,
+     fert_plots, file = "~/GitHub/plhdbR/summary.RData")
