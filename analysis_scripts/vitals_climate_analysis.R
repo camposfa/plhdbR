@@ -783,4 +783,5 @@ rm(fc_0, fc_0_lag0, fc_01, fc_02, fc_1, fc_1_lag1, fc_11, fc_12, fc_2,
 
 # Save RData file for summary
 save(fert_trials, keep, best_surv_scenarios2, surv_plots, best_fert_scenarios2,
-     fert_plots, file = "~/GitHub/plhdbR/summary.RData")
+     fert_plots, st, ft, climate_predictors,
+     file = "~/GitHub/plhdbR/summary.RData")

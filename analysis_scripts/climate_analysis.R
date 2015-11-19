@@ -1,20 +1,18 @@
 if (!("plhdbR" %in% installed.packages()[,"Package"]))
   devtools::install_github("camposfa/plhdbR")
 
+if (!("ClimGrid" %in% installed.packages()[,"Package"]))
+  devtools::install_github("camposfa/ClimGrid")
+
 Sys.setenv(TZ = 'UTC')
 list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
                          "stringr", "scales", "tidyr", "grid", "zoo", "viridis",
                          "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom",
-                         "purrr")
+                         "purrr", "ClimGrid")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if (length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
-
-if (!("ClimGrid" %in% installed.packages()[,"Package"]))
-  devtools::install_github("camposfa/ClimGrid")
-
-require(ClimGrid)
 
 `%ni%` = Negate(`%in%`)
 
