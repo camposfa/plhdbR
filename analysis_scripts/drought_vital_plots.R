@@ -1,3 +1,22 @@
+temp <- filter(mod4, site == "Capuchin" & age_class == "newborn" & var == "precip_annual" & scenario == "mod_1")
+temp <- temp$model[[1]]
+newdata <- data.frame(seq(-10, 10, 0.1))
+names(newdata)[1] <- names(fixef(temp))[2]
+newdata$predicted <- predict(temp, newdata, re.form = NA, type = "resp")
+names(newdata)[1] <- "climate_predictor"
+
+
+ggplot(newdata, aes(x = climate_predictor, y = predicted)) +
+  geom_line() +
+  theme_classic() +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_hline(yintercept = 1, lty = 2) +
+  theme(axis.line.x = element_blank())
+
+
+
+
 d_surv_models %>%
   filter(str_detect(var, "annual_mean")) %>%
   group_by(site, age_class) %>%
@@ -6,15 +25,12 @@ d_surv_models %>%
 d_best <- arrange(d_best, site, age_class)
 
 temp1 <- d_best[19, ]$model[[1]]
-newdata <- data.frame(seq(-5 , 5, 0.1))
+newdata <- data.frame(seq(-10 , 10, 0.1))
 names(newdata)[1] <- names(fixef(temp1))[2]
 newdata$predicted <- predict(temp1, newdata, re.form = NA, type = "resp")
 
 names(newdata)[1] <- "climate_predictor"
 
-ggplot(newdata, aes(x = climate_predictor, y = predicted)) +
-  geom_line() +
-  theme_classic()
 
 
 # Plot vital rates per year
