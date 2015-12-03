@@ -1,18 +1,73 @@
 temp <- filter(mod4, site == "Capuchin" & age_class == "newborn" & var == "precip_annual" & scenario == "mod_1")
 temp <- temp$model[[1]]
-newdata <- data.frame(seq(-10, 10, 0.1))
+newdata <- data.frame(seq(-5, 5, 0.1))
 names(newdata)[1] <- names(fixef(temp))[2]
 newdata$predicted <- predict(temp, newdata, re.form = NA, type = "resp")
 names(newdata)[1] <- "climate_predictor"
 
+int <- newdata[newdata$climate_predictor == 0, ]$predicted
 
-ggplot(newdata, aes(x = climate_predictor, y = predicted)) +
-  geom_line() +
-  theme_classic() +
+p1 <- ggplot(newdata, aes(x = climate_predictor, y = predicted)) +
+  geom_line(size = 1) +
+  theme_bw() +
   scale_y_continuous(limits = c(0, 1)) +
   geom_hline(yintercept = 0, lty = 2) +
   geom_hline(yintercept = 1, lty = 2) +
-  theme(axis.line.x = element_blank())
+  geom_hline(yintercept = int, lty = 3) +
+  geom_vline(xintercept = 0, lty = 3) +
+  theme(axis.line.x = element_blank()) +
+  scale_x_continuous(breaks = seq(-5, 5, 1)) +
+  labs(x = "\nStandard Deviations from Mean Annual Rainfall",
+       y = "Probability of Survival\n",
+       title = "Rainfall and Newborn Survival\n")
+
+
+
+temp <- filter(mod5, site == "Capuchin" & var == "precip_annual" & scenario == "mod_1")
+temp <- temp$model[[1]]
+newdata <- data.frame(seq(-5, 5, 0.1))
+names(newdata)[1] <- names(fixef(temp))[2]
+newdata$predicted <- predict(temp, newdata, re.form = NA, type = "resp")
+names(newdata)[1] <- "climate_predictor"
+
+int <- newdata[newdata$climate_predictor == 0, ]$predicted
+
+p2 <- ggplot(newdata, aes(x = climate_predictor, y = predicted)) +
+  geom_line(size = 1) +
+  theme_bw() +
+  scale_y_continuous(limits = c(0, 1)) +
+  geom_hline(yintercept = 0, lty = 2) +
+  geom_hline(yintercept = 1, lty = 2) +
+  geom_hline(yintercept = int, lty = 3) +
+  geom_vline(xintercept = 0, lty = 3) +
+  theme(axis.line.x = element_blank()) +
+  scale_x_continuous(breaks = seq(-5, 5, 1)) +
+  labs(x = "\nStandard Deviations from Mean Annual Rainfall",
+       y = "Annual Probability of Parturition\n",
+       title = "Drought and Female Fertility\n")
+
+
+
+library(gridExtra)
+grid.arrange(p1, p2, nrow = 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
