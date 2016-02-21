@@ -2,42 +2,129 @@ rm(list = ls())
 `%ni%` = Negate(`%in%`)
 
 # If running the script from scratch
-# load("ClimatePred1.RData")
+load("ClimatePred1.RData")
 # load("ClimatePred2.RData")
 
 # If script already run and resuming workspace
-load(".RData")
+# load(".RData")
+
+
+# ---- aggregate_to_annual ------------------------------------------------
+
+start_months <- c(2, 5, 8, 12, 2, 4, 9)
+# start_months <- rep(1, 7)
+
+# Function to assign monthly data to different kinds of "years"
+# Calendar years, birth-years, rainfall years
+assign_group_year <- function(df, group_dates) {
+
+  temp <- df %>%
+    inner_join(group_dates, by = "site") %>%
+    mutate(month_num = month(date_of),
+           group_year = ifelse(month_num >= month_start,
+                               year_of, year_of - 1)) %>%
+    select(-month_start, -month_num)
+
+  return(temp)
+}
+
+birth_years <- data_frame(site = site_list,
+                          month_start = start_months)
+birth_years$site <- factor(birth_years$site, levels = site_list)
+
+climates_combined <- assign_group_year(climates_combined, birth_years)
+climates <- assign_group_year(climates, birth_years)
+
+ann_mean <- climates_combined %>%
+  ungroup() %>%
+  select(-date_of, -month_of, -year_of, -rain_data_source) %>%
+  group_by(site, group_year) %>%
+  summarise_each(funs(mean(., na.rm = TRUE), n())) %>%
+  rename(n_months = rain_monthly_mm_n) %>%
+  select(-ends_with("_n")) %>%
+  filter(n_months == 12)
+
+ann_div <- climates %>%
+  group_by(site, group_year) %>%
+  mutate(rain_adj = ifelse(rain_monthly_mm == 0, .001, rain_monthly_mm)) %>%
+  summarise(n_months = n(),
+            shannon_rain = diversity(rain_adj, index = "shannon"),
+            simpson_rain = diversity(rain_adj, index = "simpson"),
+            invsimpson_rain = diversity(rain_adj, index = "invsimpson"),
+            cov_rain = sd(rain_monthly_mm, na.rm = TRUE) /
+              mean(rain_monthly_mm, na.rm = TRUE)) %>%
+  ungroup() %>%
+  filter(n_months == 12)
+
+ann_total <- climates %>%
+  group_by(site, group_year) %>%
+  summarise(rain_total_mm = sum(rain_monthly_mm),
+            n_months = n()) %>%
+  filter(n_months == 12)
+
+ann_extremes <- climates %>%
+  group_by(site, group_year) %>%
+  summarise(coldest_tmin_anomaly = min(tmin_anomaly),
+            hottest_tmax_anomaly = max(tmax_anomaly),
+            wettest_anomaly = max(rain_anomaly),
+            driest_anomaly = min(rain_anomaly),
+            n_months = n()) %>%
+  filter(n_months == 12)
+
+
+# Use Shannon diversity index and combine with other climate variables
+climate_predictors <- ann_mean %>%
+  left_join(select(ann_total, -n_months)) %>%
+  left_join(select(ann_extremes, -n_months)) %>%
+  left_join(select(ann_div, site, group_year, shannon_rain))
+
 
 # ---- survival -----------------------------------------------------------
 
 # Takes about 1 minute
-m <- stage_specific_survival(lh)
+m <- stage_specific_survival(lh, census_start_month = start_months)
 summary(m)
 
 # Make trials
-surv_trials <- make_survivorship_trials(m)
+# surv_trials <- make_survivorship_trials(m)
+#
+# surv_trials <- surv_trials %>%
+#   ungroup() %>%
+#   filter(year_of < 2014) %>%
+#   select(site = Study.Id, year_of, age_class, fate)
 
-surv_trials <- surv_trials %>%
+surv_trials <- m %>%
   ungroup() %>%
   filter(year_of < 2014) %>%
-  select(site = Study.Id, year_of, age_class, fate)
-
+  select(site = Study.Id, year_of, age_class, trials, successes) %>%
+  mutate(failures = trials - successes)
 
 temp <- climate_predictors %>%
+  rename(year_of = group_year) %>%
   ungroup() %>%
   group_by(site) %>%
   mutate_each(funs(scale), -site, -year_of) %>%
   gather(var, lag0, -site, -year_of) %>%
   group_by(site, var) %>%
   arrange(year_of) %>%
-  mutate(lag1 = lag(lag0),
-         lag2 = lag(lag0, n = 2),
-         lag3 = lag(lag0, n = 3))
+  mutate(lag1 = lag(lag0))
 
-l <- levels(factor(temp$var))
-keep <- l[str_detect(l, "nino") | str_detect(l, "precip") | str_detect(l, "temp") | str_detect(l, "tmax") | str_detect(l, "tmin") | str_detect(l, "spei")]
 
-temp <- temp %>% filter(var %in% keep)
+temp <- climate_predictors %>%
+  rename(year_of = group_year) %>%
+  ungroup() %>%
+  select(site, year_of, tmax_monthly_mean, spei_03_mean, nino3.4_mean, rain_total_mm) %>%
+  group_by(site) %>%
+  mutate_each(funs(scale), -site, -year_of) %>%
+  gather(var, lag0, -site, -year_of) %>%
+  group_by(site, var) %>%
+  arrange(year_of) %>%
+  mutate(lag1 = lag(lag0))
+
+# l <- levels(factor(temp$var))
+# keep <- l[str_detect(l, "nino") | str_detect(l, "precip") | str_detect(l, "temp") | str_detect(l, "tmax") | str_detect(l, "tmin") | str_detect(l, "spei")]
+#
+# temp <- temp %>% filter(var %in% keep)
 
 # Models
 mod_df1 <- surv_trials %>%
@@ -50,13 +137,23 @@ mod_df1$site <- mapvalues(mod_df1$site,
                                  "Chimpanzee", "Gorilla", "Sifaka",
                                  "Capuchin"))
 
+mod_df1$age_class <- factor(mod_df1$age_class,
+                            levels = c("newborn", "juvenile", "adult"))
+
+# mod3 <- mod_df1 %>%
+#   ungroup() %>%
+#   group_by(site, age_class, var) %>%
+#   do(mod_null = glm(cbind(successes, failures) ~ 1, data = ., family = "binomial"),
+#      mod_0 = glm(cbind(successes, failures) ~ lag0, data = ., family = "binomial"),
+#      mod_1 = glm(cbind(successes, failures) ~ lag1, data = ., family = "binomial"),
+#      mod_2 = glm(cbind(successes, failures) ~ lag2, data = ., family = "binomial"))
+
 mod3 <- mod_df1 %>%
   ungroup() %>%
   group_by(site, age_class, var) %>%
   do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
      mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_2 = glmer(fate ~ lag2 + (1 | year_of), data = ., family = "binomial"))
+     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"))
 
 mod4 <- NULL
 k <- 1
@@ -72,7 +169,7 @@ for (i in 1:nrow(mod3)) {
 
 mod4 <- bind_rows(mod4)
 
-mod4 <- filter(mod4, scenario != "mod_null" | (scenario == "mod_null" & var == "precip_annual"))
+mod4 <- filter(mod4, scenario != "mod_null" | (scenario == "mod_null" & var == "nino3.4_mean"))
 var_levels <- c(levels(factor(mod4$var)), "null")
 mod4$var <- factor(mod4$var, levels = var_levels)
 mod4[mod4$scenario == "mod_null", ]$var <- "null"
@@ -82,8 +179,8 @@ mod_sel <- mod4 %>%
   do(m_table = model.sel(.$model),
      vars = data.frame(var = .$var),
      scenarios = data.frame(scenario = .$scenario),
-     # deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
-     deviance = data.frame(deviance = .$model %>% map(summary) %>% lapply(., "[[", "AICtab") %>% map_dbl("deviance")))
+     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
+     # deviance = data.frame(deviance = .$model %>% map(summary) %>% lapply(., "[[", "AICtab") %>% map_dbl("deviance")))
 
 temp <- NULL
 
@@ -133,21 +230,27 @@ null_aic <- surv_models %>%
   select(site, age_class, null_AICc = AICc, null_delta = delta,
          null_deviance = deviance)
 
+# surv_models <- inner_join(surv_models, null_aic)
+# surv_models$scenario <- mapvalues(surv_models$scenario,
+#                                   from = c("mod_0", "mod_1", "mod_2", "mod_null"),
+#                                   to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
 surv_models <- inner_join(surv_models, null_aic)
 surv_models$scenario <- mapvalues(surv_models$scenario,
-                                  from = c("mod_0", "mod_1", "mod_2", "mod_null"),
-                                  to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
+                                  from = c("mod_0", "mod_1", "mod_null"),
+                                  to = c("Lag 0", "Lag 1", "Null"))
 
+# surv_models$scenario <- factor(surv_models$scenario,
+#                                levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
 surv_models$scenario <- factor(surv_models$scenario,
-                               levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
+                               levels = rev(c("Null", "Lag 0", "Lag 1")))
 
-surv_models %>%
-  group_by(site, age_class, var) %>%
-  top_n(1, -rank) %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_deviance) %>%
-  View()
+# surv_models %>%
+#   group_by(site, age_class, var) %>%
+#   top_n(1, -rank) %>%
+#   mutate(delta_AICc_vs_null = AICc - null_AICc,
+#          D = 1 - (deviance / null_deviance)) %>%
+#   select(-null_AICc, -null_delta, -null_deviance) %>%
+#   View()
 
 best_surv_scenarios <- surv_models %>%
   group_by(site, age_class, var) %>%
@@ -181,7 +284,7 @@ surv_plots <- surv_models %>%
 lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
               abs(max(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE))))
 
-ggplot(surv_plots, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
+ggplot(surv_plots2, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = "AICc relative to Null Model",
@@ -231,6 +334,7 @@ ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_nu
   geom_tile(size = 0.1, color = "black") +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        name = "AICc relative to Null Model",
+                       trans = "sqrt_sign",
                        limits = c(-lim, lim)) +
   facet_grid(. ~ site) +
   theme_bw() +
@@ -395,7 +499,8 @@ rm(sc_0, sc_0_lag0, sc_01, sc_02, sc_1, sc_1_lag1, sc_11, sc_12, sc_2,
 # ---- fertility ----------------------------------------------------------
 
 # Takes a few minutes to run
-f <- stage_specific_fertility(lh, fert)
+f <- stage_specific_fertility(lh, fert, census_start_month = start_months)
+f <- stage_specific_fertility(lh, fert, census_start_month = rep(1, 7))
 
 # Make trials
 fert_trials <- make_survivorship_trials(f)
@@ -405,22 +510,29 @@ fert_trials <- fert_trials %>%
   filter(year_of < 2014) %>%
   select(site = Study.Id, year_of, age_class, fate)
 
+# fert_trials <- f %>%
+#   ungroup() %>%
+#   filter(year_of < 2014) %>%
+#   select(site = Study.Id, year_of, age_class, trials, successes) %>%
+#   mutate(failures = trials - successes)
+
 temp <- climate_predictors %>%
+  rename(year_of = group_year) %>%
   ungroup() %>%
+  select(site, year_of, tmax_monthly_mean, spei_03_mean, nino3.4_mean, rain_total_mm) %>%
   group_by(site) %>%
   mutate_each(funs(scale), -site, -year_of) %>%
   gather(var, lag0, -site, -year_of) %>%
   group_by(site, var) %>%
   arrange(year_of) %>%
-  mutate(lag1 = lag(lag0),
-         lag2 = lag(lag0, n = 2))
+  mutate(lag1 = lag(lag0))
 
-temp <- temp %>% filter(var %in% keep)
+# temp <- temp %>% filter(var %in% keep)
 
 # Models
 fert_mod_df <- fert_trials %>%
   left_join(temp) %>%
-  filter(!is.na(lag0))
+  filter(!is.na(lag1))
 
 fert_mod_df$site <- mapvalues(fert_mod_df$site,
                               from = levels(fert_mod_df$site),
@@ -428,14 +540,24 @@ fert_mod_df$site <- mapvalues(fert_mod_df$site,
                                      "Chimpanzee", "Gorilla", "Sifaka",
                                      "Capuchin"))
 
+mod_df1$age_class <- factor(mod_df1$age_class,
+                            levels = c("newborn", "juvenile", "adult"))
+
+# mod <- fert_mod_df %>%
+#   filter(age_class == "adult") %>%
+#   ungroup() %>%
+#   group_by(site, var) %>%
+#   do(mod_null = glm(cbind(successes, failures) ~ 1, data = ., family = "binomial"),
+#      mod_0 = glm(cbind(successes, failures) ~ lag0, data = ., family = "binomial"),
+#      mod_1 = glm(cbind(successes, failures) ~ lag1, data = ., family = "binomial"),
+#      mod_2 = glm(cbind(successes, failures) ~ lag2, data = ., family = "binomial"))
+
 mod <- fert_mod_df %>%
   filter(age_class == "adult") %>%
   ungroup() %>%
   group_by(site, var) %>%
   do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"),
-     mod_2 = glmer(fate ~ lag2 + (1 | year_of), data = ., family = "binomial"))
+     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"))
 
 mod5 <- NULL
 k <- 1
@@ -451,7 +573,7 @@ for (i in 1:nrow(mod)) {
 
 mod5 <- bind_rows(mod5)
 
-mod5 <- filter(mod5, scenario != "mod_null" | (scenario == "mod_null" & var == "precip_annual"))
+mod5 <- filter(mod5, scenario != "mod_null" | (scenario == "mod_null" & var == "nino3.4_mean"))
 var_levels <- c(levels(factor(mod5$var)), "null")
 mod5$var <- factor(mod5$var, levels = var_levels)
 mod5[mod5$scenario == "mod_null", ]$var <- "null"
@@ -461,7 +583,8 @@ fert_mod_sel <- mod5 %>%
   do(m_table = model.sel(.$model),
      vars = data.frame(var = .$var),
      scenarios = data.frame(scenario = .$scenario),
-     deviance = data.frame(deviance = .$model %>% map(summary) %>% lapply(., "[[", "AICtab") %>% map_dbl("deviance")))
+     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
+     # deviance = data.frame(deviance = .$model %>% map(summary) %>% lapply(., "[[", "AICtab") %>% map_dbl("deviance")))
 
 temp <- NULL
 
@@ -513,31 +636,38 @@ null_aic <- fert_models %>%
 
 fert_models <- inner_join(fert_models, null_aic)
 
+# fert_models$scenario <- mapvalues(fert_models$scenario,
+#                                   from = c("mod_0", "mod_1", "mod_2", "mod_null"),
+#                                   to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
+#
+# fert_models$scenario <- factor(fert_models$scenario,
+#                                levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
+
 fert_models$scenario <- mapvalues(fert_models$scenario,
-                                  from = c("mod_0", "mod_1", "mod_2", "mod_null"),
-                                  to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
+                                  from = c("mod_1", "mod_null"),
+                                  to = c("Lag 1", "Null"))
 
 fert_models$scenario <- factor(fert_models$scenario,
-                               levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
+                               levels = rev(c("Null", "Lag 1")))
 
-fert_models %>%
-  group_by(site) %>%
-  top_n(2, -rank) %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_deviance) %>%
-  View()
-
-fert_models %>%
-  group_by(site, var) %>%
-  top_n(1, -rank) %>%
-  ungroup() %>%
-  group_by(site) %>%
-  top_n(20, -rank) %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_deviance) %>%
-  View()
+# fert_models %>%
+#   group_by(site) %>%
+#   top_n(2, -rank) %>%
+#   mutate(delta_AICc_vs_null = AICc - null_AICc,
+#          D = 1 - (deviance / null_deviance)) %>%
+#   select(-null_AICc, -null_delta, -null_deviance) %>%
+#   View()
+#
+# fert_models %>%
+#   group_by(site, var) %>%
+#   top_n(1, -rank) %>%
+#   ungroup() %>%
+#   group_by(site) %>%
+#   top_n(20, -rank) %>%
+#   mutate(delta_AICc_vs_null = AICc - null_AICc,
+#          D = 1 - (deviance / null_deviance)) %>%
+#   select(-null_AICc, -null_delta, -null_deviance) %>%
+#   View()
 
 best_fert_scenarios2 <- fert_models %>%
   group_by(site, var) %>%

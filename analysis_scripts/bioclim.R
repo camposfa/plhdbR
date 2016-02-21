@@ -1,6 +1,8 @@
 get_qua_set <- function(df, target_year){
-  r <- filter(df, year_of == target_year |
-                (year_of == target_year - 1 & month_of %in% c("Nov", "Dec")))
+  r <- df %>%
+    filter(year_of == target_year |
+                (year_of == target_year + 1 & month_of %in% c("Jan", "Feb"))) %>%
+    arrange(year_of, month_of)
   return(r)
 }
 
@@ -9,7 +11,7 @@ get_bioclim_annual <- function(df, clim_extremes = NULL){
   bca <- list()
   c <- 1
 
-  for (i in min(df$year_of + 1):max(df$year_of)) {
+  for (i in min(df$year_of):(max(df$year_of) - 1)) {
 
     t <- get_qua_set(df, i)
 
@@ -43,13 +45,14 @@ get_indclim <- function(df, clim_extremes = NULL){
   ica <- list()
   c <- 1
 
-  for (i in min(df$year_of + 1):max(df$year_of)) {
+  for (i in min(df$year_of):(max(df$year_of) - 1)) {
 
     t <- get_qua_set(df, i)
 
     osc_i <- t(as.matrix(t$value))
 
     clim <- mutate_each(clim_extremes, funs(as.numeric))
+    row.names(clim) <- row.names(clim_extremes)
 
     b <- suppressMessages(indclim_annual(osc_i, t.as.int = FALSE, clim = clim))
 
@@ -74,7 +77,9 @@ get_speiclim <- function(df, clim_extremes = NULL){
   sca <- list()
   c <- 1
 
-  for (i in min(df$year_of + 1):max(df$year_of)) {
+  for (i in min(df$year_of):(max(df$year_of) - 1)) {
+
+    # message(paste(df$site[1], ", ", df$period[1], ", ", i))
 
     t <- get_qua_set(df, i)
 
@@ -303,12 +308,18 @@ bioclim_annual <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL,
   prec.vois = c(8, 9, 12:19)
   tmean.vois = c(1, 4:6, 8:11, 18:19)
   tsize = NULL
+
+  # m.per.indx = function(x) {
+  #   mm <- c(x, (x:(x + 1)) %% 12 + 1) + 2
+  #   if (x == 11)
+  #     mm <- c(1, 2, 3)
+  #   if (x == 12)
+  #     mm <- c(2, 3, 4)
+  #   return(mm)
+  # }
+
   m.per.indx = function(x) {
-    mm <- c(x, (x:(x + 1)) %% 12 + 1) + 2
-    if (x == 11)
-      mm <- c(1, 2, 3)
-    if (x == 12)
-      mm <- c(2, 3, 4)
+    mm <- x:(x + 2)
     return(mm)
   }
 
@@ -422,12 +433,16 @@ indclim_annual <- function(osc = NULL, vois = 1:9, t.as.int = TRUE, clim = NULL)
 {
   osc.vois = c(1:9)
   tsize = NULL
+  # m.per.indx = function(x) {
+  #   mm <- c(x, (x:(x + 1)) %% 12 + 1) + 2
+  #   if (x == 11)
+  #     mm <- c(1, 2, 3)
+  #   if (x == 12)
+  #     mm <- c(2, 3, 4)
+  #   return(mm)
+  # }
   m.per.indx = function(x) {
-    mm <- c(x, (x:(x + 1)) %% 12 + 1) + 2
-    if (x == 11)
-      mm <- c(1, 2, 3)
-    if (x == 12)
-      mm <- c(2, 3, 4)
+    mm <- x:(x + 2)
     return(mm)
   }
 
@@ -673,7 +688,7 @@ indclim_annual <- function(osc = NULL, vois = 1:9, t.as.int = TRUE, clim = NULL)
 #   return(out[, vois])
 # }
 
-extremes=function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL, period = "month",tiebreak="first")
+extremes <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL, period = "month", tiebreak="first")
 {
   # 	This function finds the warmest, wettest, coldest, driest periods for each location
 

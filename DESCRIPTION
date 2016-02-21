@@ -9,11 +9,12 @@ Maintainer: Fernando Campos <camposfa@gmail.com>
 Description: Tools for working with the Primate Life History Database
 License: CC0
 Depends:
-  R (>= 3.1.0)
+    R (>= 3.1.0)
 Imports:
-  magrittr (>= 1.5),
-  plyr (>= 1.8.1),
-  dplyr (>= 0.4.1),
-  lubridate (>= 1.3.3),
-  tidyr (>= 0.2.0),
-  stringr (>= 0.6.2)
+    magrittr (>= 1.5),
+    plyr (>= 1.8.1),
+    dplyr (>= 0.4.1),
+    lubridate (>= 1.3.3),
+    tidyr (>= 0.2.0),
+    stringr (>= 0.6.2)
+RoxygenNote: 5.0.1
