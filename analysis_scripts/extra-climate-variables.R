@@ -1,6 +1,7 @@
-# load("ClimatePrep.RData")
+load("ClimatePrep.RData")
 
 source("analysis_scripts/bioclim.R")
+source("analysis_scripts/ggcorr.R")
 
 site_coords <- read.csv("data/site_coords.csv")
 names(site_coords)[2] <- "long_name"
@@ -121,7 +122,8 @@ bioclim_df$var <- mapvalues(bioclim_df$var,
                                   "v19_precip_coldest_q"))
 
 bioclim_df <- spread(bioclim_df, var, value)
-bioclim_df <- select(bioclim_df, site, year_of, matches("_q"))
+bioclim_df <- select(bioclim_df, site, year_of,
+                     contains("_q"), contains("v01"), contains("v12"))
 
 
 # ---- bioclim_plots ------------------------------------------------------
@@ -131,12 +133,13 @@ library(corrplot)
 # Plot temperatures in different quarters
 qua_temp <- bioclim_df %>%
   gather(var, value, -site, -year_of) %>%
-  filter(str_detect(var, "_q") & str_detect(var, "mean_temp"))
+  filter((str_detect(var, "_q") | str_detect(var, "v01")) & str_detect(var, "mean_temp"))
 
 qua_temp$var <- str_split_fixed(qua_temp$var, pattern = "_", 5)[, 4]
+qua_temp$var <- revalue(qua_temp$var, c("temp" = "annual"))
 
-# Temperature corrplot
-par(mfrow = c(3, 3))
+# Within-site corrplot of temperature in different quarters
+par(mfrow = c(2, 4))
 for (i in seq_along(sites$site)) {
 
   cur_site <- sites$site[i]
@@ -148,35 +151,77 @@ for (i in seq_along(sites$site)) {
     select(-site, -year_of) %>%
     cor()
 
-  corrplot.mixed(temp1, col = colorRampPalette(brewer.pal(11, "Spectral"))(100),
-                 title = cur_site, mar = c(0,0,1,0))
+  corrplot.mixed(temp1, col = colorRampPalette(rev(brewer.pal(11, "RdBu")))(100),
+                 title = cur_site, mar = c(1, 0, 1, 0),
+                 tl.col = "black", tl.cex = 0.7)
 }
 
-ggplot(data = qua_temp, aes(x = year_of, y = value)) +
+# Between-site corrplot of temperature in each quarter
+temp <- qua_temp
+temp$site <- revalue(temp$site, site_map)
+# par(mfrow = c(2, 3))
+par(mfrow = c(1, 5))
+for (i in seq_along(levels(factor(temp$var)))) {
+
+  cur_var <- levels(factor(temp$var))[i]
+
+  temp1 <- temp %>%
+    ungroup() %>%
+    filter(var == cur_var) %>%
+    spread(site, value) %>%
+    select(-var, -year_of) %>%
+    cor(., use = "na.or.complete", method = "spearman")
+
+  corrplot.mixed(temp1, col = colorRampPalette(rev(brewer.pal(11, "RdYlBu")))(100),
+                 title = cur_var, mar = c(10,0,10,0), tl.col = "black",
+                 tl.cex = 0.8, cl.cex = 0.8, cl.align.text = "l")
+}
+
+p1 <- ggplot(data = qua_temp, aes(x = year_of, y = value)) +
+  geom_line(aes(group = var), size = 0.2) +
+  geom_point(aes(fill = var), shape = 21, colour = "black",
+             size = 2, stroke = 0.2, alpha = 0.75) +
+  facet_grid(site ~ ., scales = "free_y") +
+  # scale_fill_manual(values = brewer.pal(4, "Set3")[c(3, 2, 4, 1)],
+  #                   name = "Quarter") +
+  theme_fc() +
+  labs(x = "\nYear", y = "Precip (mm)\n", title = "Raw Value") +
+  theme(strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11)) +
+  scale_x_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
+
+qua_temp <- qua_temp %>%
+  group_by(site, var) %>%
+  mutate(scale_value = scale(value)) %>%
+  ungroup()
+
+p2 <- ggplot(data = qua_temp, aes(x = year_of, y = scale_value)) +
   geom_line(aes(group = var), size = 0.2) +
   geom_point(aes(fill = var), shape = 21, colour = "black",
              size = 2, stroke = 0.2, alpha = 0.75) +
   facet_grid(site ~ ., scales = "free_y") +
   scale_fill_manual(values = brewer.pal(4, "Set3")[c(3, 2, 4, 1)],
                     name = "Quarter") +
-  theme_bw() +
-  labs(x = "\nYear", y = "Precip (mm)\n", title = "") +
+  theme_fc() +
+  labs(x = "\nYear", y = "Scaled Precip\n", title = "Scaled Value") +
   theme(strip.background = element_blank(),
         axis.line = element_blank(),
         strip.text = element_text(face = "bold", size = 11)) +
   scale_x_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
 
-
+gridExtra::grid.arrange(p1, p2, ncol = 2)
 
 # Plot precipitation in different quarters
 qua_precip <- bioclim_df %>%
   gather(var, value, -site, -year_of) %>%
-  filter(str_detect(var, "_q") & str_detect(var, "precip"))
+  filter((str_detect(var, "_q") | str_detect(var, "v12")) & str_detect(var, "precip"))
 
 qua_precip$var <- str_split_fixed(qua_precip$var, pattern = "_", 4)[, 3]
+qua_precip$var <- revalue(qua_precip$var, c("precip" = "annual"))
 
 # Precipitation corrplot
-par(mfrow = c(3, 3))
+par(mfrow = c(2, 4))
 for (i in seq_along(sites$site)) {
 
   cur_site <- sites$site[i]
@@ -188,8 +233,29 @@ for (i in seq_along(sites$site)) {
     select(-site, -year_of) %>%
     cor()
 
-  corrplot.mixed(temp1, col = colorRampPalette(brewer.pal(11, "Spectral"))(100),
-                 title = cur_site, mar = c(0,0,1,0))
+  corrplot.mixed(temp1, col = colorRampPalette(brewer.pal(11, "BrBG"))(100),
+                 title = cur_site, mar = c(1, 0, 1, 0),
+                 tl.col = "black", tl.cex = 0.7)
+}
+
+# Between-site corrplot of precipitation in each quarter
+temp <- qua_precip
+temp$site <- revalue(temp$site, site_map)
+par(mfrow = c(2, 3))
+for (i in seq_along(levels(factor(temp$var)))) {
+
+  cur_var <- levels(factor(temp$var))[i]
+
+  temp1 <- temp %>%
+    ungroup() %>%
+    filter(var == cur_var) %>%
+    spread(site, value) %>%
+    select(-var, -year_of) %>%
+    cor(., use = "na.or.complete", method = "spearman")
+
+  corrplot.mixed(temp1, col = colorRampPalette(brewer.pal(11, "BrBG"))(100),
+                 title = cur_var, mar = c(1,0,1,0), tl.col = "black",
+                 tl.cex = 0.8, cl.cex = 0.8, cl.align.text = "l")
 }
 
 ggplot(data = qua_precip, aes(x = year_of, y = value)) +
@@ -197,8 +263,8 @@ ggplot(data = qua_precip, aes(x = year_of, y = value)) +
   geom_point(aes(fill = var), shape = 21, colour = "black",
              size = 2, stroke = 0.2, alpha = 0.75) +
   facet_grid(site ~ ., scales = "free_y") +
-  scale_fill_manual(values = brewer.pal(4, "Set3")[c(3, 2, 4, 1)],
-                    name = "Quarter") +
+  # scale_fill_manual(values = brewer.pal(4, "Set3")[c(3, 2, 4, 1)],
+  #                   name = "Quarter") +
   theme_bw() +
   labs(x = "\nYear", y = "Precip (mm)\n", title = "") +
   theme(strip.background = element_blank(),
@@ -243,12 +309,16 @@ indclim_df$site <- factor(indclim_df$site,
                                      "beza", "ssr"))
 
 indclim_df <- spread(indclim_df, var, value)
-indclim_df <- select(indclim_df, index, site, year_of, matches("_q"))
+indclim_df <- select(indclim_df, index, site, year_of,
+                     contains("_q"), contains("v01"))
 
 qua_ind <- indclim_df %>%
   gather(var, value, -site, -year_of, -index)
 
 qua_ind$var <- str_split_fixed(qua_ind$var, pattern = "_", 4)[, 3]
+
+# qua_ind <- filter(qua_ind, var != "mean")
+qua_ind$var <- revalue(qua_ind$var, c("mean" = "annual"))
 
 ggplot(data = qua_ind, aes(x = year_of, y = value)) +
   geom_line(aes(group = var), size = 0.2) +
@@ -264,8 +334,7 @@ ggplot(data = qua_ind, aes(x = year_of, y = value)) +
         strip.text = element_text(face = "bold", size = 11)) +
   scale_x_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5))
 
-
-par(mfrow = c(3, 3))
+par(mfrow = c(2, 4))
 for (i in seq_along(sites$site)) {
 
   cur_site <- sites$site[i]
@@ -277,8 +346,29 @@ for (i in seq_along(sites$site)) {
     select(-site, -year_of, -index) %>%
     cor()
 
-  corrplot.mixed(temp1, col = colorRampPalette(brewer.pal(11, "Spectral"))(100),
-                 title = cur_site, mar = c(0,0,1,0))
+  corrplot.mixed(temp1, col = rev(colorRampPalette(brewer.pal(11, "PiYG"))(100)),
+                 title = cur_site, mar = c(1, 0, 1, 0),
+                 tl.col = "black", tl.cex = 0.7)
+}
+
+# Between-site corrplot of nino3.4 in each quarter
+temp <- qua_ind
+temp$site <- revalue(temp$site, site_map)
+par(mfrow = c(2, 3))
+for (i in seq_along(levels(factor(temp$var)))) {
+
+  cur_var <- levels(factor(temp$var))[i]
+
+  temp1 <- temp %>%
+    ungroup() %>%
+    filter(var == cur_var) %>%
+    spread(site, value) %>%
+    select(-var, -year_of, -index) %>%
+    cor(., use = "na.or.complete", method = "spearman")
+
+  corrplot.mixed(temp1, col = colorRampPalette(rev(brewer.pal(11, "PiYG")))(100),
+                 title = cur_var, mar = c(1,0,1,0), tl.col = "black",
+                 tl.cex = 0.8, cl.cex = 0.8, cl.align.text = "l")
 }
 
 
@@ -343,12 +433,14 @@ speiclim_df$var <- mapvalues(speiclim_df$var,
 # speiclim_df <- unite(speiclim_df, variable, period, var)
 #
 speiclim_df <- spread(speiclim_df, var, value)
-speiclim_df <- select(speiclim_df, period, site, year_of, matches("_q"))
+speiclim_df <- select(speiclim_df, period, site, year_of,
+                      contains("_q"), contains("v01"))
 
 qua_spei <- speiclim_df %>%
   gather(var, value, -site, -year_of, -period)
 
 qua_spei$var <- str_split_fixed(qua_spei$var, pattern = "_", 4)[, 3]
+qua_spei <- filter(qua_spei, var != "mean")
 
 ggplot(data = filter(qua_spei, period == "spei_01"), aes(x = year_of, y = value)) +
   geom_line(aes(group = var), size = 0.2) +
@@ -373,27 +465,107 @@ q_temp_df <- bioclim_df %>%
   mutate(var = "mean_temp")
 
 names(q_temp_df) <- str_replace(names(q_temp_df), pattern = "v.._mean_temp_", "")
-q_temp_df <- gather(q_temp_df, quarter, value, matches("_q"))
+names(q_temp_df) <- str_replace(names(q_temp_df), pattern = "v01_annual_mean_temp", "annual")
+q_temp_df <- gather(q_temp_df, quarter, value, contains("_q"), annual)
 
 q_precip_df <- bioclim_df %>%
-  select(site, year_of, matches("precip")) %>%
+  select(site, year_of, contains("precip")) %>%
   mutate(var = "precip")
 
 names(q_precip_df) <- str_replace(names(q_precip_df), pattern = "v.._precip_", "")
-q_precip_df <- gather(q_precip_df, quarter, value, matches("_q"))
+names(q_precip_df) <- str_replace(names(q_precip_df), pattern = "v12_annual_precip", "annual")
+q_precip_df <- gather(q_precip_df, quarter, value, contains("_q"), annual)
 
 q_ind_df <- indclim_df %>%
   mutate(temp_var = "index") %>%
   unite(var, c(temp_var, index))
 
 names(q_ind_df) <- str_replace(names(q_ind_df), pattern = "v.._mean_", "")
-q_ind_df <- gather(q_ind_df, quarter, value, matches("_q"))
+names(q_ind_df) <- str_replace(names(q_ind_df), pattern = "v01_annual_mean", "annual")
+q_ind_df <- gather(q_ind_df, quarter, value, contains("_q"), annual)
 
 q_spei_df <- speiclim_df
 names(q_spei_df) <- str_replace(names(q_spei_df), pattern = "v.._mean_", "")
+names(q_spei_df) <- str_replace(names(q_spei_df), pattern = "v01_annual_mean", "annual")
 q_spei_df <- q_spei_df %>%
-  gather(quarter, value, matches("_q")) %>%
+  gather(quarter, value, contains("_q"), annual) %>%
   rename(var = period)
+
+
+
+# ---- new_ggcorr_plots ---------------------------------------------------
+
+g_list <- list(15)
+
+temp <- qua_temp
+temp$site <- revalue(temp$site, site_map)
+
+for (i in seq_along(levels(factor(temp$var)))) {
+
+  cur_var <- levels(factor(temp$var))[i]
+
+  temp1 <- temp %>%
+    ungroup() %>%
+    filter(var == cur_var) %>%
+    spread(site, value) %>%
+    select(-var, -year_of)
+
+  g_list[[i]] <- ggcorr_fc(temp1, method = c("na.or.complete", method = "spearman"),
+                           geom = "tile", label = TRUE, hjust = 0.75, digits = 2, label_size = 3,
+                           label_round = 2, palette = rev(brewer.pal(11, "RdYlBu")),
+                           nbreaks = 10, size = 3, layout.exp = 1, color = "gray50") +
+    labs(title = ifelse(cur_var == "annual", capitalize(cur_var),
+                        paste(capitalize(cur_var), "Quarter"))) +
+    guides(fill = FALSE)
+
+}
+
+temp <- qua_precip
+temp$site <- revalue(temp$site, site_map)
+for (i in seq_along(levels(factor(temp$var)))) {
+
+  cur_var <- levels(factor(temp$var))[i]
+
+  temp1 <- temp %>%
+    ungroup() %>%
+    filter(var == cur_var) %>%
+    spread(site, value) %>%
+    select(-var, -year_of)
+
+  g_list[[i + 5]] <- ggcorr_fc(temp1, method = c("na.or.complete", method = "spearman"),
+                           geom = "tile", label = TRUE, hjust = 0.75, digits = 2, label_size = 3,
+                           label_round = 2, palette = brewer.pal(11, "BrBG"),
+                           nbreaks = 10, size = 3, layout.exp = 1, color = "gray50") +
+    labs(title = ifelse(cur_var == "annual", capitalize(cur_var),
+         paste(capitalize(cur_var), "Quarter"))) +
+    guides(fill = FALSE)
+}
+
+temp <- qua_ind
+temp$site <- revalue(temp$site, site_map)
+for (i in seq_along(levels(factor(temp$var)))) {
+
+  cur_var <- levels(factor(temp$var))[i]
+
+  temp1 <- temp %>%
+    ungroup() %>%
+    filter(var == cur_var) %>%
+    spread(site, value) %>%
+    select(-var, -year_of, -index)
+
+  g_list[[i + 10]] <- ggcorr_fc(temp1, method = c("na.or.complete", method = "spearman"),
+                           geom = "tile", label = TRUE, hjust = 0.75, digits = 2, label_size = 3,
+                           label_round = 2, palette = rev(brewer.pal(11, "PiYG")),
+                           nbreaks = 10, size = 3, layout.exp = 1, color = "gray50") +
+    labs(title = ifelse(cur_var == "annual", capitalize(cur_var),
+                        paste(capitalize(cur_var), "Quarter"))) +
+    guides(fill = FALSE)
+}
+
+cowplot::plot_grid(plotlist = g_list, nrow = 3, ncol = 5,
+                   labels = c("a", rep("", 4), "b", rep("", 4), "c", rep("", 4)))
+
+ggsave("~/Desktop/temp.pdf", width = 16, height = 9, units = "in")
 
 
 # ---- final_set ----------------------------------------------------------
@@ -409,8 +581,20 @@ climate_predictors <- temp %>%
   select(-sumrow) %>%
   gather(var, value, -site, -year_of, -quarter)
 
+# Change "precip" to "rainfall" to avoid name conflict with R's precip data set
+climate_predictors$var <- revalue(climate_predictors$var, c(precip = "rainfall"))
+
 save(lh, fert, qua, climate_predictors, sites,
      file = "~/GitHub/plhdbR/ClimatePred3.RData")
+
+
+
+
+
+
+
+
+
 
 
 

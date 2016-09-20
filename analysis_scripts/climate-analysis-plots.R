@@ -91,7 +91,7 @@ fc_tile_plot(at, "t_anomaly") +
 
 # TMAX only
 
-temp <- filter(at, var == "tmax")
+temp <- filter(at, var == "tavg")
 lim <- max(abs(temp$t_anomaly))
 # TMAX Anomalies
 fc_tile_plot(temp, "t_anomaly") +
@@ -106,6 +106,119 @@ fc_tile_plot(temp, "t_monthly") +
                        name = "Temperature") +
   labs(x = "Month", y = "Year", title = "Berkeley Earth TMAX\n")
 
+
+# ---- site_plot ----------------------------------------------------------
+
+temp <- filter(at, var == "tavg" & site == "ssr")
+lim <- max(abs(temp$t_anomaly))
+
+p1 <- ggplot(temp, aes(x = month_of, y = year_of, fill = t_anomaly)) +
+  geom_tile() +
+  coord_equal() +
+  # facet_grid(. ~ site) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        # legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.height = unit(1, "cm"),
+        legend.key.width = unit(0.25, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1979, 2016), breaks = seq(1945, 2015, by = 5)) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
+                       name = expression(paste(degree, C)),
+                       limits = c(-lim, lim)) +
+  labs(x = "Month", y = "Year", title = "Temperature Anomaly\n")
+
+p2 <- ggplot(temp, aes(x = month_of, y = year_of, fill = t_monthly)) +
+  geom_tile() +
+  coord_equal() +
+  # facet_grid(. ~ site) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        # legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.height = unit(1, "cm"),
+        legend.key.width = unit(0.25, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1979, 2016), breaks = seq(1945, 2015, by = 5)) +
+  scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"),
+                       name = expression(paste(degree, C))) +
+  labs(x = "Month", y = "Year", title = "Average Temperature\n")
+
+temp <- filter(rain_selected, site == "ssr")
+lim <- max(abs(temp$rain_anomaly))
+
+p3 <- ggplot(temp, aes(x = month_of, y = year_of, fill = rain_monthly_mm)) +
+  geom_tile() +
+  coord_equal() +
+  # facet_grid(. ~ site) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        # legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.height = unit(1, "cm"),
+        legend.key.width = unit(0.25, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1979, 2016), breaks = seq(1945, 2015, by = 5)) +
+  scale_fill_gradientn(colours = brewer.pal(9, "Blues"),
+                       trans = sqrt_trans(),
+                       name = "mm") +
+  labs(x = "Month", y = "Year", title = "Rainfall\n")
+
+p4 <- ggplot(temp, aes(x = month_of, y = year_of, fill = rain_anomaly)) +
+  geom_tile() +
+  coord_equal() +
+  # facet_grid(. ~ site) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        # legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.height = unit(1, "cm"),
+        legend.key.width = unit(0.25, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1979, 2016), breaks = seq(1945, 2015, by = 5)) +
+  scale_fill_gradientn(colours = brewer.pal(11, "BrBG"),
+                       name = "mm",
+                       trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
+  labs(x = "Month", y = "Year", title = "Rainfall Anomaly\n")
+
+temp <- ind_df %>%
+  filter(index == "nino3.4") %>%
+  mutate(month_of = month(date_of, label = TRUE),
+         year_of = year(date_of))
+
+lim <- max(abs(temp$value))
+
+p5 <- ggplot(temp, aes(x = month_of, y = year_of, fill = value)) +
+  geom_tile() +
+  coord_equal() +
+  # facet_grid(. ~ site) +
+  theme_bw() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
+        # legend.position = "bottom",
+        strip.background = element_blank(),
+        axis.line = element_blank(),
+        strip.text = element_text(face = "bold", size = 11),
+        legend.key.height = unit(1, "cm"),
+        legend.key.width = unit(0.25, "cm"),
+        panel.margin = unit(1, "lines")) +
+  scale_y_continuous(limits = c(1979, 2016), breaks = seq(1945, 2015, by = 5)) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "PiYG")),
+                       name = "",
+                       trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim)) +
+  labs(x = "Month", y = "Year", title = "ENSO Index\n")
+
+cowplot::plot_grid(p2, p1, p3, p4, p5, nrow = 1, align = "hv")
 
 # ---- plot_spei ----------------------------------------------------------
 
@@ -445,23 +558,23 @@ for (i in 1:length(levels(monthly_anom$site))) {
 # ---- index_correlations -------------------------------------------------
 
 phase_cor <- climates %>%
-  select(site, date_of, month_of, contains("anomaly"), contains("detrended")) %>%
+  select(site, year_of, date_of, month_of, contains("anomaly"), contains("detrended")) %>%
   inner_join(ind_df) %>%
   group_by(site, month_of, index) %>%
   arrange(year_of) %>%
-  summarise(ind_rain_cor = cor(value, rain_anomaly),
+  summarise(ind_rain_cor = cor(value, rain_anomaly, use = "na.or.complete"),
             ind_rain_p = cor.test(value, rain_anomaly)$p.value,
-            ind_tmin_cor = cor(value, tmin_anomaly),
+            ind_tmin_cor = cor(value, tmin_anomaly, use = "na.or.complete"),
             ind_tmin_p = cor.test(value, tmin_anomaly)$p.value,
-            ind_tavg_cor = cor(value, tavg_anomaly),
+            ind_tavg_cor = cor(value, tavg_anomaly, use = "na.or.complete"),
             ind_tavg_p = cor.test(value, tavg_anomaly)$p.value,
-            ind_tmax_cor = cor(value, tmax_anomaly),
+            ind_tmax_cor = cor(value, tmax_anomaly, use = "na.or.complete"),
             ind_tmax_p = cor.test(value, tmax_anomaly)$p.value,
-            ind_tmin_d_cor = cor(value, tmin_detrended),
+            ind_tmin_d_cor = cor(value, tmin_detrended, use = "na.or.complete"),
             ind_tmin_d_p = cor.test(value, tmin_detrended)$p.value,
-            ind_tavg_d_cor = cor(value, tavg_detrended),
+            ind_tavg_d_cor = cor(value, tavg_detrended, use = "na.or.complete"),
             ind_tavg_d_p = cor.test(value, tavg_detrended)$p.value,
-            ind_tmax_d_cor = cor(value, tmax_detrended),
+            ind_tmax_d_cor = cor(value, tmax_detrended, use = "na.or.complete"),
             ind_tmax_d_p = cor.test(value, tmax_detrended)$p.value,
             n = n())
 
@@ -804,3 +917,75 @@ ggplot(phase_cor, aes(x = index, y = month_of, fill = new_tmax_d_cor)) +
 ggsave(filename = "sig_tmax_detrended.pdf", plot = last_plot(),
        path = "plots/index_anomaly_correlations",
        width = 12, height = 4.5, units = "in")
+
+
+
+
+
+temp <- phase_cor %>%
+  filter(index == "nino3.4") %>%
+  select(site, month_of, index, matches("new"), -matches("tmax"),
+         -matches("tmin"), -new_tavg_cor) %>%
+  gather(var, value, -site, -month_of, -index)
+
+temp <- phase_cor %>%
+  filter(index == "nino3.4" & site == "ssr") %>%
+  select(site, month_of, index, ind_tavg_d_cor, ind_rain_cor) %>%
+  gather(var, value, -site, -month_of, -index)
+
+old_vars <- levels(factor(temp$var))
+
+temp$var <- mapvalues(temp$var, from = old_vars, to = c("Rainfall", "Mean Temperature"))
+temp$site <- revalue(temp$site, site_map)
+
+lim <-  max(c(abs(min(temp$value, na.rm = TRUE)),
+              abs(max(temp$value, na.rm = TRUE))))
+
+ggplot(temp, aes(y = var, x = month_of, fill = value)) +
+  geom_tile(size = 0.1, color = "black") +
+  coord_equal() +
+  facet_wrap(~ site, ncol = 4) +
+  scale_fill_gradientn(colours = rev(brewer.pal(11, "RdBu")),
+                       name = "Correlation Coefficient",
+                       limits = c(-lim, lim)) +
+  theme_fc() +
+  labs(y = "", x = "") +
+  theme(strip.background = element_blank(),
+        legend.key.width = unit(1.5, "cm"),
+        legend.key.height = unit(0.2, "cm"),
+        axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+
+# ---- var_pairwise_plots -------------------------------------------------
+
+temp <- climates_combined %>%
+  filter(site == "ssr") %>%
+  select(site, year_of, month_of, rain_monthly_mm, rain_anomaly, tavg_detrended, nino3.4)
+
+lim <-  max(abs(temp$tavg_detrended), na.rm = TRUE)
+
+p1 <- ggplot(temp, aes(x = nino3.4, y = tavg_detrended, color = tavg_detrended)) +
+  geom_point() +
+  facet_wrap(~month_of, ncol = 3) +
+  scale_color_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
+                        limits = c(-lim, lim),
+                        trans = sqrt_sign_trans(),
+                        guide = FALSE) +
+  theme_dark() +
+  stat_smooth(method = "lm", se = FALSE, color = "white", size = 0.75) +
+  labs(x = "ENSO Conditions", y = "Temperature Anomaly", title = "ENSO vs Temperature")
+
+lim <-  max(abs(temp$rain_anomaly), na.rm = TRUE)
+
+p2 <- ggplot(temp, aes(x = nino3.4, y = rain_anomaly, color = rain_anomaly)) +
+  geom_point() +
+  facet_wrap(~month_of, ncol = 3) +
+  scale_color_gradientn(colours = brewer.pal(11, "BrBG"),
+                        limits = c(-lim, lim),
+                        trans = sqrt_sign_trans(),
+                        guide = FALSE) +
+  theme_dark() +
+  stat_smooth(method = "lm", se = FALSE, color = "white", size = 0.75) +
+  labs(x = "ENSO Conditions", y = "Rain Anomaly", title = "ENSO vs Rainfall")
+
+cowplot::plot_grid(p1, p2, nrow = 1, align = "hv", scale = 0.95)

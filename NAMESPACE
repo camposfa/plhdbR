@@ -2,7 +2,6 @@
 
 export("%ni%")
 export(age_first_rep)
-export(age_specific_fertility)
 export(cubroot_trans)
 export(find_bio_errors)
 export(find_fert_errors)

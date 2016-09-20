@@ -754,6 +754,6 @@ extremes <- function(tmin = NULL, tmax = NULL, prec = NULL, tmean = NULL, period
   out[, 4] = unname(apply(tt2, 1, which.min))
 
   out=data.frame(out)
-  colnames(out) = c("Warmest","Coldest","Wettest","Driest")
+  colnames(out) = c("warmest", "coldest", "wettest", "driest")
   return(out)
 }

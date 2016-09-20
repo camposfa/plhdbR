@@ -2,18 +2,75 @@ rm(list = ls())
 `%ni%` = Negate(`%in%`)
 
 # If running the script from scratch
-load("ClimatePred3.RData")
+# load("ClimatePred3.RData")
 
 # If script already run and resuming workspace
-# load(".RData")
+load(".RData")
+source("~/Dropbox/R/theme_fte.R")
+source("analysis_scripts/ggcorr.R")
+
+
+# ---- plotting_helpers ---------------------------------------------------
+
+var_map <- c(
+  rainfall = "Rainfall",
+  mean_temp = "Temperature",
+  index_nino3.4 = "ENSO Index",
+  spei_03 = "Drought Index"
+)
+
+term_map <- c(
+  age_classjuvenile = "Juveniles vs. Adults",
+  age_classnewborn = "Newborns vs. Adults",
+  `value` = "Climate Variable",
+  `value:age_classjuvenile` = "Juvelines:Climate",
+  `value:age_classnewborn` = "Newborns:Climate"
+)
+
+site_map <- c(
+  `rppn-fma` = "Muriqui",
+  amboseli = "Baboon",
+  kakamega = "Blue Monkey",
+  gombe = "Chimpanzee",
+  karisoke = "Gorilla",
+  beza = "Sifaka",
+  ssr = "Capuchin"
+)
+
+quarter_map <- c(
+  annual = "Annual",
+  coldest_q = "Coldest Q",
+  driest_q = "Driest Q",
+  warmest_q = "Warmest Q",
+  wettest_q = "Wettest Q"
+)
+
+age_map <- c(
+  newborn = "Infant",
+  juvenile = "Juvenile",
+  adult = "Adult",
+  combined = "Age Classes Combined"
+)
+
+global_labeller <- labeller(
+  age_class = age_map,
+  var = var_map,
+  term = term_map,
+  site = site_map,
+  grp = site_map,
+  quarter = quarter_map
+)
 
 
 # ---- combine_climate_survival -------------------------------------------
 
-m <- list()
+qua$annual <- rep(1, nrow(sites))
+
 # Takes ~5 minutes
+m <- list()
 for (i in 2:ncol(qua)) {
-  temp_m <- stage_specific_survival(lh, census_start_month = qua[, i][[1]])
+  temp_m <- stage_specific_survival(lh, weaning_ages = weaning,
+                                    census_start_month = qua[, i][[1]])
   temp_m$quarter <- paste0(names(qua[, i]), "_q")
   m[[i - 1]] <- temp_m
 }
@@ -28,10 +85,17 @@ m <- complete(m, nesting(site, quarter, year_of), age_class,
                               deaths = 0, trials = 0, successes = 0,
                               failures = 0))
 
-temp <- inner_join(climate_predictors, m)
-temp <- filter(temp, !str_detect(var, "spei"))
+m$quarter <- revalue(m$quarter, c("annual_q" = "annual"))
+full_df <- inner_join(climate_predictors, m)
+full_df <- filter(full_df, var %ni% c("spei_01", "spei_06", "spei_12"))
 
-temp1 <- temp %>%
+# Rescale variables (within site, var, and quarter)
+full_df <- full_df %>%
+  group_by(site, var, quarter) %>%
+  mutate(value = scale(value)) %>%
+  ungroup()
+
+by_site_qua_var <- full_df %>%
   group_by(site, quarter, var) %>%
   arrange(site, quarter, var) %>%
   nest()
@@ -40,9 +104,10 @@ qua_df <- gather(qua, quarter, start_month, -site)
 qua_df$quarter <- paste0(qua_df$quarter, "_q")
 
 
-# ---- warmest_q_model ----------------------------------------------------
+# ==== Q1
+# ---- q1_models ----------------------------------------------------------
 
-remove_years <- temp1 %>%
+remove_years <- by_site_qua_var %>%
   unnest() %>%
   select(site, quarter, var, year_of, age_class, successes, failures, value) %>%
   complete(nesting(site, year_of, var, age_class), quarter) %>%
@@ -50,930 +115,1374 @@ remove_years <- temp1 %>%
   select(site, year_of) %>%
   distinct()
 
-temp2 <- anti_join(temp, remove_years) %>%
+# by_site_qua_var_ac <- anti_join(full_df, remove_years) %>%
+by_site_qua_var_ac <- full_df %>%
   arrange(site, quarter, var, year_of) %>%
-  group_by(site, age_class, quarter, var) %>%
+  group_by(site, quarter, var, age_class) %>%
   nest()
 
+get_trials <- function(df) {
+
+  fates <- list()
+
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
+
+    f <- data.frame(fate = fate)
+
+    if (nrow(f) > 0) {
+      f$year_of <- df[i, ]$year_of
+      f$value <- df[i, ]$value
+
+      fates[[i]] <- f
+    }
+
+  }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
+}
+
+by_site_qua_var_ac <- by_site_qua_var_ac %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_site_qua_var_ac <- by_site_qua_var_ac %>%
+  mutate(model = purrr::map(trials, ~ glmer(fate ~ value + (1 | year_of),
+                                        family = binomial, data = .)),
+         null_model = purrr::map(trials, ~ glmer(fate ~ 1 + (1 | year_of),
+                                             family = binomial, data = .)))
+
 # Verify
-filter(temp2, site == "ssr" & age_class == "newborn")
+filter(by_site_qua_var_ac, site == "ssr" & age_class == "newborn")
 
-temp3 <- temp2 %>%
-  mutate(model = purrr::map(data, ~ glm(cbind(successes, failures) ~ value,
-                                        family = "binomial", data = .)))
+by_site_qua_var_ac <- by_site_qua_var_ac %>%
+  mutate(AICc = purrr::map_dbl(model, MuMIn::AICc),
+         null_AICc = purrr::map_dbl(null_model, MuMIn::AICc)) %>%
+  arrange(site, quarter, age_class)
 
-temp4 <- temp3 %>% unnest(model %>% purrr::map(broom::glance))
+q1 <- by_site_qua_var_ac %>%
+  select(-data, -model, -null_model) %>%
+  group_by(site, quarter, age_class) %>%
+  mutate(delta = AICc - null_AICc)
 
-temp4 <- temp4 %>%
-  arrange(site, age_class, AIC)
-
-View(select(temp4, -data, -model))
-
-
-
-
-# ---- aggregate_to_annual ------------------------------------------------
-
-start_months <- c(2, 5, 8, 12, 2, 4, 9)
-# start_months <- rep(1, 7)
-
-# Function to assign monthly data to different kinds of "years"
-# Calendar years, birth-years, rainfall years
-assign_group_year <- function(df, group_dates) {
-
-  temp <- df %>%
-    inner_join(group_dates, by = "site") %>%
-    mutate(month_num = month(date_of),
-           group_year = ifelse(month_num >= month_start,
-                               year_of, year_of - 1)) %>%
-    select(-month_start, -month_num)
-
-  return(temp)
-}
-
-birth_years <- data_frame(site = site_list, month_start = start_months)
-birth_years$site <- factor(birth_years$site, levels = site_list)
-
-climates_combined <- assign_group_year(climates_combined, birth_years)
-climates <- assign_group_year(climates, birth_years)
-
-ann_mean <- climates_combined %>%
-  ungroup() %>%
-  select(-date_of, -month_of, -year_of, -rain_data_source) %>%
-  group_by(site, group_year) %>%
-  summarise_each(funs(mean(., na.rm = TRUE), n())) %>%
-  rename(n_months = rain_monthly_mm_n) %>%
-  select(-ends_with("_n")) %>%
-  filter(n_months == 12)
-
-ann_div <- climates %>%
-  group_by(site, group_year) %>%
-  mutate(rain_adj = ifelse(rain_monthly_mm == 0, .001, rain_monthly_mm)) %>%
-  summarise(n_months = n(),
-            shannon_rain = diversity(rain_adj, index = "shannon"),
-            simpson_rain = diversity(rain_adj, index = "simpson"),
-            invsimpson_rain = diversity(rain_adj, index = "invsimpson"),
-            cov_rain = sd(rain_monthly_mm, na.rm = TRUE) /
-              mean(rain_monthly_mm, na.rm = TRUE)) %>%
-  ungroup() %>%
-  filter(n_months == 12)
-
-ann_total <- climates %>%
-  group_by(site, group_year) %>%
-  summarise(rain_total_mm = sum(rain_monthly_mm),
-            n_months = n()) %>%
-  filter(n_months == 12)
-
-ann_extremes <- climates %>%
-  group_by(site, group_year) %>%
-  summarise(coldest_tmin_anomaly = min(tmin_anomaly),
-            hottest_tmax_anomaly = max(tmax_anomaly),
-            wettest_anomaly = max(rain_anomaly),
-            driest_anomaly = min(rain_anomaly),
-            n_months = n()) %>%
-  filter(n_months == 12)
-
-
-# Use Shannon diversity index and combine with other climate variables
-climate_predictors <- ann_mean %>%
-  left_join(select(ann_total, -n_months)) %>%
-  left_join(select(ann_extremes, -n_months)) %>%
-  left_join(select(ann_div, site, group_year, shannon_rain))
-
-
-# ---- survival -----------------------------------------------------------
-
-# Takes about 1 minute
-m <- stage_specific_survival(lh, census_start_month = start_months)
-summary(m)
-
-# Make trials
-# surv_trials <- make_survivorship_trials(m)
+# q1_coef <- by_site_qua_var_ac %>%
+#   unnest(model %>% purrr::map(., ~ broom::tidy(., effects = "fixed",
+#                                                conf.int = TRUE))) %>%
+#   filter(!str_detect(term, "Intercept"))
 #
-# surv_trials <- surv_trials %>%
-#   ungroup() %>%
-#   filter(year_of < 2014) %>%
-#   select(site = Study.Id, year_of, age_class, fate)
+# q1_coef$p_cat <- cut(q1_coef$p, breaks = c(0, 0.05, 1), labels = c("p < 0.05", "N.S."))
+# q1_coef$p_cat <- factor(q1_coef$p_cat, levels = rev(levels(q1_coef$p_cat)))
 
-surv_trials <- m %>%
-  ungroup() %>%
-  filter(year_of < 2014) %>%
-  select(site = Study.Id, year_of, age_class, trials, successes) %>%
-  mutate(failures = trials - successes)
+q1_coef <- by_site_qua_var_ac %>%
+  filter(var != "spei_03") %>%
+  unnest(model %>% purrr::map(., ~ broom::tidy(., effects = "fixed",
+                                               conf.int = TRUE,
+                                               conf.method = "boot",
+                                               .progress="txt", PBargs=list(style = 3)))) %>%
+  filter(!str_detect(term, "Intercept"))
 
-temp <- climate_predictors %>%
-  rename(year_of = group_year) %>%
-  ungroup() %>%
-  group_by(site) %>%
-  mutate_each(funs(scale), -site, -year_of) %>%
-  gather(var, lag0, -site, -year_of) %>%
-  group_by(site, var) %>%
-  arrange(year_of) %>%
-  mutate(lag1 = lag(lag0))
+q1_coef <- q1_coef %>%
+  mutate(ci_sig = (0 < conf.low) | (0 > conf.high))
+
+q1_coef$p_cat <- factor(q1_coef$ci_sig, levels = c("FALSE", "TRUE"),
+                        labels = c("N.S.", "p < 0.05"))
+
+# Completed
 
 
-temp <- climate_predictors %>%
-  rename(year_of = group_year) %>%
-  ungroup() %>%
-  select(site, year_of, tmax_monthly_mean, spei_03_mean, nino3.4_mean, rain_total_mm) %>%
-  group_by(site) %>%
-  mutate_each(funs(scale), -site, -year_of) %>%
-  gather(var, lag0, -site, -year_of) %>%
-  group_by(site, var) %>%
-  arrange(year_of) %>%
-  mutate(lag1 = lag(lag0))
+# ---- q1_plot_tile_AIC ---------------------------------------------------
 
-# l <- levels(factor(temp$var))
-# keep <- l[str_detect(l, "nino") | str_detect(l, "precip") | str_detect(l, "temp") | str_detect(l, "tmax") | str_detect(l, "tmin") | str_detect(l, "spei")]
-#
-# temp <- temp %>% filter(var %in% keep)
+temp <- filter(q1, var != "spei_03")
+lim <- max(abs(temp$delta))
+# temp$var <- revalue(temp$var, var_map)
+temp$quarter <- revalue(temp$quarter, quarter_map)
+temp$age_class <- revalue(temp$age_class, age_map)
+temp$age_class <- factor(temp$age_class, levels = c("Adult", "Juvenile", "Infant"))
+q1_coef$age_class <- revalue(q1_coef$age_class, age_map)
+q1_coef$age_class <- factor(q1_coef$age_class, levels = c("Adult", "Juvenile", "Infant"))
 
-# Models
-mod_df1 <- surv_trials %>%
-  left_join(temp) %>%
-  filter(!is.na(lag0))
-
-mod_df1$site <- mapvalues(mod_df1$site,
-                          from = levels(mod_df1$site),
-                          to = c("Muriqui", "Baboon", "Blue Monkey",
-                                 "Chimpanzee", "Gorilla", "Sifaka",
-                                 "Capuchin"))
-
-mod_df1$age_class <- factor(mod_df1$age_class,
-                            levels = c("newborn", "juvenile", "adult"))
-
-# mod3 <- mod_df1 %>%
-#   ungroup() %>%
-#   group_by(site, age_class, var) %>%
-#   do(mod_null = glm(cbind(successes, failures) ~ 1, data = ., family = "binomial"),
-#      mod_0 = glm(cbind(successes, failures) ~ lag0, data = ., family = "binomial"),
-#      mod_1 = glm(cbind(successes, failures) ~ lag1, data = ., family = "binomial"),
-#      mod_2 = glm(cbind(successes, failures) ~ lag2, data = ., family = "binomial"))
-
-mod3 <- mod_df1 %>%
-  ungroup() %>%
-  group_by(site, age_class, var) %>%
-  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
-     mod_0 = glmer(fate ~ lag0 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"))
-
-mod4 <- NULL
-k <- 1
-for (i in 1:nrow(mod3)) {
-  for (j in 4:ncol(mod3)) {
-    temp <- select(mod3[i, ], 1:3, j)
-    temp$scenario <- names(temp)[4]
-    names(temp)[4] <- "model"
-    mod4[[k]] <- temp
-    k <- k + 1
-  }
-}
-
-mod4 <- bind_rows(mod4)
-
-mod4 <- filter(mod4, scenario != "mod_null" | (scenario == "mod_null" & var == "nino3.4_mean"))
-var_levels <- c(levels(factor(mod4$var)), "null")
-mod4$var <- factor(mod4$var, levels = var_levels)
-mod4[mod4$scenario == "mod_null", ]$var <- "null"
-
-mod_sel <- mod4 %>%
-  group_by(site, age_class) %>%
-  do(m_table = model.sel(.$model),
-     vars = data.frame(var = .$var),
-     scenarios = data.frame(scenario = .$scenario),
-     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
-# deviance = data.frame(deviance = .$model %>% map(summary) %>% lapply(., "[[", "AICtab") %>% map_dbl("deviance")))
-
-temp <- NULL
-
-for (i in 1:nrow(mod_sel)) {
-  m_table <- data.frame(mod_sel[i, ]$m_table[[1]])
-  m_table$num <- rownames(m_table)
-
-  vars <- mod_sel[i, ]$vars[[1]]
-  vars$num <- rownames(vars)
-
-  scenarios <- mod_sel[i, ]$scenarios[[1]]
-  scenarios$num <- rownames(scenarios)
-
-  deviance <- mod_sel[i, ]$deviance[[1]]
-  deviance$num <- rownames(deviance)
-
-  temp1 <- suppressMessages(inner_join(m_table, vars))
-  temp1 <- suppressMessages(inner_join(temp1, scenarios))
-  temp1 <- suppressMessages(inner_join(temp1, deviance))
-  temp1$site <- mod_sel[i, ]$site
-  temp1$age_class <- mod_sel[i, ]$age_class
-  temp1$rank <- as.numeric(rownames(temp1))
-
-  temp1 <- temp1 %>%
-    select(site, age_class, var, scenario, deviance, rank, model_num = num, 1:9)
-
-  temp[[i]] <- temp1
-
-}
-
-surv_models <- tbl_df(bind_rows(temp))
-
-# Since MuMIn fails to get intercepts for null models
-temp <- mod4 %>%
-  filter(var == "null") %>%
-  group_by(site, age_class) %>%
-  summarise(intercept = lapply(lapply(model, summary), coef)[[1]][, "Estimate"]) %>%
-  mutate(var = "null")
-
-for (i in 1:length(levels(surv_models$site))) {
-  current_site <- levels(surv_models$site)[i]
-  surv_models[surv_models$site == current_site & surv_models$var == "null", ]$X.Intercept. <- temp[temp$site == current_site, ]$intercept
-}
-
-null_aic <- surv_models %>%
-  filter(var == "null") %>%
-  select(site, age_class, null_AICc = AICc, null_delta = delta,
-         null_deviance = deviance)
-
-# surv_models <- inner_join(surv_models, null_aic)
-# surv_models$scenario <- mapvalues(surv_models$scenario,
-#                                   from = c("mod_0", "mod_1", "mod_2", "mod_null"),
-#                                   to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
-surv_models <- inner_join(surv_models, null_aic)
-surv_models$scenario <- mapvalues(surv_models$scenario,
-                                  from = c("mod_0", "mod_1", "mod_null"),
-                                  to = c("Lag 0", "Lag 1", "Null"))
-
-# surv_models$scenario <- factor(surv_models$scenario,
-#                                levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
-surv_models$scenario <- factor(surv_models$scenario,
-                               levels = rev(c("Null", "Lag 0", "Lag 1")))
-
-# surv_models %>%
-#   group_by(site, age_class, var) %>%
-#   top_n(1, -rank) %>%
-#   mutate(delta_AICc_vs_null = AICc - null_AICc,
-#          D = 1 - (deviance / null_deviance)) %>%
-#   select(-null_AICc, -null_delta, -null_deviance) %>%
-#   View()
-
-best_surv_scenarios <- surv_models %>%
-  group_by(site, age_class, var) %>%
-  top_n(1, -rank) %>%
-  ungroup() %>%
-  group_by(site, age_class) %>%
-  top_n(1, -rank) %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_deviance)
-
-best_surv_scenarios2 <- surv_models %>%
-  group_by(site, age_class, var) %>%
-  top_n(1, -rank) %>%
-  ungroup() %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_deviance)
-
-
-
-# ---- Survival_tile_plots ------------------------------------------------
-
-# All lag scenarios
-
-surv_plots <- surv_models %>%
-  filter(var != "null") %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance))
-
-lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
-              abs(max(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE))))
-
-ggplot(surv_plots2, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
-  geom_tile(size = 0.1, color = "black") +
+ggplot(temp,
+       aes(x = age_class, y = quarter, fill = delta)) +
+  geom_tile(color = "black", size = 0.1) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = "AICc relative to Null Model",
                        # trans = sqrt_sign_trans(),
-                       limits = c(-lim, lim)) +
-  facet_grid(scenario ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
+                       limits = c(-lim, lim),
+                       name = "AICc units from\nnull model") +
+  coord_equal() +
+  theme_minimal() +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom",
         legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
+        legend.key.height = unit(0.35, "cm"),
+        strip.text = element_text(face = "bold"),
+        axis.text.x = element_text(size = 7, angle = 90, vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_text(size = 8),
+        axis.title.y = element_text(size = 8),
+        plot.margin = unit(c(0.35, 0.35, 0.35, 0.35), "cm"))
+
+ggsave("~/Desktop/Q1_AIC_Tile_Plot_All.pdf",
+       width = 8, height = 8, units = "in")
+
+
+# ---- q1_plot_AIC --------------------------------------------------------
+
+lim <- max(abs(temp$delta))
+fil <- "age_class == 'Adult' & var != 'spei_03'"
+
+p1 <- ggplot(filter_(temp, fil),
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       breaks = seq(-ceiling(lim), ceiling(lim), by = 2),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "") +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n")
+       # title = stringi::stri_trans_totitle(filter_(temp, fil)$age_class[[1]]))
+
+
+# ---- q1_plot_coefficients -----------------------------------------------
+
+# lim <- max(c(abs(filter_(q1_coef, fil)$conf.low),
+#              abs(filter_(q1_coef, fil)$conf.high)))
+
+lim <- max(c(abs(q1_coef$conf.low),
+             abs(q1_coef$conf.high)))
+
+temp1 <- filter_(q1_coef, fil)
+temp1$quarter <- revalue(temp1$quarter, quarter_map)
+
+p2 <- ggplot(temp1,
+       aes(x = estimate, y = quarter, fill = p_cat)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_errorbarh(aes(xmax = conf.high, xmin = conf.low),
+                 height = 0.5, size = 0.25) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-lim, lim), trans = sqrt_sign_trans()) +
+  scale_fill_manual(values = brewer.pal(3, "RdGy")[c(3, 1)],
+                    name = "", drop = FALSE) +
+  theme_fc() +
+  theme(legend.key.width = unit(0.5, "cm")) +
+  labs(x = "\nCoefficient Estimate", y = "Climate Model\n")
+       # title = stringi::stri_trans_totitle(filter_(q1_coef, fil)$age_class[[1]]))
+
+cowplot::plot_grid(p1, p2, nrow = 2, scale = 0.95, labels = c("a", "b"))
+
+ggsave("~/Desktop/temp.pdf",
+       width = 10, height = 8.5, units = "in")
+
+# ---- site_specific_surv_plots -------------------------------------------
+
+my_site <- "beza"
+my_quarter <- "coldest_q"
+my_var <- "rainfall"
+my_age_class <- "newborn"
+
+temp <- by_site_qua_var_ac %>%
+  dplyr::filter(site == my_site & quarter == my_quarter & var == my_var &
+                  age_class == my_age_class)
+temp1 <- temp$model[[1]]
+temp2 <- as.data.frame(temp$trials[[1]])
+temp1@call$data <- as.name(deparse(substitute(temp2)))
+
+t1 <- sjp.glmer(temp1, type = "fe.pc", prnt.plot = FALSE, show.ci = TRUE,
+                axis.lim = c(0, 1), facet.grid = FALSE)$plot.list[[1]]
+
+t2 <- t1$data
+t3 <- temp$trials[[1]]
+
+p1 <- ggplot(t2, aes(values, y)) +
+  geom_hline(aes(yintercept = 0), color = "gray90") +
+  geom_hline(aes(yintercept = 1), color = "gray90") +
+  ggstance::geom_violinh(data = t3, aes(x = value, y = fate, group = fate),
+                         width = 0.1, color = NA, fill = "gray90") +
+  geom_point(data = t3, aes(x = value, y = fate),
+             # position = position_jitter(width = 0, height = 0.05),
+             size = 0.5, alpha = 0.1, shape = 3) +
+  stat_smooth(method = glm, se = TRUE, n = 80, fill = "#B2182B",
+              color = "#B2182B", fullrange = FALSE, level = 0.95, na.rm = FALSE,
+              method.args = list(family = "binomial"), span = 0.75) +
+  theme_fc() +
+  labs(x = "\nScaled rainfall during coldest/driest quarter",
+       y = "Predicted probability of survival\n",
+       title = "Newborn Sifakas") +
+  theme(legend.key.width = unit(0.75, "cm"),
         panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(x = "\nAge Class", y = "Cliamte Variable\n") +
-  coord_equal()
-
-ggsave("plots/models/Survival_AllLagScenarios_AIC.pdf",
-       width = 9, height = 15, units = "in")
+        plot.background = element_blank())
 
 
-lim <- max(surv_plots$D)
-# Plot Deviance
-ggplot(surv_plots, aes(x = age_class, y = var, fill = D)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
-                       limits = c(0, lim),
-                       name = "Proportional Reduction\nin Deviance") +
-  facet_grid(scenario ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(y = "Climate Variable\n", x = "\nAge Class") +
-  coord_equal()
+my_site <- "kakamega"
+my_quarter <- "annual"
+my_var <- "rainfall"
+my_age_class <- "juvenile"
 
-ggsave("plots/models/Survival_AllLagScenarios_Deviance.pdf",
-       width = 9, height = 15, units = "in")
+temp <- by_site_qua_var_ac %>%
+  dplyr::filter(site == my_site & quarter == my_quarter & var == my_var &
+                  age_class == my_age_class)
+temp1 <- temp$model[[1]]
+temp2 <- as.data.frame(temp$trials[[1]])
+temp1@call$data <- as.name(deparse(substitute(temp2)))
 
+t1 <- sjp.glmer(temp1, type = "fe.pc", prnt.plot = FALSE, show.ci = TRUE,
+                axis.lim = c(0, 1), facet.grid = FALSE)$plot.list[[1]]
 
-lim <-  max(c(abs(min(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE)),
-              abs(max(surv_plots$null_AICc - surv_plots$AICc, na.rm = TRUE))))
+t2 <- t1$data
+t3 <- temp$trials[[1]]
 
-# Pick best lag scenario
-ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = delta_AICc_vs_null)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = "AICc relative to Null Model",
-                       trans = "sqrt_sign",
-                       limits = c(-lim, lim)) +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
+p2 <- ggplot(t2, aes(value, y)) +
+  geom_hline(aes(yintercept = 0), color = "gray90") +
+  geom_hline(aes(yintercept = 1), color = "gray90") +
+  ggstance::geom_violinh(data = t3, aes(x = value, y = fate, group = fate),
+                         width = 0.1, color = NA, fill = "gray90") +
+  geom_point(data = t3, aes(x = value, y = fate),
+             size = 0.5, alpha = 0.1, shape = 3,
+             position = position_jitter(width = 0, height = 0.05)) +
+  stat_smooth(method = glm, se = TRUE, n = 80, fill = "#B2182B",
+              color = "#B2182B", fullrange = FALSE, level = 0.95, na.rm = FALSE,
+              method.args = list(family = "binomial"), span = 0.75) +
+  theme_fc() +
+  labs(x = "\nScaled rainfall during year",
+       y = "Predicted probability of survival\n",
+       title = "Juvenile Blue Monkeys") +
+  theme(legend.key.width = unit(0.75, "cm"),
         panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(y = "Climate Variable\n", x = "\nAge Class") +
-  coord_equal()
+        plot.background = element_blank())
 
-ggsave("plots/models/Survival_BestLagScenarios_AIC.pdf",
-       width = 11, height = 8.5, units = "in")
+my_site <- "karisoke"
+my_quarter <- "annual"
+my_var <- "index_nino3.4"
+my_age_class <- "adult"
 
-lim <- max(best_surv_scenarios2$D)
+temp <- by_site_qua_var_ac %>%
+  dplyr::filter(site == my_site & quarter == my_quarter & var == my_var &
+                  age_class == my_age_class)
+temp1 <- temp$model[[1]]
+temp2 <- as.data.frame(temp$trials[[1]])
+temp1@call$data <- as.name(deparse(substitute(temp2)))
 
-ggplot(best_surv_scenarios2, aes(x = age_class, y = var, fill = D)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
-                       name = "Proportional Reduction\nin Deviance",
-                       trans = sqrt_trans(),
-                       limits = c(0, lim)) +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
+t1 <- sjp.glmer(temp1, type = "fe.pc", prnt.plot = FALSE, show.ci = TRUE,
+                axis.lim = c(0, 1), facet.grid = FALSE)$plot.list[[1]]
+
+t2 <- t1$data
+t3 <- temp$trials[[1]]
+
+p3 <- ggplot(t2, aes(value, y)) +
+  geom_hline(aes(yintercept = 0), color = "gray90") +
+  geom_hline(aes(yintercept = 1), color = "gray90") +
+  ggstance::geom_violinh(data = t3, aes(x = value, y = fate, group = fate),
+                         width = 0.1, color = NA, fill = "gray90") +
+  geom_point(data = t3, aes(x = value, y = fate),
+             size = 0.5, alpha = 0.1, shape = 3,
+             position = position_jitter(width = 0, height = 0.05)) +
+  stat_smooth(method = glm, se = TRUE, n = 80, fill = "#B2182B",
+              color = "#B2182B", fullrange = FALSE, level = 0.95, na.rm = FALSE,
+              method.args = list(family = "binomial"), span = 0.75) +
+  theme_fc() +
+  labs(x = "\nScaled ENSO index during year",
+       y = "Predicted probability of survival\n",
+       title = "Adult Gorillas") +
+  theme(legend.key.width = unit(0.75, "cm"),
         panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(y = "Climate Variable\n", x = "\nAge Class") +
-  coord_equal()
+        plot.background = element_blank())
 
-ggsave("plots/models/Survival_BestLagScenarios_Deviance.pdf",
-       width = 11, height = 8.5, units = "in")
+cowplot::plot_grid(p1, p2, p3, nrow = 1, scale = 0.95, labels = c("a", "b", "c"))
 
 
 
-# ---- Survival_coefficients ----------------------------------------------
+# ==== Q1A
+# ---- q1a_models ---------------------------------------------------------
 
+by_site_qua_var <- anti_join(full_df, remove_years) %>%
+  arrange(site, quarter, var, year_of) %>%
+  group_by(site, quarter, var) %>%
+  nest()
 
-# All CIs / SEs
+get_trials <- function(df) {
 
-sc_0 <- mod4 %>%
-  filter(scenario == "mod_0" & var %ni% c("null"))
+  fates <- list()
 
-sc_01 <- cbind(sc_0[, 1:3], ldply(sc_0$model, .fun = function(x) coef(summary(x))["lag0", "Std. Error"]))
-sc_02 <- cbind(sc_0[, 1:3], ldply(sc_0$model, .fun = function(x) confint(x, method = "Wald")["lag0", ]))
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
 
-sc_0 <- surv_models %>%
-  filter(scenario == "Lag 0" & var %ni% c("null"))
+    f <- data.frame(fate = fate)
 
-sc_0$var <- factor(sc_0$var)
-sc_02$var <- factor(sc_02$var, levels = levels(factor(sc_0$var)))
-sc_01$var <- factor(sc_01$var, levels = levels(factor(sc_0$var)))
+    if (nrow(f) > 0) {
+      f$year_of <- df[i, ]$year_of
+      f$value <- df[i, ]$value
+      f$age_class <- df[i, ]$age_class
 
-sc_0_lag0 <- sc_0 %>% inner_join(sc_01) %>% inner_join(sc_02)
-names(sc_0_lag0)[(ncol(sc_0_lag0) - 2):ncol(sc_0_lag0)] <- c("se", "lower_ci", "upper_ci")
+      fates[[i]] <- f
+    }
 
-sc_1 <- mod4 %>%
-  filter(scenario == "mod_1" & var %ni% c("null"))
-
-sc_11 <- cbind(sc_1[, 1:3], ldply(sc_1$model, .fun = function(x) coef(summary(x))["lag1", "Std. Error"]))
-sc_12 <- cbind(sc_1[, 1:3], ldply(sc_1$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
-
-sc_1 <- surv_models %>%
-  filter(scenario == "Lag 1" & var %ni% c("null"))
-
-sc_1$var <- factor(sc_1$var)
-sc_12$var <- factor(sc_12$var, levels = levels(factor(sc_1$var)))
-sc_11$var <- factor(sc_11$var, levels = levels(factor(sc_1$var)))
-
-sc_1_lag1 <- sc_1 %>% inner_join(sc_11) %>% inner_join(sc_12)
-names(sc_1_lag1)[(ncol(sc_1_lag1) - 2):ncol(sc_1_lag1)] <- c("se", "lower_ci", "upper_ci")
-
-sc_2 <- mod4 %>%
-  filter(scenario == "mod_2" & var %ni% c("null"))
-
-sc_21 <- cbind(sc_2[, 1:3], ldply(sc_2$model, .fun = function(x) coef(summary(x))["lag2", "Std. Error"]))
-sc_22 <- cbind(sc_2[, 1:3], ldply(sc_2$model, .fun = function(x) confint(x, method = "Wald")["lag2", ]))
-
-sc_2 <- surv_models %>%
-  filter(scenario == "Lag 2" & var %ni% c("null"))
-
-sc_2$var <- factor(sc_2$var)
-sc_22$var <- factor(sc_22$var, levels = levels(factor(sc_2$var)))
-sc_21$var <- factor(sc_21$var, levels = levels(factor(sc_2$var)))
-
-sc_2_lag2 <- sc_2 %>% inner_join(sc_21) %>% inner_join(sc_22)
-names(sc_2_lag2)[(ncol(sc_2_lag2) - 2):ncol(sc_2_lag2)] <- c("se", "lower_ci", "upper_ci")
-
-sc <- bind_rows(sc_0_lag0, sc_1_lag1, sc_2_lag2)
-
-st <- sc %>%
-  select(-scenario) %>%
-  gather(lag, estimate, lag0, lag1, lag2) %>%
-  filter(!is.na(estimate))
-
-st$lag <- mapvalues(st$lag,
-                    from = c("lag0", "lag1", "lag2"),
-                    to = c("Lag 0", "Lag 1", "Lag 2"))
-
-st$var <- factor(st$var)
-
-
-# Plot both lag scenarios for each site separately
-st <- st %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance))
-
-for (i in 1:length(levels(st$site))) {
-
-  for (j in 1:length(levels(st$age_class))) {
-
-    current_site = levels(st$site)[i]
-    current_ac <- levels(st$age_class)[j]
-
-    temp4 <- filter(st, site == current_site & age_class == current_ac)
-
-    temp4 <- temp4 %>%
-      unite(newvar, var, lag, sep = ", ", remove = FALSE)
-
-    temp4 <- temp4 %>%
-      group_by(site, var) %>%
-      top_n(1, -AICc)
-
-    temp4$newvar <- factor(temp4$newvar, levels = temp4$newvar[order(temp4$var)])
-
-    lim <-  max(c(abs(min(temp4$D, na.rm = TRUE)),
-                  abs(max(temp4$D, na.rm = TRUE))))
-
-    ggplot(temp4, aes(x = estimate, y = newvar, color = D)) +
-      geom_point(size = 3) +
-      geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
-                     height = 0.3, size = 0.75) +
-      scale_color_gradientn(colours = brewer.pal(9, "Greens"),
-                            name = "Proportional Reduction\nin Deviance",
-                            limits = c(0, lim)) +
-      geom_vline(xintercept = 0, lty = 2) +
-      theme_bw() +
-      theme(strip.background = element_blank(),
-            legend.position = "bottom",
-            legend.key.width = unit(2, "cm"),
-            legend.key.height = unit(0.5, "cm"),
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-      labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
-           title = paste(current_site, ", ", current_ac, ":\n",
-                         "Scaled Coefficient Estimates for Models of Survival\n",
-                         sep = ""))
-
-    ggsave(paste("plots/models/Survival_Coefficients_",
-                 i, "_", current_site, "_", current_ac, ".pdf", sep = ""),
-           width = 8, height = 10, units = "in")
   }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
 }
 
-rm(sc_0, sc_0_lag0, sc_01, sc_02, sc_1, sc_1_lag1, sc_11, sc_12, sc_2,
-   sc_2_lag2, sc_21, sc_22)
+by_site_qua_var <- by_site_qua_var %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
 
+by_site_qua_var <- by_site_qua_var %>%
+  mutate(model = purrr::map(trials, ~ glmer(fate ~ value * age_class + (1 | age_class/year_of),
+                                            family = binomial, data = .)),
+         null_model = purrr::map(trials, ~ glmer(fate ~ age_class + (1 | age_class/year_of),
+                                             family = binomial, data = .)))
 
-# ---- fertility ----------------------------------------------------------
+by_site_qua_var <- by_site_qua_var %>%
+  mutate(AICc = purrr::map_dbl(model, MuMIn::AICc),
+         null_AICc = purrr::map_dbl(null_model, MuMIn::AICc)) %>%
+  arrange(site, quarter)
 
-# Takes a few minutes to run
-f <- stage_specific_fertility(lh, fert, census_start_month = start_months)
-f <- stage_specific_fertility(lh, fert, census_start_month = rep(1, 7))
+q1a <- by_site_qua_var %>%
+  select(-data, -model, -null_model) %>%
+  group_by(site, quarter) %>%
+  mutate(delta = AICc - null_AICc)
 
-# Make trials
-fert_trials <- make_survivorship_trials(f)
+q1a_coef <- by_site_qua_var %>%
+  unnest(model %>% purrr::map(., ~ broom::tidy(., effects = "fixed",
+                                               # conf.method = "profile",
+                                               conf.int = TRUE))) %>%
+  filter(!str_detect(term, "Intercept"))
 
-fert_trials <- fert_trials %>%
-  ungroup() %>%
-  filter(year_of < 2014) %>%
-  select(site = Study.Id, year_of, age_class, fate)
+q1a_coef$p_cat <- cut(q1a_coef$p.value, breaks = c(0, 0.05, 1), labels = c("p < 0.05", "N.S."))
+q1a_coef$p_cat <- factor(q1a_coef$p_cat, levels = rev(levels(q1a_coef$p_cat)))
 
-# fert_trials <- f %>%
-#   ungroup() %>%
-#   filter(year_of < 2014) %>%
-#   select(site = Study.Id, year_of, age_class, trials, successes) %>%
-#   mutate(failures = trials - successes)
+temp <- filter(q1a, var != "spei_03")
+# temp <- filter(temp, quarter %ni% c("warmest_q", "coldest_q"))
+# temp$var <- mapvalues(temp$var,
+#                      from = c("index_nino3.4", "mean_temp", "rainfall"),
+#                      to = c("Niño3.4", "Tavg", "Rainfall"))
+temp$quarter <- revalue(temp$quarter, quarter_map)
+# temp$site <- revalue(temp$site, site_map)
+lim <- max(abs(q1$delta))
 
-temp <- climate_predictors %>%
-  rename(year_of = group_year) %>%
-  ungroup() %>%
-  select(site, year_of, tmax_monthly_mean, spei_03_mean, nino3.4_mean, rain_total_mm) %>%
-  group_by(site) %>%
-  mutate_each(funs(scale), -site, -year_of) %>%
-  gather(var, lag0, -site, -year_of) %>%
-  group_by(site, var) %>%
-  arrange(year_of) %>%
-  mutate(lag1 = lag(lag0))
-
-# temp <- temp %>% filter(var %in% keep)
-
-# Models
-fert_mod_df <- fert_trials %>%
-  left_join(temp) %>%
-  filter(!is.na(lag1))
-
-fert_mod_df$site <- mapvalues(fert_mod_df$site,
-                              from = levels(fert_mod_df$site),
-                              to = c("Muriqui", "Baboon", "Blue Monkey",
-                                     "Chimpanzee", "Gorilla", "Sifaka",
-                                     "Capuchin"))
-
-mod_df1$age_class <- factor(mod_df1$age_class,
-                            levels = c("newborn", "juvenile", "adult"))
-
-# mod <- fert_mod_df %>%
-#   filter(age_class == "adult") %>%
-#   ungroup() %>%
-#   group_by(site, var) %>%
-#   do(mod_null = glm(cbind(successes, failures) ~ 1, data = ., family = "binomial"),
-#      mod_0 = glm(cbind(successes, failures) ~ lag0, data = ., family = "binomial"),
-#      mod_1 = glm(cbind(successes, failures) ~ lag1, data = ., family = "binomial"),
-#      mod_2 = glm(cbind(successes, failures) ~ lag2, data = ., family = "binomial"))
-
-mod <- fert_mod_df %>%
-  filter(age_class == "adult") %>%
-  ungroup() %>%
-  group_by(site, var) %>%
-  do(mod_null = glmer(fate ~ 1 + (1 | year_of), data = ., family = "binomial"),
-     mod_1 = glmer(fate ~ lag1 + (1 | year_of), data = ., family = "binomial"))
-
-mod5 <- NULL
-k <- 1
-for (i in 1:nrow(mod)) {
-  for (j in 3:ncol(mod)) {
-    temp <- select(mod[i, ], 1:2, j)
-    temp$scenario <- names(temp)[3]
-    names(temp)[3] <- "model"
-    mod5[[k]] <- temp
-    k <- k + 1
-  }
-}
-
-mod5 <- bind_rows(mod5)
-
-mod5 <- filter(mod5, scenario != "mod_null" | (scenario == "mod_null" & var == "nino3.4_mean"))
-var_levels <- c(levels(factor(mod5$var)), "null")
-mod5$var <- factor(mod5$var, levels = var_levels)
-mod5[mod5$scenario == "mod_null", ]$var <- "null"
-
-fert_mod_sel <- mod5 %>%
-  group_by(site) %>%
-  do(m_table = model.sel(.$model),
-     vars = data.frame(var = .$var),
-     scenarios = data.frame(scenario = .$scenario),
-     deviance = data.frame(deviance = unlist(lapply(.$model, deviance))))
-# deviance = data.frame(deviance = .$model %>% map(summary) %>% lapply(., "[[", "AICtab") %>% map_dbl("deviance")))
-
-temp <- NULL
-
-for (i in 1:nrow(fert_mod_sel)) {
-  m_table <- data.frame(fert_mod_sel[i, ]$m_table[[1]])
-  m_table$num <- rownames(m_table)
-
-  vars <- fert_mod_sel[i, ]$vars[[1]]
-  vars$num <- rownames(vars)
-
-  scenarios <- fert_mod_sel[i, ]$scenarios[[1]]
-  scenarios$num <- rownames(scenarios)
-
-  deviance <- fert_mod_sel[i, ]$deviance[[1]]
-  deviance$num <- rownames(deviance)
-
-  temp1 <- suppressMessages(inner_join(m_table, vars))
-  temp1 <- suppressMessages(inner_join(temp1, scenarios))
-  temp1 <- suppressMessages(inner_join(temp1, deviance))
-  temp1$site <- fert_mod_sel[i, ]$site
-  temp1$rank <- as.numeric(rownames(temp1))
-
-  temp1 <- temp1 %>%
-    select(site, var, scenario, deviance, rank, model_num = num, 1:9)
-
-  temp[[i]] <- temp1
-
-}
-
-fert_models <- tbl_df(bind_rows(temp))
-
-# Since MuMIn fails to get intercepts for null models
-temp <- mod5 %>%
-  filter(var == "null") %>%
-  group_by(site) %>%
-  summarise(intercept = lapply(lapply(model, summary), coef)[[1]][, "Estimate"]) %>%
-  mutate(var = "null")
-
-for (i in 1:length(levels(fert_models$site))) {
-  current_site <- levels(fert_models$site)[i]
-  fert_models[fert_models$site == current_site & fert_models$var == "null", ]$X.Intercept. <- temp[temp$site == current_site, ]$intercept
-}
-
-
-null_aic <- fert_models %>%
-  filter(var == "null") %>%
-  select(site, null_AICc = AICc, null_delta = delta,
-         null_deviance = deviance)
-
-fert_models <- inner_join(fert_models, null_aic)
-
-# fert_models$scenario <- mapvalues(fert_models$scenario,
-#                                   from = c("mod_0", "mod_1", "mod_2", "mod_null"),
-#                                   to = c("Lag 0", "Lag 1", "Lag 2", "Null"))
-#
-# fert_models$scenario <- factor(fert_models$scenario,
-#                                levels = rev(c("Null", "Lag 0", "Lag 1", "Lag 2")))
-
-fert_models$scenario <- mapvalues(fert_models$scenario,
-                                  from = c("mod_1", "mod_null"),
-                                  to = c("Lag 1", "Null"))
-
-fert_models$scenario <- factor(fert_models$scenario,
-                               levels = rev(c("Null", "Lag 1")))
-
-# fert_models %>%
-#   group_by(site) %>%
-#   top_n(2, -rank) %>%
-#   mutate(delta_AICc_vs_null = AICc - null_AICc,
-#          D = 1 - (deviance / null_deviance)) %>%
-#   select(-null_AICc, -null_delta, -null_deviance) %>%
-#   View()
-#
-# fert_models %>%
-#   group_by(site, var) %>%
-#   top_n(1, -rank) %>%
-#   ungroup() %>%
-#   group_by(site) %>%
-#   top_n(20, -rank) %>%
-#   mutate(delta_AICc_vs_null = AICc - null_AICc,
-#          D = 1 - (deviance / null_deviance)) %>%
-#   select(-null_AICc, -null_delta, -null_deviance) %>%
-#   View()
-
-best_fert_scenarios2 <- fert_models %>%
-  group_by(site, var) %>%
-  top_n(1, -rank) %>%
-  ungroup() %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance)) %>%
-  select(-null_AICc, -null_delta, -null_deviance)
-
-
-
-# ---- Fertility_tile_plots -----------------------------------------------
-
-# Plot
-
-fert_plots <- fert_models %>%
-  filter(var != "null") %>%
-  mutate(D = 1 - (deviance / null_deviance))
-
-lim <-  max(c(abs(min(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE)),
-              abs(max(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE))))
-
-ggplot(fert_plots, aes(y = var, x = scenario, fill = (AICc - null_AICc))) +
-  geom_tile(size = 0.1, color = "black") +
+ggplot(temp, aes(x = site, y = quarter, fill = delta)) +
+  geom_tile(color = "black", size = 0.1) +
+  facet_grid(var ~ ., switch = "y", labeller = global_labeller) +
   scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = "AICc relative to Null Model",
+                       limits = c(-lim, lim),
+                       name = "AICc units from\nnull model") +
+  coord_equal() +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(0.5, "cm"),
+        legend.key.height = unit(0.35, "cm"),
+        strip.text = element_text(face = "bold"),
+        axis.text.x = element_text(size = 7, angle = 90, vjust = 0.5, hjust = 1),
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_text(size = 8),
+        axis.title.y = element_text(size = 8),
+        plot.margin = unit(c(0.35, 0.35, 0.35, 0.35), "cm")) +
+  labs(x = "", y = "")
+
+ggplot(temp,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(#breaks = seq(-ceiling(lim), ceiling(lim), by = 4),
+                     limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       breaks = seq(-ceiling(lim), ceiling(lim), by = 2),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "", guide = FALSE) +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n")
+
+fil <- "site == 'beza'"
+
+lim <- max(abs(filter_(q1a_coef, fil)$conf.high),
+           abs(filter_(q1a_coef, fil)$conf.low))
+
+ggplot(filter_(q1a_coef, fil),
+       aes(x = estimate, y = quarter, fill = p_cat)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_errorbarh(aes(xmax = conf.high, xmin = conf.low),
+                 height = 0.5, size = 0.25) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ term, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-lim, lim)) +
+  scale_fill_manual(values = brewer.pal(3, "RdGy")[c(3, 1)],
+                    name = "", drop = FALSE) +
+  theme_fc() +
+  theme(legend.key.width = unit(0.5, "cm")) +
+  labs(x = "\nCoefficient Estimate", y = "Climate Model\n",
+       title = stringi::stri_trans_totitle(filter_(q1a_coef, fil)$site[[1]]))
+
+ggplot(filter(q1a_coef, term == "value"),
+       aes(x = estimate, y = quarter, fill = p_cat)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_errorbarh(aes(xmax = conf.high, xmin = conf.low),
+                 height = 0.5, size = 0.25) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  # scale_x_continuous(limits = c(-lim, lim)) +
+  scale_fill_manual(values = brewer.pal(3, "RdGy")[c(3, 1)],
+                    name = "", drop = FALSE) +
+  theme_fc() +
+  theme(legend.key.width = unit(0.5, "cm")) +
+  labs(x = "\nCoefficient Estimate", y = "Climate Model\n")
+
+
+# ==== Q2
+# ---- q2_models ----------------------------------------------------------
+
+by_qua_ac <- full_df %>%
+  spread(var, value) %>%
+  group_by(quarter, age_class) %>%
+  nest()
+
+get_trials <- function(df) {
+
+  fates <- list()
+
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
+
+    f <- data.frame(fate = fate)
+
+    if (nrow(f) > 0) {
+      f$year_of <- df[i, ]$year_of
+      f$index_nino3.4 <- df[i, ]$index_nino3.4
+      f$mean_temp <- df[i, ]$mean_temp
+      f$rainfall <- df[i, ]$rainfall
+      f$spei_03 <- df[i, ]$spei_03
+      f$site <- df[i, ]$site
+
+      fates[[i]] <- f
+    }
+
+  }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
+}
+
+by_qua_ac <- by_qua_ac %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_qua_ac <- by_qua_ac %>%
+  mutate(null_model = purrr::map(trials, ~ glmer(fate ~ site + (1 | site/year_of),
+                                             family = binomial, data = .)),
+         ind_model = purrr::map(trials, ~ glmer(fate ~ site * index_nino3.4 + (1 | site/year_of),
+                                            family = binomial, data = .)),
+         temp_model = purrr::map(trials, ~ glmer(fate ~ site * mean_temp + (1 | site/year_of),
+                                             family = binomial, data = .)),
+         rainfall_model = purrr::map(trials, ~ glmer(fate ~ site * rainfall + (1 | site/year_of),
+                                                 family = binomial, data = .)),
+         drought_model = purrr::map(trials, ~ glmer(fate ~ site * spei_03 + (1 | site/year_of),
+                                                 family = binomial, data = .)))
+
+q2 <- by_qua_ac %>%
+  mutate(null_AICc = purrr::map_dbl(null_model, MuMIn::AICc),
+         index_nino3.4 = purrr::map_dbl(ind_model, MuMIn::AICc),
+         mean_temp = purrr::map_dbl(temp_model, MuMIn::AICc),
+         rainfall = purrr::map_dbl(rainfall_model, MuMIn::AICc),
+         spei_03 = purrr::map_dbl(drought_model, MuMIn::AICc)) %>%
+  select(-contains("model"), -data, -trials) %>%
+  gather(var, AICc, -quarter, -age_class, -null_AICc) %>%
+  mutate(delta = AICc - null_AICc)
+
+lim <- max(abs(q2$delta))
+temp <- q2
+temp$quarter <- revalue(temp$quarter, quarter_map)
+temp <- filter(temp, var != "spei_03")
+
+p1 <- ggplot(temp,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ age_class, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       breaks = seq(-ceiling(lim), ceiling(lim), by = 2),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "", guide = FALSE) +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n",
+       title = "Survival")
+
+# sjPlot::sjp.glmer(by_qua_ac$ind_model[[8]], printPlot = FALSE)$plot + theme_fc()
+
+
+# ---- q2a_models ---------------------------------------------------------
+
+by_qua <- full_df %>%
+  spread(var, value) %>%
+  group_by(quarter) %>%
+  nest()
+
+get_trials <- function(df) {
+
+  fates <- list()
+
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
+
+    f <- data.frame(fate = fate)
+
+    if (nrow(f) > 0) {
+      f$year_of <- df[i, ]$year_of
+      f$index_nino3.4 <- df[i, ]$index_nino3.4
+      f$mean_temp <- df[i, ]$mean_temp
+      f$rainfall <- df[i, ]$rainfall
+      f$spei_03 <- df[i, ]$spei_03
+      f$site <- df[i, ]$site
+      f$age_class <- df[i, ]$age_class
+
+      fates[[i]] <- f
+    }
+
+  }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
+}
+
+by_qua <- by_qua %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_qua <- by_qua %>%
+  mutate(null_model = map(trials, ~ glmer(fate ~ site * age_class + (1 | site/age_class/year_of),
+                                          family = binomial, data = .)),
+         ind_model = purrr::map(trials, ~ glmer(fate ~ (site + age_class + index_nino3.4) ^ 2 + (1 | site/age_class/year_of),
+                                                family = binomial, data = .)),
+         temp_model = purrr::map(trials, ~ glmer(fate ~ (site + age_class + mean_temp) ^ 2 + (1 | site/age_class/year_of),
+                                                 family = binomial, data = .)),
+         rainfall_model = purrr::map(trials, ~ glmer(fate ~ (site + age_class + rainfall) ^ 2 + (1 | site/age_class/year_of),
+                                                     family = binomial, data = .)))
+
+q2a <- by_qua %>%
+  mutate(null_AICc = purrr::map_dbl(null_model, MuMIn::AICc),
+         index_nino3.4 = purrr::map_dbl(ind_model, MuMIn::AICc),
+         mean_temp = purrr::map_dbl(temp_model, MuMIn::AICc),
+         rainfall = purrr::map_dbl(rainfall_model, MuMIn::AICc)) %>%
+  select(-contains("model"), -data, -trials) %>%
+  gather(var, AICc, -quarter, -null_AICc) %>%
+  mutate(delta = AICc - null_AICc)
+
+lim <- max(abs(q2a$delta))
+temp <- q2a
+temp$quarter <- revalue(temp$quarter, quarter_map)
+temp <- filter(temp, var != "spei_03")
+
+ggplot(temp,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ ., switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "", guide = FALSE) +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n")
+
+
+# ---- fert_all_females ---------------------------------------------------
+
+# Takes ~11 minutes
+f <- list()
+
+# Set up a progress bar
+pb <- txtProgressBar(min = 1, max = ncol(qua), style = 3)
+n <- 1
+
+# Set up a timer
+ptm <- proc.time()
+
+for (i in 2:ncol(qua)) {
+
+  if (i == 2) {
+    setTxtProgressBar(pb, 1)
+  }
+
+  temp_f <- stage_specific_fertility(lh, fert, adult_definition = "minimum",
+                                     weaning_ages = weaning,
+                                     census_start_month = qua[, i][[1]])
+  temp_f$quarter <- paste0(names(qua[, i]), "_q")
+  f[[i - 1]] <- temp_f
+
+  # n is a counter that updates the progress bar
+  n <- n + 1
+  setTxtProgressBar(pb, n)
+}
+
+# Evaluate timer and close progress bar
+dur <- proc.time() - ptm
+close(pb)
+
+f <- bind_rows(f)
+f <- f %>%
+  mutate(successes = ifelse(trials - successes >= 0, successes, trials),
+         failures = trials - successes) %>%
+  dplyr::rename(site = Study.Id)
+
+
+# ---- fert_fertile_only --------------------------------------------------
+
+# Fertile only
+new_fert <- fertile_periods(lh, fert, weaning)
+
+# Takes ~11 minutes
+ff <- list()
+
+# Set up a progress bar
+pb <- txtProgressBar(min = 1, max = ncol(qua), style = 3)
+n <- 1
+
+# Set up a timer
+ptm <- proc.time()
+
+for (i in 2:ncol(qua)) {
+
+  if (i == 2) {
+    setTxtProgressBar(pb, 1)
+  }
+
+  temp_f <- stage_specific_fertility(lh, new_fert, adult_definition = "minimum",
+                                     weaning_ages = weaning,
+                                     census_start_month = qua[, i][[1]])
+
+  temp_f$quarter <- paste0(names(qua[, i]), "_q")
+  ff[[i - 1]] <- temp_f
+
+  # n is a counter that updates the progress bar
+  n <- n + 1
+  setTxtProgressBar(pb, n)
+}
+
+# Evaluate timer and close progress bar
+dur <- proc.time() - ptm
+close(pb)
+
+ff <- bind_rows(ff)
+ff <- ff %>%
+  mutate(successes = ifelse(trials - successes >= 0, successes, trials),
+         failures = trials - successes) %>%
+  dplyr::rename(site = Study.Id) %>%
+  filter(trials >= 1)
+
+
+# ---- combine_climate_fertility ------------------------------------------
+
+# Adjust year_of for climate predictors so that lag1 is matched to fertility
+# temp <- mutate(climate_predictors, year_of = year_of)
+temp <- climate_predictors
+
+f$quarter <- revalue(f$quarter, c("annual_q" = "annual"))
+full_f_df <- inner_join(temp, f)
+full_f_df <- filter(full_f_df, var %ni% c("spei_01", "spei_06", "spei_12") & age_class == "adult")
+
+# Rescale variables (within site, var, and quarter)
+full_f_df <- full_f_df %>%
+  group_by(site, var, quarter) %>%
+  mutate(value = scale(value)) %>%
+  ungroup()
+
+full_f_df <- full_f_df %>%
+  group_by(site, quarter, var) %>%
+  arrange(site, quarter, var, year_of)
+
+by_site_qua_var_f <- full_f_df %>%
+  group_by(site, quarter, var) %>%
+  arrange(site, quarter, var) %>%
+  nest()
+
+
+# ff$quarter <- revalue(ff$quarter, c("annual_q" = "annual"))
+# full_ff_df <- inner_join(temp, ff)
+# full_ff_df <- filter(full_ff_df, var %ni% c("spei_01", "spei_06", "spei_12") & age_class == "adult")
+#
+# # Rescale variables (within site, var, and quarter)
+# full_ff_df <- full_ff_df %>%
+#   group_by(site, var, quarter) %>%
+#   mutate(value = scale(value)) %>%
+#   ungroup()
+#
+# full_ff_df <- full_ff_df %>%
+#   group_by(site, quarter, var) %>%
+#   arrange(site, quarter, var, year_of)
+#
+# by_site_qua_var_ff <- full_ff_df %>%
+#   group_by(site, quarter, var) %>%
+#   arrange(site, quarter, var) %>%
+#   nest()
+
+
+# ---- q1_models_f --------------------------------------------------------
+
+get_trials <- function(df) {
+
+  fates <- list()
+
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
+
+    f <- data.frame(fate = fate)
+
+    if (nrow(f) > 0) {
+      f$year_of <- df[i, ]$year_of
+      f$value <- df[i, ]$value
+
+      fates[[i]] <- f
+    }
+
+  }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
+}
+
+by_site_qua_var_f <- by_site_qua_var_f %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_site_qua_var_f <- by_site_qua_var_f %>%
+  mutate(model = purrr::map(trials, ~ glmer(fate ~ value + (1 | year_of),
+                                        family = binomial, data = .)),
+         null_model = purrr::map(trials, ~ glmer(fate ~ 1 + (1 | year_of),
+                                             family = binomial, data = .)))
+
+# Verify
+filter(by_site_qua_var_f, site == "ssr")
+
+by_site_qua_var_f <- by_site_qua_var_f %>%
+  mutate(AICc = purrr::map_dbl(model, MuMIn::AICc),
+         null_AICc = purrr::map_dbl(null_model, MuMIn::AICc)) %>%
+  arrange(site, quarter)
+
+q1_f <- by_site_qua_var_f %>%
+  select(-data, -model, -null_model) %>%
+  group_by(site, quarter) %>%
+  mutate(delta = AICc - null_AICc)
+
+q1_f_coef <- by_site_qua_var_f %>%
+  filter(var != "spei_03") %>%
+  unnest(model %>% purrr::map(., ~ broom::tidy(., effects = "fixed",
+                                               conf.int = TRUE,
+                                               conf.method = "boot",
+                                               .progress="txt", PBargs=list(style=3)))) %>%
+  filter(!str_detect(term, "Intercept"))
+
+q1_f_coef <- q1_f_coef %>%
+  mutate(ci_sig = (0 < conf.low) | (0 > conf.high))
+
+q1_f_coef$p_cat <- factor(q1_f_coef$ci_sig, levels = c("FALSE", "TRUE"),
+                        labels = c("N.S.", "p < 0.05"))
+
+# q1_f_coef <- by_site_qua_var_f %>%
+#   unnest(model %>% purrr::map(., ~ broom::tidy(., effects = "fixed",
+#                                                conf.int = TRUE))) %>%
+#   filter(!str_detect(term, "Intercept"))
+#
+# q1_f_coef$p_cat <- cut(q1_f_coef$p, breaks = c(0, 0.05, 1), labels = c("p < 0.05", "N.S."))
+# q1_f_coef$p_cat <- factor(q1_f_coef$p_cat, levels = rev(levels(q1_f_coef$p_cat)))
+
+lim <- max(abs(q1_f$delta))
+
+ggplot(filter(q1_f, var != "spei_03"),
+       aes(x = site, y = quarter, fill = delta)) +
+  geom_tile(color = "black", size = 0.1) +
+  facet_grid(var ~ ., switch = "y", labeller = global_labeller) +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
                        # trans = sqrt_sign_trans(),
-                       limits = c(-lim, lim)) +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
+                       limits = c(-lim, lim),
+                       name = "AICc units from\nnull model") +
+  coord_equal() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(1, "cm"),
+        legend.key.height = unit(0.35, "cm"),
+        strip.text = element_text(face = "bold"),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_text(size = 8),
+        axis.title.y = element_text(size = 8),
+        plot.margin = unit(c(0.35, 0.35, 0.35, 0.35), "cm"))
+
+
+# ---- q1_f_plot_AIC ------------------------------------------------------
+
+temp <- filter(q1_f, var != "spei_03")
+temp$quarter <- revalue(temp$quarter, quarter_map)
+lim <- max(abs(q1_f$delta))
+
+p1 <- ggplot(temp,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(#breaks = c(-11, -7, -4, -2, 0, 2, 4, 11),
+    # breaks = seq(-ceiling(lim), ceiling(lim), by = 2),
+    limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       colours = brewer.pal(11, "RdGy"),
+                       # trans = sqrt_sign_trans(),
+                       name = "") +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n")
+
+
+# ---- q1_f_plot_coefficients ---------------------------------------------
+
+lim <- max(c(abs(q1_f_coef$conf.low),
+             abs(q1_f_coef$conf.high)))
+
+temp <- filter(q1_f_coef, var != "spei_03")
+temp$quarter <- revalue(temp$quarter, quarter_map)
+
+p2 <- ggplot(temp,
+       aes(x = estimate, y = quarter, fill = p_cat)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_errorbarh(aes(xmax = conf.high, xmin = conf.low),
+                 height = 0.5, size = 0.25) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-lim, lim)) +
+  scale_fill_manual(values = brewer.pal(3, "RdGy")[c(3, 1)],
+                    name = "", drop = FALSE) +
+  theme_fc() +
+  theme(legend.key.width = unit(0.5, "cm")) +
+  labs(x = "\nCoefficient Estimate", y = "Climate Model\n")
+
+cowplot::plot_grid(p1, p2, nrow = 2, scale = 0.95, labels = c("a", "b"))
+
+
+# ---- q1_f_curve ---------------------------------------------------------
+
+my_site <- "ssr"
+my_quarter <- "driest_q"
+my_var <- "index_nino3.4"
+
+temp <- by_site_qua_var_f %>%
+  dplyr::filter(site == my_site & quarter == my_quarter & var == my_var)
+temp1 <- temp$model[[1]]
+temp2 <- as.data.frame(temp$trials[[1]])
+temp1@call$data <- as.name(deparse(substitute(temp2)))
+
+t1 <- sjp.glmer(temp1, type = "fe.pc", prnt.plot = FALSE, show.ci = TRUE,
+                axis.lim = c(0, 1), facet.grid = FALSE)$plot.list[[1]]
+
+t2 <- t1$data
+t3 <- temp$trials[[1]]
+
+ggplot(t2, aes(values, y)) +
+  geom_hline(aes(yintercept = 0), color = "gray90") +
+  geom_hline(aes(yintercept = 1), color = "gray90") +
+  ggstance::geom_violinh(data = t3, aes(x = value, y = fate, group = fate),
+                         width = 0.1, color = NA, fill = "gray90") +
+  geom_point(data = t3, aes(x = value, y = fate),
+             # position = position_jitter(width = 0, height = 0.05),
+             size = 0.5, alpha = 0.1, shape = 3) +
+  stat_smooth(method = glm, se = TRUE, n = 80, fill = "#B2182B",
+              color = "#B2182B", fullrange = FALSE, level = 0.95, na.rm = FALSE,
+              method.args = list(family = "binomial"), span = 0.75) +
+  theme_fc() +
+  labs(x = "\nScaled ENSO index during driest quarter",
+       y = "Predicted probability of reproducing\n",
+       title = "Female Capuchin Fertility") +
+  theme(legend.key.width = unit(0.75, "cm"),
         panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  labs(x = "\nClimate Variable", y = "Lag Scenario\n") +
-  coord_equal()
+        plot.background = element_blank())
 
-ggsave("plots/models/Fertility_AllLagScenarios_AIC.pdf",
-       width = 11, height = 8.5, units = "in")
+# ---- q1_models_ff -------------------------------------------------------
 
+get_trials <- function(df) {
 
-# Deviance
-lim <- max(fert_plots$D)
+  fates <- list()
 
-ggplot(fert_plots, aes(y = var, x = scenario, fill = D)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", rev(viridis(6))[2:6]),
-                       name = "Proportional Reduction\nin Deviance",
-                       limits = c(0, lim)) +
-  facet_grid(. ~ site) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(2, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5)) +
-  labs(x = "\nClimate Variable", y = "Lag Scenario\n") +
-  coord_equal()
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
 
-ggsave("plots/models/Fertility_AllLagScenarios_Deviance.pdf",
-       width = 11, height = 8.5, units = "in")
+    f <- data.frame(fate = fate)
 
+    if (nrow(f) > 0) {
+      f$year_of <- df[i, ]$year_of
+      f$value <- df[i, ]$value
 
-lim <-  max(c(abs(min(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE)),
-              abs(max(fert_plots$null_AICc - fert_plots$AICc, na.rm = TRUE))))
+      fates[[i]] <- f
+    }
 
-ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = delta_AICc_vs_null)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
-                       name = "AICc relative to Null Model",
-                       limits = c(-lim, lim)) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(1.5, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(y = "Climate Variable\n", x = "\nPopulation") +
-  coord_equal()
+  }
 
-ggsave("plots/models/Fertility_BestLagScenarios_AIC.pdf",
-       width = 7, height = 8, units = "in")
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
 
-lim <- max(fert_plots$D)
-
-ggplot(best_fert_scenarios2, aes(x = site, y = var, fill = D)) +
-  geom_tile(size = 0.1, color = "black") +
-  scale_fill_gradientn(colours = c("#FFFFFF", brewer.pal(9, "Greens")),
-                       name = "Proportional Reduction\nin Deviance",
-                       trans = sqrt_trans(),
-                       limits = c(0, lim)) +
-  theme_bw() +
-  theme(strip.background = element_blank(),
-        legend.position = "bottom",
-        legend.key.width = unit(1.5, "cm"),
-        legend.key.height = unit(0.2, "cm"),
-        panel.grid = element_blank(),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-  labs(y = "Climate Variable\n", x = "\nPopulation") +
-  coord_equal()
-
-ggsave("plots/models/Fertility_BestLagScenarios_Deviance.pdf",
-       width = 7, height = 8, units = "in")
-
-
-
-# ---- Fertility_coefficients ---------------------------------------------
-
-
-# Coefficients
-fc_0 <- mod5 %>%
-  filter(scenario == "mod_0" & var %ni% c("null"))
-
-fc_01 <- cbind(fc_0[, 1:3], ldply(fc_0$model, .fun = function(x) coef(summary(x))["lag0", "Std. Error"]))
-fc_02 <- cbind(fc_0[, 1:3], ldply(fc_0$model, .fun = function(x) confint(x, method = "Wald")["lag0", ]))
-
-fc_01 <- select(fc_01, -model)
-fc_02 <- select(fc_02, -model)
-
-fc_0 <- fert_models %>%
-  filter(scenario == "Lag 0" & var %ni% c("null"))
-
-fc_0$var <- factor(fc_0$var)
-fc_02$var <- factor(fc_02$var, levels = levels(factor(fc_0$var)))
-fc_01$var <- factor(fc_01$var, levels = levels(factor(fc_0$var)))
-
-fc_0_lag0 <- fc_0 %>%
-  inner_join(fc_01, by = c("site", "var")) %>%
-  inner_join(fc_02, by = c("site", "var"))
-
-names(fc_0_lag0)[(ncol(fc_0_lag0) - 2):ncol(fc_0_lag0)] <- c("se", "lower_ci", "upper_ci")
-
-fc_1 <- mod5 %>%
-  filter(scenario == "mod_1" & var %ni% c("null"))
-
-fc_11 <- cbind(fc_1[, 1:3], ldply(fc_1$model, .fun = function(x) coef(summary(x))["lag1", "Std. Error"]))
-fc_12 <- cbind(fc_1[, 1:3], ldply(fc_1$model, .fun = function(x) confint(x, method = "Wald")["lag1", ]))
-
-fc_11 <- select(fc_11, -model)
-fc_12 <- select(fc_12, -model)
-
-fc_1 <- fert_models %>%
-  filter(scenario == "Lag 1" & var %ni% c("null"))
-
-fc_1$var <- factor(fc_1$var)
-fc_12$var <- factor(fc_12$var, levels = levels(factor(fc_1$var)))
-fc_11$var <- factor(fc_11$var, levels = levels(factor(fc_1$var)))
-
-fc_1_lag1 <- fc_1 %>%
-  inner_join(fc_11) %>%
-  inner_join(fc_12)
-
-names(fc_1_lag1)[(ncol(fc_1_lag1) - 2):ncol(fc_1_lag1)] <- c("se", "lower_ci", "upper_ci")
-
-fc_2 <- mod5 %>%
-  filter(scenario == "mod_2" & var %ni% c("null"))
-
-fc_21 <- cbind(fc_2[, 1:3], ldply(fc_2$model, .fun = function(x) coef(summary(x))["lag2", "Std. Error"]))
-fc_22 <- cbind(fc_2[, 1:3], ldply(fc_2$model, .fun = function(x) confint(x, method = "Wald")["lag2", ]))
-
-fc_21 <- select(fc_21, -model)
-fc_22 <- select(fc_22, -model)
-
-fc_2 <- fert_models %>%
-  filter(scenario == "Lag 2" & var %ni% c("null"))
-
-fc_2$var <- factor(fc_2$var)
-fc_22$var <- factor(fc_22$var, levels = levels(factor(fc_2$var)))
-fc_21$var <- factor(fc_21$var, levels = levels(factor(fc_2$var)))
-
-fc_2_lag2 <- fc_2 %>%
-  inner_join(fc_21) %>%
-  inner_join(fc_22)
-
-names(fc_2_lag2)[(ncol(fc_2_lag2) - 2):ncol(fc_2_lag2)] <- c("se", "lower_ci", "upper_ci")
-
-fc <- bind_rows(fc_0_lag0, fc_1_lag1, fc_2_lag2)
-
-ft <- fc %>%
-  select(-scenario) %>%
-  gather(lag, estimate, lag0, lag1, lag2) %>%
-  filter(!is.na(estimate))
-
-ft$lag <- mapvalues(ft$lag,
-                    from = c("lag0", "lag1", "lag2"),
-                    to = c("Lag 0", "Lag 1", "Lag 2"))
-
-# Plot both lag scenarios for each site separately
-ft <- ft %>%
-  mutate(delta_AICc_vs_null = AICc - null_AICc,
-         D = 1 - (deviance / null_deviance))
-
-
-for (i in 1:length(levels(ft$site))) {
-
-  current_site = levels(ft$site)[i]
-
-  temp4 <- filter(ft, site == current_site)
-
-  temp4 <- temp4 %>%
-    unite(newvar, var, lag, sep = ", ", remove = FALSE)
-
-  temp4 <- temp4 %>%
-    group_by(site, var) %>%
-    top_n(1, -AICc)
-
-  temp4$newvar <- factor(temp4$newvar, levels = temp4$newvar[order(temp4$var)])
-
-  lim <-  max(c(abs(min(temp4$D, na.rm = TRUE)),
-                abs(max(temp4$D, na.rm = TRUE))))
-
-  ggplot(temp4, aes(x = estimate, y = newvar, color = D)) +
-    geom_point(size = 3) +
-    geom_errorbarh(aes(xmin = estimate - se, xmax = estimate + se),
-                   height = 0.3, size = 0.75) +
-    scale_color_gradientn(colours = brewer.pal(9, "Greens"),
-                          name = "Proportional Reduction\nin Deviance",
-                          limits = c(0, lim)) +
-    geom_vline(xintercept = 0, lty = 2) +
-    theme_bw() +
-    theme(strip.background = element_blank(),
-          legend.position = "bottom",
-          legend.key.width = unit(2, "cm"),
-          legend.key.height = unit(0.5, "cm"),
-          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
-    labs(x = "\nScaled Coefficient Estimate", y = "Variable\n",
-         title = paste(current_site, ":\n",
-                       "Scaled Coefficient Estimates for Models of Fertility\n",
-                       sep = ""))
-
-  ggsave(paste("plots/models/Fertility_Coefficients_",
-               i, "_", current_site, ".pdf", sep = ""),
-         width = 8, height = 10, units = "in")
+  return(fates)
 }
 
-rm(fc_0, fc_0_lag0, fc_01, fc_02, fc_1, fc_1_lag1, fc_11, fc_12, fc_2,
-   fc_2_lag2, fc_21, fc_22)
+by_site_qua_var_ff <- by_site_qua_var_ff %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_site_qua_var_ff <- by_site_qua_var_ff %>%
+  mutate(model = purrr::map(trials, ~ glmer(fate ~ value + (1 | year_of),
+                                            family = binomial, data = .)),
+         null_model = purrr::map(trials, ~ glmer(fate ~ 1 + (1 | year_of),
+                                                 family = binomial, data = .)))
+
+# Verify
+# filter(by_site_qua_var_ff, site == "ssr")
+
+by_site_qua_var_ff <- by_site_qua_var_ff %>%
+  mutate(AICc = purrr::map_dbl(model, MuMIn::AICc),
+         null_AICc = purrr::map_dbl(null_model, MuMIn::AICc)) %>%
+  arrange(site, quarter)
+
+q1_ff <- by_site_qua_var_ff %>%
+  select(-data, -model, -null_model) %>%
+  group_by(site, quarter) %>%
+  mutate(delta = AICc - null_AICc)
+
+q1_ff_coef <- by_site_qua_var_ff %>%
+  unnest(model %>% purrr::map(., ~ broom::tidy(., effects = "fixed",
+                                               conf.int = TRUE))) %>%
+  filter(!str_detect(term, "Intercept"))
+
+q1_ff_coef$p_cat <- cut(q1_ff_coef$p, breaks = c(0, 0.05, 1), labels = c("p < 0.05", "N.S."))
+q1_ff_coef$p_cat <- factor(q1_ff_coef$p_cat, levels = rev(levels(q1_ff_coef$p_cat)))
 
 
-# Save RData file for summary
-save(fert_trials, keep, best_surv_scenarios2, surv_plots, best_fert_scenarios2,
-     fert_plots, st, ft, climate_predictors,
-     file = "~/GitHub/plhdbR/summary.RData")
+lim <- max(abs(q1_ff$delta))
+
+ggplot(q1_ff, aes(x = site, y = quarter, fill = delta)) +
+  geom_tile(color = "white", size = 0.1) +
+  facet_grid(var ~ ., switch = "y", labeller = global_labeller) +
+  scale_fill_gradientn(colours = brewer.pal(11, "RdGy"),
+                       # trans = sqrt_sign_trans(),
+                       limits = c(-lim, lim),
+                       name = "AICc units from\nnull model") +
+  coord_equal() +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5)) +
+  labs(x = "", y = "") +
+  theme(legend.position = "bottom",
+        legend.key.width = unit(1, "cm"),
+        legend.key.height = unit(0.35, "cm"),
+        strip.text = element_text(face = "bold"),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        axis.title.x = element_text(size = 8),
+        axis.title.y = element_text(size = 8),
+        plot.margin = unit(c(0.35, 0.35, 0.35, 0.35), "cm"))
+
+t4 <- filter(by_site_qua_var_ff, quarter == "wettest_q" & site == "ssr" & var == "rainfall")$model[[1]]
+sjp.glmer(t4, type = "fe.pc", printPlot = FALSE, show.ci = TRUE)$plot.mp[[1]] + theme_fc()
+
+
+# ---- q1_ff_plot_AIC -----------------------------------------------------
+
+lim <- max(abs(q1_ff$delta))
+temp <- filter(q1_ff, var != "spei_03")
+temp$quarter <- revalue(temp$quarter, quarter_map)
+
+p1 <- ggplot(temp,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(#breaks = c(-11, -7, -4, -2, 0, 2, 4, 11),
+    # breaks = seq(-ceiling(lim), ceiling(lim), by = 2),
+    limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       colours = brewer.pal(11, "RdGy"),
+                       # trans = sqrt_sign_trans(),
+                       name = "") +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n")
+
+
+# ---- q1_ff_plot_coefficients --------------------------------------------
+
+lim <- max(c(abs(q1_ff_coef$conf.low),
+             abs(q1_ff_coef$conf.high)))
+
+temp <- filter(q1_ff_coef, var != "spei_03")
+temp$quarter <- revalue(temp$quarter, quarter_map)
+
+p2 <- ggplot(temp,
+       aes(x = estimate, y = quarter, fill = p_cat)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_errorbarh(aes(xmax = conf.high, xmin = conf.low),
+                 height = 0.5, size = 0.25) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ site, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-lim, lim)) +
+  scale_fill_manual(values = brewer.pal(3, "RdGy")[c(3, 1)],
+                    name = "", drop = FALSE) +
+  theme_fc() +
+  theme(legend.key.width = unit(0.5, "cm")) +
+  labs(x = "\nCoefficient Estimate", y = "Climate Model\n")
+
+cowplot::plot_grid(p1, p2, nrow = 2, scale = 0.95, labels = c("a", "b"))
+
+
+# ==== Q2_f
+# ---- q2_f_models --------------------------------------------------------
+
+by_qua_f <- full_f_df %>%
+  spread(var, value) %>%
+  group_by(quarter) %>%
+  nest()
+
+get_trials <- function(df) {
+
+  fates <- list()
+
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
+
+    f <- data.frame(fate = fate)
+
+    if (nrow(f) > 0) {
+      f$site <- df[i, ]$site
+      f$year_of <- df[i, ]$year_of
+      f$index_nino3.4 <- df[i, ]$index_nino3.4
+      f$mean_temp <- df[i, ]$mean_temp
+      f$rainfall <- df[i, ]$rainfall
+      f$spei_03 <- df[i, ]$spei_03
+
+      fates[[i]] <- f
+    }
+
+  }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
+}
+
+by_qua_f <- by_qua_f %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_qua_f <- by_qua_f %>%
+  mutate(null_model = purrr::map(trials, ~ glmer(fate ~ site + (1 | site/year_of),
+                                             family = binomial, data = .)),
+         ind_model = purrr::map(trials, ~ glmer(fate ~ site * index_nino3.4 + (1 | site/year_of),
+                                            family = binomial, data = .)),
+         temp_model = purrr::map(trials, ~ glmer(fate ~ site * mean_temp + (1 | site/year_of),
+                                             family = binomial, data = .)),
+         rainfall_model = purrr::map(trials, ~ glmer(fate ~ site * rainfall + (1 | site/year_of),
+                                                 family = binomial, data = .)),
+         drought_model = purrr::map(trials, ~ glmer(fate ~ site * spei_03 + (1 | site/year_of),
+                                                   family = binomial, data = .)))
+
+q2_f <- by_qua_f %>%
+  mutate(null_AICc = purrr::map_dbl(null_model, MuMIn::AICc),
+         index_nino3.4 = purrr::map_dbl(ind_model, MuMIn::AICc),
+         mean_temp = purrr::map_dbl(temp_model, MuMIn::AICc),
+         rainfall = purrr::map_dbl(rainfall_model, MuMIn::AICc),
+         spei_03 = purrr::map_dbl(drought_model, MuMIn::AICc)) %>%
+  select(-matches("model"), -data, -trials) %>%
+  gather(var, AICc, -quarter, -null_AICc) %>%
+  mutate(delta = AICc - null_AICc)
+
+
+lim <- max(abs(q2a$delta))
+temp <- q2
+temp$quarter <- revalue(temp$quarter, quarter_map)
+temp <- filter(temp, var != "spei_03")
+
+p1 <- ggplot(temp,
+             aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ age_class, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-7, ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       breaks = seq(-ceiling(lim), ceiling(lim), by = 2),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "", guide = FALSE) +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n",
+       title = "Survival")
+
+# lim <- max(abs(q2a$delta))
+temp <- q2a
+temp$quarter <- revalue(temp$quarter, quarter_map)
+temp <- filter(temp, var != "spei_03")
+temp$age_class <- "combined"
+
+p2 <- ggplot(temp,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ age_class, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "", guide = FALSE) +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n",
+       title = "Survival")
+
+# lim <- max(abs(q2_f$delta))
+q2_f$quarter <- revalue(q2_f$quarter, quarter_map)
+q2_f$age_class <- "adult"
+
+p3 <- ggplot(filter(q2_f, var != "spei_03"),
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ age_class, switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-7, ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       trans = sqrt_sign_trans(),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "", guide = FALSE) +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n",
+       title = "Fertility")
+
+cowplot::ggdraw() +
+  cowplot::draw_plot(p1, 0, 0, 0.50, 1) +
+  cowplot::draw_plot(p2, 0.50, 0, .25, 1) +
+  cowplot::draw_plot(p3, 0.75, 0, .25, 1) +
+  cowplot::draw_plot_label(c("a", "b", "c"), c(0, 0.50, 0.75), c(1, 1, 1), size = 15)
+
+ggsave("~/Desktop/q2-plots.pdf",
+       width = 11, height = 4, units = "in")
+
+
+# q2_f_coef <- by_qua_f %>%
+#   mutate(ind_params = purrr::map(ind_model, ~ broom::tidy(., effects = "fixed",
+#                                                           conf.int = TRUE)),
+#          temp_params = purrr::map(temp_model, ~ broom::tidy(., effects = "fixed",
+#                                                             conf.int = TRUE)),
+#          rainfall_params = purrr::map(rainfall_model, ~ broom::tidy(., effects = "fixed",
+#                                                                     conf.int = TRUE))) %>%
+#   select(-data, -trials, -contains("model"))
+#
+# t1 <- q2_f_coef %>%
+#   select(quarter, ind_params) %>%
+#   mutate(var = "index_nino3.4") %>%
+#   unnest() %>%
+#   filter(term != "(Intercept)")
+#
+# t2 <- q2_f_coef %>%
+#   select(quarter, temp_params) %>%
+#   mutate(var = "mean_temp") %>%
+#   unnest() %>%
+#   filter(term != "(Intercept)")
+#
+# t3 <- q2_f_coef %>%
+#   select(quarter, rainfall_params) %>%
+#   mutate(var = "rainfall") %>%
+#   unnest() %>%
+#   filter(term != "(Intercept)")
+#
+# q2_f_coef <- bind_rows(t1, t2, t3)
+# rm(t1, t2, t3)
+#
+# q2_f_coef$p_cat <- cut(q2_f_coef$p, breaks = c(0, 0.05, 1), labels = c("p < 0.05", "N.S."))
+# q2_f_coef$p_cat <- factor(q2_f_coef$p_cat, levels = rev(levels(q2_f_coef$p_cat)))
+#
+# lim <- max(c(abs(q2_f_coef$conf.low),
+#              abs(q2_f_coef$conf.high)))
+#
+# ggplot(filter(q2_f_coef, term %in% c("rainfall", "index_nino3.4", "mean_temp")),
+#        aes(x = estimate, y = quarter, fill = p_cat)) +
+#   geom_vline(xintercept = 0, lty = 3) +
+#   geom_errorbarh(aes(xmax = conf.high, xmin = conf.low),
+#                  height = 0.5, size = 0.25) +
+#   geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+#   facet_grid(var ~ ., switch = "y", labeller = global_labeller) +
+#   scale_x_continuous(limits = c(-lim, lim)) +
+#   scale_fill_manual(values = brewer.pal(3, "RdGy")[c(3, 1)],
+#                     name = "", drop = FALSE) +
+#   theme_fc() +
+#   theme(legend.key.width = unit(0.5, "cm")) +
+#   labs(x = "\nCoefficient Estimate", y = "Climate Model\n")
+
+
+# ==== Q2_ff
+# ---- q2_ff_models -------------------------------------------------------
+
+by_qua_ff <- full_ff_df %>%
+  spread(var, value) %>%
+  group_by(quarter) %>%
+  nest()
+
+get_trials <- function(df) {
+
+  fates <- list()
+
+  for (i in 1:nrow(df)) {
+    fate <- c(rep(1L, df[i, ]$successes),
+              rep(0L, df[i, ]$trials - df[i, ]$successes))
+
+    f <- data.frame(fate = fate)
+
+    if (nrow(f) > 0) {
+      f$site <- df[i, ]$site
+      f$year_of <- df[i, ]$year_of
+      f$index_nino3.4 <- df[i, ]$index_nino3.4
+      f$mean_temp <- df[i, ]$mean_temp
+      f$rainfall <- df[i, ]$rainfall
+      f$spei_03 <- df[i, ]$spei_03
+
+      fates[[i]] <- f
+    }
+
+  }
+
+  fates <- dplyr::bind_rows(fates)
+  fates$year_of <- factor(fates$year_of)
+
+  return(fates)
+}
+
+by_qua_ff <- by_qua_ff %>%
+  mutate(trials = purrr::map(data, ~ get_trials(.)))
+
+by_qua_ff <- by_qua_ff %>%
+  mutate(null_model = purrr::map(trials, ~ glmer(fate ~ site + (1 | site/year_of),
+                                                 family = binomial, data = .)),
+         ind_model = purrr::map(trials, ~ glmer(fate ~ site * index_nino3.4 + (1 | site/year_of),
+                                                family = binomial, data = .)),
+         temp_model = purrr::map(trials, ~ glmer(fate ~ site * mean_temp + (1 | site/year_of),
+                                                 family = binomial, data = .)),
+         rainfall_model = purrr::map(trials, ~ glmer(fate ~ site * rainfall + (1 | site/year_of),
+                                                     family = binomial, data = .)),
+         drought_model = purrr::map(trials, ~ glmer(fate ~ site * spei_03 + (1 | site/year_of),
+                                                    family = binomial, data = .)))
+
+q2_ff <- by_qua_ff %>%
+  mutate(null_AICc = purrr::map_dbl(null_model, MuMIn::AICc),
+         index_nino3.4 = purrr::map_dbl(ind_model, MuMIn::AICc),
+         mean_temp = purrr::map_dbl(temp_model, MuMIn::AICc),
+         rainfall = purrr::map_dbl(rainfall_model, MuMIn::AICc),
+         spei_03 = purrr::map_dbl(drought_model, MuMIn::AICc)) %>%
+  select(-matches("model"), -data, -trials) %>%
+  gather(var, AICc, -quarter, -null_AICc) %>%
+  mutate(delta = AICc - null_AICc)
+
+lim <- max(abs(q2_ff$delta))
+
+ggplot(q2_ff,
+       aes(x = delta, y = quarter, fill = delta)) +
+  geom_vline(xintercept = 0, lty = 3) +
+  geom_point(shape = 21, size = 2.5, color = "black", stroke = 0.25) +
+  facet_grid(var ~ ., switch = "y", labeller = global_labeller) +
+  scale_x_continuous(limits = c(-ceiling(lim), ceiling(lim))) +
+  scale_fill_gradientn(limits = c(-lim, lim),
+                       trans = sqrt_sign_trans(),
+                       colours = brewer.pal(11, "RdGy"),
+                       name = "") +
+  theme_fc() +
+  labs(x = "\nAICc units from the null model", y = "Climate Model\n")
+
+
+# sjplot ------------------------------------------------------------------
+
+# P1
+q <- "wettest_q"
+mod <- "rainfall_model"
+
+# P2
+q <- "wettest_q"
+mod <- "temp_model"
+
+# P3
+q <- "annual"
+mod <- "ind_model"
+
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "re")
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "fe.cor")
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "re.qq")
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "fe.pc", facet.grid = TRUE)
+
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]],
+          type = "fe", printPlot = FALSE, y.offset = 0.25, fade.ns = TRUE,
+          sort.coef = TRUE, showIntercept = FALSE)$plot +
+  theme_fc()
+
+# ri.pc
+temp <- sjPlot::sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "ri.pc", facet.grid = FALSE, printPlot = FALSE)
+temp$plot[[1]] + scale_color_discrete(guide = FALSE) + theme_fc()
+temp$plot[[2]] + scale_color_discrete(guide = FALSE) + theme_fc()
+temp$plot[[3]] + theme_fc()
+temp$plot[[4]] + theme_fc()
+
+
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "y.pc", facet.grid = TRUE)
+sjp.glmer(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "ma")
+
+sjp.int(by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]], type = "cond")
+
+# eff plot
+temp <- by_qua_f[by_qua_f$quarter == q, mod][[1]][[1]]
+temp1 <- as.data.frame(by_qua_f[by_qua_f$quarter == q, "trials"][[1]][[1]])
+temp@call$data <- as.name(deparse(substitute(temp1)))
+
+t1 <- sjp.int(temp, type = "eff", printPlot = FALSE, showCI = TRUE,
+        facet.grid = FALSE, geom.colors = "Dark2")$plot.list[[1]]
+
+t1$data$grp <- factor(t1$data$grp, levels = levels(sites$site))
+
+# t1 +
+#   theme_fc() +
+#   theme(legend.key.width = unit(0.75, "cm")) +
+#   facet_grid(. ~ grp, labeller = global_labeller)
+
+t2 <- t1$data
+t2$site = factor(t2$grp, levels = levels(sites$site))
+t3 <- by_qua_f[by_qua_f$quarter == q, "trials"][[1]][[1]]
+
+v <- names(fixef(temp))
+v <- v[v %in% c("index_nino3.4", "mean_temp", "rainfall")]
+
+t2$quarter <- q
+t2$var <- v
+
+t2 <- inner_join(t2, dplyr::select(q1_f_coef, site, quarter, var, p_cat),
+           by = c("site", "quarter", "var"))
+
+p1 <- ggplot(t2, aes(x, y)) +
+  geom_hline(aes(yintercept = 0), color = "gray90") +
+  geom_hline(aes(yintercept = 1), color = "gray90") +
+  geom_ribbon(aes(ymin = conf.low, ymax = conf.high, fill = p_cat),
+              alpha = 0.3, color = NA) +
+  geom_line(aes(color = p_cat, fill = p_cat)) +
+  ggstance::geom_violinh(data = t3, aes(x = rainfall, y = fate, group = fate),
+                         width = 0.1, color = NA, fill = "gray90") +
+  geom_point(data = t3, aes(x = rainfall, y = fate),
+             size = 0.5, alpha = 0.1,
+             shape = 3) +
+  scale_color_manual(values = brewer.pal(10, "RdGy")[c(7, 2)], guide = FALSE) +
+  scale_fill_manual(values = brewer.pal(10, "RdGy")[c(7, 2)], guide = FALSE) +
+  facet_grid(. ~ site, scales = "free_x", labeller = global_labeller) +
+  theme_fc() +
+  labs(x = "\nScaled rainfall during wettest quarter",
+       y = "Probability of reproducing before next census\n") +
+  theme(legend.key.width = unit(0.75, "cm"),
+        panel.grid = element_blank(),
+        plot.background = element_blank())
+
+cowplot::plot_grid(p1, p2, p3, ncol = 1, scale = 0.95, labels = c("a", "b", "c"))

@@ -5,11 +5,11 @@ if (!("ClimGrid" %in% installed.packages()[,"Package"]))
   devtools::install_github("camposfa/ClimGrid")
 
 Sys.setenv(TZ = 'UTC')
-list.of.packages <- list("Hmisc", "plyr", "reshape2", "ncdf4",
+list.of.packages <- list("plhdbR", "Hmisc", "plyr", "reshape2", "ncdf4",
                          "lubridate", "ggplot2", "RColorBrewer", "grid",
                          "stringr", "scales", "tidyr", "grid", "zoo", "viridis",
-                         "dplyr", "MuMIn", "plhdbR", "vegan", "lme4", "broom",
-                         "purrr", "ClimGrid")
+                         "dplyr", "MuMIn", "vegan", "lme4", "broom",
+                         "purrr", "ClimGrid", "sjPlot")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if (length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
@@ -52,16 +52,70 @@ sites <- dplyr::select(site_coords, site, lat = Lat, lon = Long)
 rm(site_coords)
 
 
+# ---- weaning ------------------------------------------------------------
+
+gest <- tbl_df(read.csv("data/IBI_descriptive_stats.csv")) %>%
+  select(Study, Species, Gestation)
+
+offspring <- lh %>%
+  dplyr::filter(!is.na(Mom.Id)) %>%
+  dplyr::select(Study.Id, Offspring.Id = Animal.Id, Mom.Id, Birth.Date, Depart.Date,
+                Depart.Type) %>%
+  dplyr::arrange(Study.Id, Mom.Id, Birth.Date) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(Age.Depart = (Depart.Date - Birth.Date) / lubridate::dyears(1))
+  # dplyr::left_join(weaning_ages, by = c("Study.Id" = "site")) %>%
+  # dplyr::rowwise() %>%
+  # dplyr::mutate(Resume.Date = as.Date(Birth.Date + lubridate::dyears(min(Age.Depart, weaning_age))))
+
+ibi <- offspring %>%
+  filter(!is.na(Birth.Date)) %>%
+  ungroup() %>%
+  arrange(Study.Id, Mom.Id, Birth.Date) %>%
+  # group_by(Study.Id, Mom.Id, Birth.Date) %>% # Remove most twins
+  # top_n(1, Depart.Date) %>% # Remove most twins
+  # ungroup %>%
+  group_by(Study.Id, Mom.Id) %>%
+  mutate(prev_off = lag(Offspring.Id),
+         prev_off_dod = lag(Depart.Date),
+         prev_off_dob = lag(Birth.Date),
+         prev_death_age = difftime(prev_off_dod, prev_off_dob,
+                                   units = "days") / dyears(1),
+         ibi_days = difftime(Birth.Date, prev_off_dob, units = "days"),
+         ibi_years = ibi_days / dyears(1),
+         is_successful = Birth.Date <= prev_off_dod)
+
+# Remove some special cases, twins and probable data entry errors
+ibi_suc <- ibi %>%
+  filter(is_successful & Offspring.Id %ni% c("356-1", "BUK") & ibi_days != 0)
+
+ibi_summary <- ibi_suc %>%
+  ungroup %>%
+  group_by(Study.Id) %>%
+  summarise(med_suc = median(ibi_years),
+            min_suc = min(ibi_years))
+
+ibi_summary$gest <- gest$Gestation
+
+weaning <- ibi_summary %>%
+  mutate(weaning_age = med_suc - gest,
+         min_weaning_age = min_suc - gest) %>%
+  select(site = Study.Id, weaning_age)
+
+
 # ==== GRIDDED_RAINFALL_DATA ==============================================
 
 # gridded_gpcc ------------------------------------------------------------
 
 # Downloaded from http://www.esrl.noaa.gov/psd/data/gridded/data.gpcc.html
 
-# GPCC total monthly precipitation (1901 to 2010)
+# GPCC total monthly precipitation (1901 to 2013)
 # 0.5 degree latitude x 0.5 degree longitude global grid
 # ftp://ftp.cdc.noaa.gov/Datasets/gpcc/full_v6/precip.mon.total.v6.nc
-t <- nc_open("data/grids/gpcc/precip.mon.total.v6.nc")
+# download.file("ftp://ftp.cdc.noaa.gov/Datasets/gpcc/full_v7/precip.mon.total.v7.nc",
+#                destfile = "data/grids/gpcc/precip.mon.total.v7.nc")
+
+t <- nc_open("data/grids/gpcc/precip.mon.total.v7.nc")
 
 precip_sites_f <- extract_nc_values(t, sites = sites, x_var = "lon",
                                     y_var = "lat", t_var = "time",
@@ -72,7 +126,7 @@ precip_sites_f <- extract_nc_values(t, sites = sites, x_var = "lon",
 
 # ---- gpcc_monitoring_data -----------------------------------------------
 
-# Monitoring data set (2011 to present)
+# Monitoring data set (use 2013 to present)
 # GPCC total monthly precipitation montoring data set
 # 1 degree latitude x 1 degree longitude global grid
 # ftp://ftp.cdc.noaa.gov/Datasets/gpcc/monitor/precip.monitor.mon.total.1x1.v4.nc
@@ -90,7 +144,7 @@ precip_sites_m <- extract_nc_values(m, sites = sites, x_var = "lon",
                                     t_origin = as.POSIXct("1800-01-01"))
 
 # Get data from after 2010 only
-precip_sites_m <- filter(precip_sites_m, year_of > 2010)
+precip_sites_m <- filter(precip_sites_m, year_of > 2013)
 
 
 # ---- combine_gpcc_data --------------------------------------------------
@@ -249,7 +303,7 @@ for (j in 1:length(f)) {
 spei_m <- bind_rows(spei_m)
 spei_m <- spread(spei_m, period, spei)
 names(spei_m)[5:(5 + length(f) - 1)] <- paste("spei", f, sep = "_")
-spei_m$date_of <- ymd(paste(spei_m$year_of, spei_m$month_of, "16", sep = "-"))
+spei_m$date_of <- ymd(paste(spei_m$year_of, spei_m$month_of, "16", sep = "-"), tz = "UTC")
 
 spei_m_replace <- semi_join(spei_m, select(spei_nulls, site, year_of, month_of))
 
@@ -281,7 +335,7 @@ amboseli <- amboseli %>%
 beza <- tbl_df(read.csv("data/rain_csv/beza.csv"))
 names(beza) <- c("year_of", "rainfall")
 beza <- beza %>%
-  mutate(date_of = ymd(paste(year_of, "-12-31", sep = "")),
+  mutate(date_of = ymd(paste(year_of, "-12-31", sep = ""), tz = "UTC"),
          type = "yearly",
          site = "beza")
 
@@ -289,7 +343,7 @@ gombe <- tbl_df(read.csv("data/rain_csv/gombe.csv"))
 names(gombe) <- c("year_of", "rainfall")
 gombe <- gombe %>%
   filter(!is.na(rainfall)) %>%
-  mutate(date_of = ymd(paste(year_of, "-12-31", sep = "")),
+  mutate(date_of = ymd(paste(year_of, "-12-31", sep = ""), tz = "UTC"),
          type = "yearly",
          site = "gombe")
 
@@ -314,7 +368,7 @@ karisoke$variable <- as.integer(substr(karisoke$variable,
 names(karisoke) <- c("month_of", "day_of", "rainfall")
 karisoke <- karisoke %>%
   filter(!is.na(rainfall)) %>%
-  mutate(date_of = ymd(paste(month_of, day_of, sep = "-")),
+  mutate(date_of = ymd(paste(month_of, day_of, sep = "-"), tz = "UTC"),
          type = "daily",
          year_of = year(date_of),
          site = "karisoke") %>%
@@ -327,7 +381,7 @@ karisoke_monthly <- karisoke %>%
   summarise(rainfall = sum(rainfall),
             n = n()) %>%
   ungroup() %>%
-  mutate(date_of = ymd(paste(year_of, month_of, "01", sep = "-")) + months(1) - days(1),
+  mutate(date_of = ymd(paste(year_of, month_of, "01", sep = "-"), tz = "UTC") + months(1) - days(1),
          # date_of = paste("01", month_of, year_of, sep = "-"),
          type = "monthly") %>%
   select(year_of, rainfall, date_of, type, site)
@@ -360,7 +414,7 @@ rppn <- rppn %>%
 ssr <- read.csv("data/rain_csv/ssr.csv") %>%
   tbl_df() %>%
   select(-X) %>%
-  mutate(date_of = ymd(date_of))
+  mutate(date_of = ymd(date_of, tz = "UTC"))
 
 
 # ---- load_pace_data -----------------------------------------------------
@@ -381,7 +435,7 @@ ssr <- ssr %>%
   filter(!is.na(rainfall)) %>%
   mutate(type = "daily",
          year_of = year(date_of),
-         date_of = ymd(date_of),
+         date_of = ymd(date_of, tz = "UTC"),
          site = "ssr") %>%
   arrange(date_of) %>%
   select(year_of, rainfall, date_of, type, site)
@@ -506,7 +560,7 @@ rain_monthly <- inner_join(rain_monthly, study_durations, by = c("site" = "Study
 
 # Assign data source priority and remove years before min_entry - 5 years
 rain_monthly <- rain_monthly %>%
-  mutate(date_of = ymd(paste(year_of, month_of, "01", sep = "-")),
+  mutate(date_of = ymd(paste(year_of, month_of, "01", sep = "-"), tz = "UTC"),
          priority = ifelse(data_source == "rain_gauge", 1,
                            ifelse(data_source == "nearby_station", 2,
                                   ifelse(data_source == "satellite_trmm", 3,
@@ -636,7 +690,7 @@ ind <- ClimGrid::load_climate_index(c("pdo", "dmi", "mei", "soi", "nino3.4",
 
 ind_df <- bind_rows(ind)
 
-ind_df <- filter(ind_df, date_of > ymd("1945-01-01"))
+ind_df <- filter(ind_df, date_of > ymd("1945-01-01", tz = "UTC"))
 
 ind_df$index <- factor(ind_df$index,
                        levels = c("pdo", "dmi", "mei", "soi", "nino3.4", "amo",
@@ -657,10 +711,9 @@ ggplot() +
   facet_grid(index ~ ., scales = "free_y") +
   geom_hline(yintercept = 0) +
   scale_x_datetime(labels = date_format("%Y"),
-                   limits = c(ymd("1944-01-01"), ymd("2016-01-01")),
+                   limits = c(ymd("1944-01-01", tz = "UTC"), ymd("2016-01-01", tz = "UTC")),
                    minor_breaks = date_breaks("1 year"),
                    breaks = date_breaks("5 years")) +
-
   theme_bw() +
   theme(strip.background = element_blank()) +
   labs(x = "Year", y = "Value", title = "Climate Oscillations\n")
@@ -762,14 +815,14 @@ climates <- temp1 %>%
   select(site, year_of, month_of, contains("rain"),
          contains("tmin"), contains("tavg"), contains("tmax"), contains("spei")) %>%
   ungroup() %>%
-  mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"))) %>%
+  mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"), tz = "UTC")) %>%
   arrange(site, date_of)
 
 climates$site <- factor(climates$site, levels = site_list)
 
 climates_tidy <- climates %>%
   select(-rain_data_source) %>%
-  gather(var, value, 5:ncol(.))
+  gather(var, value, 4:ncol(.))
 
 rm(temp1)
 rm(temp2)
