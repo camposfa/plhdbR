@@ -38,7 +38,7 @@ site_map <- c(
 )
 
 quarter_map <- c(
-  annual = "Annual",
+  annual = "Calendar Y",
   coldest_q = "Coldest Q",
   driest_q = "Driest Q",
   warmest_q = "Warmest Q",
@@ -232,7 +232,7 @@ ggsave("~/Desktop/Q1_AIC_Tile_Plot_All.pdf",
 # ---- q1_plot_AIC --------------------------------------------------------
 
 lim <- max(abs(temp$delta))
-fil <- "age_class == 'Adult' & var != 'spei_03'"
+fil <- "age_class == 'Infant' & var != 'spei_03'"
 
 p1 <- ggplot(filter_(temp, fil),
        aes(x = delta, y = quarter, fill = delta)) +
@@ -970,6 +970,7 @@ p2 <- ggplot(temp,
   labs(x = "\nCoefficient Estimate", y = "Climate Model\n")
 
 cowplot::plot_grid(p1, p2, nrow = 2, scale = 0.95, labels = c("a", "b"))
+ggsave("~/Desktop/temp.pdf", width = 10, height = 8.5, units = "in")
 
 
 # ---- q1_f_curve ---------------------------------------------------------

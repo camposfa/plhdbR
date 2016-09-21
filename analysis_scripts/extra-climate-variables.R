@@ -499,7 +499,7 @@ g_list <- list(15)
 
 temp <- qua_temp
 temp$site <- revalue(temp$site, site_map)
-
+temp$var <- revalue(temp$var, quarter_map)
 for (i in seq_along(levels(factor(temp$var)))) {
 
   cur_var <- levels(factor(temp$var))[i]
@@ -514,7 +514,7 @@ for (i in seq_along(levels(factor(temp$var)))) {
                            geom = "tile", label = TRUE, hjust = 0.75, digits = 2, label_size = 3,
                            label_round = 2, palette = rev(brewer.pal(11, "RdYlBu")),
                            nbreaks = 10, size = 3, layout.exp = 1, color = "gray50") +
-    labs(title = ifelse(cur_var == "annual", capitalize(cur_var),
+    labs(title = ifelse(cur_var == "Calendar Y", capitalize(cur_var),
                         paste(capitalize(cur_var), "Quarter"))) +
     guides(fill = FALSE)
 
@@ -522,6 +522,7 @@ for (i in seq_along(levels(factor(temp$var)))) {
 
 temp <- qua_precip
 temp$site <- revalue(temp$site, site_map)
+temp$var <- revalue(temp$var, quarter_map)
 for (i in seq_along(levels(factor(temp$var)))) {
 
   cur_var <- levels(factor(temp$var))[i]
@@ -536,13 +537,14 @@ for (i in seq_along(levels(factor(temp$var)))) {
                            geom = "tile", label = TRUE, hjust = 0.75, digits = 2, label_size = 3,
                            label_round = 2, palette = brewer.pal(11, "BrBG"),
                            nbreaks = 10, size = 3, layout.exp = 1, color = "gray50") +
-    labs(title = ifelse(cur_var == "annual", capitalize(cur_var),
+    labs(title = ifelse(cur_var == "Calendar Y", capitalize(cur_var),
          paste(capitalize(cur_var), "Quarter"))) +
     guides(fill = FALSE)
 }
 
 temp <- qua_ind
 temp$site <- revalue(temp$site, site_map)
+temp$var <- revalue(temp$var, quarter_map)
 for (i in seq_along(levels(factor(temp$var)))) {
 
   cur_var <- levels(factor(temp$var))[i]
@@ -557,7 +559,7 @@ for (i in seq_along(levels(factor(temp$var)))) {
                            geom = "tile", label = TRUE, hjust = 0.75, digits = 2, label_size = 3,
                            label_round = 2, palette = rev(brewer.pal(11, "PiYG")),
                            nbreaks = 10, size = 3, layout.exp = 1, color = "gray50") +
-    labs(title = ifelse(cur_var == "annual", capitalize(cur_var),
+    labs(title = ifelse(cur_var == "Calendar Y", capitalize(cur_var),
                         paste(capitalize(cur_var), "Quarter"))) +
     guides(fill = FALSE)
 }

@@ -169,3 +169,5 @@ ggcorr_fc2(temp1, geom = "tile", label = TRUE, hjust = 0.75, digits = 2,
   facet_grid(site ~ quarter, switch = "y", labeller = global_labeller) +
   theme(strip.background = element_blank(),
         strip.text = element_text(face = "bold"))
+
+ggsave("~/Desktop/temp.pdf", width = 10, height = 10, units = "in")

@@ -160,7 +160,9 @@ p2 <- ggplot(temp,
                      limits = c(0, 1),
                      breaks = seq(0, 1, by = 0.2))
 
+# 6 x 13
 cowplot::plot_grid(p1, p2, nrow = 1, scale = 0.95, labels = c("a", "b"))
+
 
 
 # Fert filtered
