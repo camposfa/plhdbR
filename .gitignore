@@ -19,4 +19,5 @@ analysis_scripts/old/*
 
 test/*
 
+*/.DS_Store
 .DS_Store
