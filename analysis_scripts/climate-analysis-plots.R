@@ -1,17 +1,12 @@
 fc_tile_plot <- function(df, var) {
 
   p <- ggplot(df, aes_string(x = "factor(month_of)", y = "year_of", fill = var)) +
-    geom_tile() +
+    geom_tile(color = "white", size = 0.1) +
     coord_equal() +
-    facet_grid(. ~ site) +
-    theme_bw() +
+    facet_grid(. ~ site, labeller = global_labeller) +
+    theme_gcb() +
     theme(axis.text.x = element_text(angle = 90, vjust = 0.5),
-          legend.position = "bottom",
-          strip.background = element_blank(),
-          axis.line = element_blank(),
-          strip.text = element_text(face = "bold", size = 11),
-          legend.key.width = unit(2, "cm"),
-          panel.margin = unit(1, "lines")) +
+          legend.key.width = unit(1.5, "cm")) +
     scale_y_continuous(limits = c(1945, 2016), breaks = seq(1945, 2015, by = 5))
 
   return(p)
@@ -89,22 +84,23 @@ fc_tile_plot(at, "t_anomaly") +
   coord_cartesian()
 
 
-# TMAX only
-
-temp <- filter(at, var == "tavg")
+# TAVG only
+at$site <- factor(at$site, levels = site_list)
+temp <- filter(at, var == "tavg" & year_of >= 1955)
 lim <- max(abs(temp$t_anomaly))
 # TMAX Anomalies
 fc_tile_plot(temp, "t_anomaly") +
   scale_fill_gradientn(colours = rev(brewer.pal(11, "RdYlBu")),
-                       name = "Temperature Anomaly",
+                       name = expression(paste("Temperature Anomaly (", degree, "C)")),
                        limits = c(-lim, lim)) +
-  labs(x = "Month", y = "Year", title = "Berkeley Earth TMAX Anomalies\n")
+  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5)) +
+  labs(x = "Month", y = "Year", title = "Berkeley Earth TAVG Anomalies\n")
 
 fc_tile_plot(temp, "t_monthly") +
   scale_fill_gradientn(colours = brewer.pal(9, "YlOrRd"),
                        guide = FALSE,
                        name = "Temperature") +
-  labs(x = "Month", y = "Year", title = "Berkeley Earth TMAX\n")
+  labs(x = "Month", y = "Year", title = "Berkeley Earth TAVG\n")
 
 
 # ---- site_plot ----------------------------------------------------------
@@ -239,12 +235,14 @@ source_comp %>%
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
-  facet_wrap(~site, scales = "free") +
+  facet_wrap(~site, scales = "free", labeller = global_labeller) +
   coord_fixed() +
   labs(x = "Rain Gauge",
        y = "GPCC Weather Stations",
        title = "Station rain gauges vs. GPCC\n") +
-  theme_bw()
+  theme_gcb() +
+  scale_x_sqrt() +
+  scale_y_sqrt()
 
 # ggsave(filename = "Rain Gauge VS GPCC.pdf",
 #        path = "plots/source_comparisons",
@@ -259,12 +257,14 @@ source_comp %>%
   geom_abline(intercept = 0, slope = 1) +
   geom_point(alpha = 0.5) +
   stat_smooth(method = "lm", se = FALSE, fullrange = TRUE) +
-  facet_wrap(~site, scales = "free") +
+  facet_wrap(~site, scales = "free", labeller = global_labeller) +
   coord_fixed() +
   labs(x = "Rain Gauge",
        y = "TRMM Satellite",
        title = "Station rain gauges vs. TRMM satellite\n") +
-  theme_bw()
+  theme_gcb() +
+  scale_x_sqrt() +
+  scale_y_sqrt()
 
 # ggsave(filename = "Rain Gauge VS TRMM Satellite.pdf",
 #        path = "plots/source_comparisons",
@@ -353,21 +353,35 @@ source_comp %>%
 
 # ---- plot_rainfall_summaries --------------------------------------------
 
+rain_selected$site <- factor(rain_selected$site, levels = site_list)
 # Accumulated monthly rainfall
-fc_tile_plot(rain_selected, "rain_monthly_mm") +
+fc_tile_plot(filter(rain_selected, year_of < 2015), "rain_monthly_mm") +
   scale_fill_gradientn(colours = brewer.pal(9, "Blues"),
                        name = "Rainfall Total (mm)",
                        # guide = FALSE,
                        trans = "cubroot") +
+  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5)) +
   labs(x = "Month", y = "Year", title = "Total Monthly Rainfall\n")
 
+temp <- rain_selected
+temp$data_source <- as.character(temp$data_source)
+temp[temp$site == "karisoke" & temp$data_source == "satellite_trmm", ]$data_source <- "predicted_from_trmm"
+
+temp$data_source <- mapvalues(temp$data_source,
+                              from = c("rain_gauge", "nearby_station",
+                                       "satellite_trmm", "predicted_from_trmm",
+                                       "gpcc", "predicted_from_gpcc"),
+                              to = c("On-site rain gauge", "Nearby weather station",
+                                     "TRMM (raw)", "TRMM (corrected)",
+                                     "GPCC (raw)", "GPCC (corrected)"))
 
 # Data sources
-fc_tile_plot(rain_selected, "data_source") +
+fc_tile_plot(filter(temp, year_of < 2015), "data_source") +
   scale_fill_brewer(name = "Data Source",
                     # guide = FALSE,
-                    palette = "Dark2") +
+                    palette = "Paired") +
   labs(x = "Month", y = "Year", title = "Data Sources for Composite Rainfall Set\n") +
+  scale_y_continuous(limits = c(1955, 2016), breaks = seq(1955, 2015, by = 5)) +
   theme(legend.key.width = unit(1, "cm"))
 
 lim <- max(abs(rain_selected$rain_anomaly))

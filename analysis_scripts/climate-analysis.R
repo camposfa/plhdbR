@@ -5,11 +5,11 @@ if (!("ClimGrid" %in% installed.packages()[,"Package"]))
   devtools::install_github("camposfa/ClimGrid")
 
 Sys.setenv(TZ = 'UTC')
-list.of.packages <- list("plhdbR", "Hmisc", "plyr", "reshape2", "ncdf4",
-                         "lubridate", "ggplot2", "RColorBrewer", "grid",
-                         "stringr", "scales", "tidyr", "grid", "zoo", "viridis",
-                         "dplyr", "MuMIn", "vegan", "lme4", "broom",
-                         "purrr", "ClimGrid", "sjPlot")
+list.of.packages <- list("plhdbR", "plyr", "Hmisc", "reshape2", "ncdf4",
+                         "lubridate", "RColorBrewer", "grid",
+                         "stringr", "scales", "grid", "zoo", "viridis",
+                         "MuMIn", "vegan", "lme4", "broom", "climwin",
+                         "purrr", "ClimGrid", "sjPlot", "tidyverse", "forcats")
 new.packages <- list.of.packages[!(list.of.packages %in% installed.packages()[,"Package"])]
 if (length(new.packages)) install.packages(unlist(new.packages))
 lapply(list.of.packages, require, character.only = T)
@@ -47,6 +47,7 @@ site_coords <- read.csv("data/site_coords.csv")
 names(site_coords)[2] <- "long_name"
 site_list <- c("rppn-fma", "amboseli", "kakamega", "gombe", "karisoke", "beza", "ssr")
 site_coords$site <- site_list
+site_list <- c("beza", "ssr", "rppn-fma", "kakamega", "amboseli", "gombe", "karisoke")
 site_coords$site <- factor(site_coords$site, levels = site_list)
 sites <- dplyr::select(site_coords, site, lat = Lat, lon = Long)
 rm(site_coords)
@@ -688,6 +689,8 @@ write.csv(rain_selected, "data/rain_csv/rain_selected.csv", row.names = FALSE)
 ind <- ClimGrid::load_climate_index(c("pdo", "dmi", "mei", "soi", "nino3.4",
                                       "amo", "nao", "sam", "ao"))
 
+ind <- ClimGrid::load_climate_index(c("dmi", "nino3.4"))
+
 ind_df <- bind_rows(ind)
 
 ind_df <- filter(ind_df, date_of > ymd("1945-01-01", tz = "UTC"))
@@ -795,6 +798,7 @@ temp2$var <- str_replace(temp2$var, "_t_", "_")
 temp2 <- temp2 %>% spread(var, value)
 
 temp3 <- t_sites_df %>%
+  tbl_df() %>%
   filter(component == "remainder" | component == "seasonal") %>%
   unite(v, variable, component) %>%
   spread(v, value) %>%
@@ -803,7 +807,7 @@ temp3 <- t_sites_df %>%
          tmin_detrended = tmin_seasonal + tmin_remainder,
          tavg_detrended = tavg_seasonal + tavg_remainder,
          tmax_detrended = tmax_seasonal + tmax_remainder) %>%
-  select(site, year_of, month_of, contains("detrended"))
+  select(site, year_of, month_of, dplyr::contains("detrended"))
 
 temp4 <- spei %>%
   select(-date_of)
@@ -812,8 +816,9 @@ climates <- temp1 %>%
   left_join(temp2) %>%
   left_join(temp3) %>%
   left_join(temp4) %>%
-  select(site, year_of, month_of, contains("rain"),
-         contains("tmin"), contains("tavg"), contains("tmax"), contains("spei")) %>%
+  select(site, year_of, month_of, dplyr::contains("rain"),
+         dplyr::contains("tmin"), dplyr::contains("tavg"),
+         dplyr::contains("tmax"), dplyr::contains("spei")) %>%
   ungroup() %>%
   mutate(date_of = ymd(paste(year_of, month_of, "16", sep = "-"), tz = "UTC")) %>%
   arrange(site, date_of)
@@ -844,5 +849,5 @@ climates_combined <- climates %>%
 # ---- save_r_data --------------------------------------------------------
 
 save.image("~/GitHub/plhdbR/ClimatePrep.RData")
-save(lh, fert, climates, climates_combined, ind_df, site_list,
+save(lh, fert, climates, climates_combined, ind_df, site_list, sites, weaning,
      file = "~/GitHub/plhdbR/ClimatePred1.RData")
