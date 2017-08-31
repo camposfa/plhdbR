@@ -18,3 +18,5 @@ vignettes/VitalRates_cache/
 analysis_scripts/old/*
 
 test/*
+
+.DS_Store
